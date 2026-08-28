@@ -1,4 +1,4 @@
-2"use client";
+"use client";
 
 import Link from "next/link";
 import { Printer } from "lucide-react";
