@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Plus, Search, Printer } from "lucide-react";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/utils";
 import type { Patient } from "@/types";
 
-export default function PatientsPage() {
+function PatientsContent() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -84,6 +84,14 @@ export default function PatientsPage() {
         </CardContent></Card>
       )}
     </div>
+  );
+}
+
+export default function PatientsPage() {
+  return (
+    <Suspense fallback={<div className="space-y-6"><h1 className="text-2xl font-bold">Loading...</h1></div>}>
+      <PatientsContent />
+    </Suspense>
   );
 }
 
