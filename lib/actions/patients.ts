@@ -92,3 +92,11 @@ export async function updatePatient(id: string, formData: PatientFormData) {
   revalidatePath("/patients");
   return { data };
 }
+
+export async function getPatientForPrint(id: string) {
+  const data = await findPatientById(id);
+  if (!data) throw new Error("Patient not found");
+
+  await logAudit({ action: "EXPORT", entity: "Patient", entityId: id });
+  return data;
+}
