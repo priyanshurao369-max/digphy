@@ -79,7 +79,13 @@ export function DocumentLibrary({ patientId, serverDocs }: DocumentLibraryProps)
                   <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{doc.filename}</p>
+                      <button
+                        className="font-medium underline text-primary hover:text-primary/80"
+                        onClick={() => openInViewer(doc)}
+                        type="button"
+                      >
+                        {doc.filename}
+                      </button>
                       <Badge variant="secondary">{doc.type}</Badge>
                     </div>
                     <p className="truncate text-sm text-muted-foreground">
