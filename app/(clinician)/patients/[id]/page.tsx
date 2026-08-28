@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Edit, FileText, LineChart, Plus } from "lucide-react";
+import { Edit, LineChart, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressChart } from "@/components/charts/ProgressChart";
 import { DocumentUpload } from "@/components/documents/document-upload";
+import { DocumentLibrary } from "@/components/documents/document-library";
 import { getPatient } from "@/lib/actions/patients";
 import { getEncounters, getProgressEntries } from "@/lib/actions/encounters";
 import { getDocuments } from "@/lib/actions/documents";
@@ -182,19 +183,7 @@ export default async function PatientDetailPage({
 
         <TabsContent value="documents" className="space-y-4">
           <DocumentUpload patientId={id} />
-          {documents.map((doc) => (
-            <Card key={doc.id}>
-              <CardContent className="flex items-center gap-3 py-4">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">{doc.type}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {doc.filename} · {formatDateTime(doc.uploaded_at)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <DocumentLibrary patientId={id} serverDocs={documents} />
         </TabsContent>
       </Tabs>
     </div>

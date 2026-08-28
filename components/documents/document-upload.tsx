@@ -14,6 +14,27 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { uploadDocument } from "@/lib/actions/documents";
+import type { Document } from "@/types";
+
+const DOCS_KEY = (patientId: string) => `digphy_docs_${patientId}`;
+
+function readLocal(patientId: string): Document[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(DOCS_KEY(patientId));
+    return raw ? (JSON.parse(raw) as Document[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocal(patientId: string, docs: Document[]) {
+  try {
+    window.localStorage.setItem(DOCS_KEY(patientId), JSON.stringify(docs));
+  } catch {
+    // Storage may be full (large files) — fall back to server-only. Not fatal.
+  }
+}
 
 interface DocumentUploadProps {
   patientId: string;
@@ -42,6 +63,14 @@ export function DocumentUpload({ patientId }: DocumentUploadProps) {
       setError(result.error);
       return;
     }
+
+    if (result.data) {
+      // Persist to localStorage so the uploaded file survives the in-memory
+      // store resetting across Vercel serverless instances.
+      const existing = readLocal(patientId).filter((d) => d.id !== result.data!.id);
+      saveLocal(patientId, [...existing, result.data!]);
+    }
+
     router.refresh();
     (e.target as HTMLFormElement).reset();
   }
