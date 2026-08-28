@@ -22,11 +22,6 @@ interface DocumentLibraryProps {
 
 const KEY = (patientId: string) => `digphy_docs_${patientId}`;
 
-/**
- * Read documents persisted in the browser for this patient.
- * (The backend in-memory mock resets across Vercel serverless instances, so we
- * cache uploaded files in localStorage so View/Download keep working.)
- */
 function readLocal(patientId: string): Document[] {
   if (typeof window === "undefined") return [];
   try {
@@ -37,7 +32,6 @@ function readLocal(patientId: string): Document[] {
   }
 }
 
-/** Detect whether a document's data URL can be rendered by an <img> tag. */
 function isImage(doc: Document): boolean {
   const url = doc.storage_reference ?? "";
   if (url.startsWith("data:image")) return true;
@@ -55,12 +49,17 @@ export function DocumentLibrary({ patientId, serverDocs }: DocumentLibraryProps)
   const docs = useMemo(() => {
     const map = new Map<string, Document>();
     for (const d of serverDocs) map.set(d.id, d);
-    // Persisted local copies win so the most recent view always reflects uploads.
     for (const d of localDocs) map.set(d.id, d);
     return [...map.values()].sort(
       (a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime(),
     );
   }, [serverDocs, localDocs]);
+
+  const openInViewer = (doc: Document) => {
+    if (doc.storage_reference) {
+      window.open(doc.storage_reference, "_blank", "noopener,noreferrer");
+    }
+  };
 
   return (
     <>
@@ -107,7 +106,7 @@ export function DocumentLibrary({ patientId, serverDocs }: DocumentLibraryProps)
       )}
 
       <Dialog open={!!preview} onOpenChange={(open) => setPreview(open ? preview : null)}>
-        {preview && (
+        {preview && preview.storage_reference && (
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle className="pr-8">{preview.filename}</DialogTitle>
@@ -115,24 +114,28 @@ export function DocumentLibrary({ patientId, serverDocs }: DocumentLibraryProps)
                 <DialogDescription>Document type: {preview.type}</DialogDescription>
               )}
             </DialogHeader>
-            <div className="max-h-[80vh] overflow-auto rounded-md border bg-muted">
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-2 border p-3 rounded-md bg-muted">
+                <Button onClick={() => openInViewer(preview)}>
+                  Open in Viewer
+                </Button>
+                <Button asChild variant="outline">
+                  <a href={preview.storage_reference} download={preview.filename}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </a>
+                </Button>
+              </div>
               {isImage(preview) ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={preview.storage_reference}
                   alt={preview.filename}
-                  className="mx-auto h-auto max-w-full object-contain"
+                  className="mx-auto max-h-[70vh] max-w-full rounded"
                 />
               ) : (
-                <iframe
-                  title={preview.filename}
-                  src={preview.storage_reference}
-                  className="h-[80vh] w-full"
-                />
-              )}
-              {!preview.storage_reference && (
-                <p className="p-8 text-center text-muted-foreground">
-                  No preview available for this document. Use Download to save it.
+                <p className="text-sm text-muted-foreground">
+                  Images render directly in the dialog. Click &quot;Open in Viewer&quot; for PDFs
+                  and other file types.
                 </p>
               )}
             </div>
