@@ -1,0 +1,179 @@
+Patient (core) — required
+yaml
+patient:
+  patient_id: "uuid"
+  first_name: "string"
+  last_name: "string"
+  date_of_birth: "YYYY-MM-DD"
+  sex: "Male | Female | Other"
+  contact_phone: "+91-XXXXXXXXXX"
+  email: "user@example.com"
+  address: "string"
+  emergency_contact:
+    name: "string"
+    phone: "+91-XXXXXXXXXX"
+    relationship: "string"
+  primary_diagnosis: "text (ICD code optional)"
+  comorbidities: ["text", "text"]
+  current_medications: ["text", "text"]
+  allergies: ["text"]
+  mobility_aids: ["list"]
+  caregiver:
+    name: "string"
+    phone: "+91-XXXXXXXXXX"
+    relationship: "string"
+  consent:
+    signed: true
+    date: "YYYY-MM-DD"
+    document_id: "doc-uuid"
+Encounter header — required
+yaml
+encounter:
+  encounter_id: "uuid"
+  patient_id: "uuid"
+  clinician_id: "uuid"
+  date_time: "YYYY-MM-DDTHH:MM:SS"
+  encounter_type: "Initial | Follow-up | Telehealth | HomeVisit | Discharge"
+  location: "ClinicName | Remote | Home"
+  confidentiality_level: "Standard | Sensitive"   # set Sensitive for mental health, HIV, etc.
+  notes: "brief summary"
+SOAP (universal) — required
+Subjective
+yaml
+subjective:
+  chief_complaint: "text"
+  history_of_present_illness:
+    onset_date: "YYYY-MM-DD"
+    mechanism: "text"
+    mode_of_onset: "Sudden | Gradual | Insidious | Periodic"
+    duration_category: "Acute | Subacute | Chronic"
+  pain:
+    site: "text"
+    type: "Muscle | Joint | Nerve | Bone | Vascular"
+    descriptors: ["dull","sharp"]
+    intensity_vas: 0-10
+    aggravating_factors: "text"
+    relieving_factors: "text"
+  past_medical_history: "text"
+  surgical_history: "text"
+  medications: ["text"]
+  social_history:
+    occupation: "text"
+    tobacco: "yes/no; details"
+    alcohol: "yes/no; details"
+    living_situation: "alone/with family/caregiver"
+  patient_goals: "text"
+  consent_for_treatment_and_data_sharing: true
+Objective
+yaml
+objective:
+  vitals:
+    heart_rate_bpm: number
+    blood_pressure_mmHg: "systolic/diastolic"
+    respiratory_rate_bpm: number
+    spo2_percent: number
+    temperature_c: number
+  general_condition: "Good | Fair | Poor"
+  ambulatory_status: "Independent | WithAid | Wheelchair | Bedridden"
+  observation:
+    posture: { anterior: "text", posterior: "text", lateral: "text" }
+    gait: { barefoot: "text", with_aids: "text" }
+  palpation: { tenderness_grade: 0-4, tone: "normal/hypotonia/hypertonia", crepitus: "none/fine/coarse" }
+  rom:
+    arom: { joint_key: value_unit }
+    prom: { joint_key: value_unit }
+    end_feel: "soft|firm|hard|empty"
+  strength:
+    mmt: { muscle_key: grade_0_5 }
+  neuro:
+    sensation: "normal/altered; details"
+    reflexes: { biceps: "0/+/++/+++/++++", patella: "..." }
+  functional_tests: { tug_sec: number, six_mwt_m: number, other: "text" }
+  measurements: { limb_length_true_cm: number, girth_cm: { thigh: number } }
+  attachments: ["document_id", "image_id"]
+Assessment
+yaml
+assessment:
+  problem_list:
+    - "1) concise problem statement"
+    - "2) ..."
+  working_diagnosis: "text (ICD code optional)"
+  red_flags_present: false
+  clinical_impression: "text"
+Plan
+yaml
+plan:
+  short_term_goals:
+    - goal_id: "uuid"
+      description: "SMART description"
+      baseline_value: "value/unit"
+      target_value: "value/unit"
+      target_date: "YYYY-MM-DD"
+      owner_clinician_id: "uuid"
+  long_term_goals: []
+  treatment_plan:
+    treatment_id: "uuid"
+    title: "text"
+    start_date: "YYYY-MM-DD"
+    end_date: "YYYY-MM-DD"
+    frequency_per_week: number
+    duration_minutes: number
+    interventions:
+      - exercise_id: "uuid"
+        name: "text"
+        reps: number
+        sets: number
+        hold_seconds: number
+        progression_rule: "text"
+        resource_ref: "video_id or doc_id"
+    modalities: ["heat","ice","TENS"]
+    education: ["topic1","topic2"]
+    home_program: "text"
+  monitoring:
+    metrics_to_track: ["metric_key1","metric_key2"]
+    review_interval_days: number
+  next_follow_up: "YYYY-MM-DD"
+Progress entry (time series) — required
+yaml
+progress_entry:
+  entry_id: "uuid"
+  patient_id: "uuid"
+  date_time: "YYYY-MM-DDTHH:MM:SS"
+  metric_key: "e.g., pain_vas, rom_knee_flexion_deg"
+  value: number
+  unit: "deg | m | sec | % | score"
+  source: "clinic | patient_report | device"
+  clinician_id: "uuid"
+  notes: "text"
+App & Data Governance fields — required (India‑aligned)
+yaml
+audit_log:
+  log_id: "uuid"
+  user_id: "uuid"
+  action: "CREATE | READ | UPDATE | DELETE | EXPORT"
+  entity: "Patient | Encounter | Document"
+  entity_id: "uuid"
+  timestamp: "YYYY-MM-DDTHH:MM:SS"
+  ip_address: "string"
+
+access_control:
+  roles: ["Physiotherapist","Assistant","Admin","Patient"]
+  permissions: { role: ["read:patients","write:encounters"] }
+
+data_privacy:
+  data_retention_policy: "e.g., retain clinical records 8 years; configurable per clinic"
+  encryption_at_rest: true
+  encryption_in_transit: true
+  pii_minimization: "store only necessary identifiers; use document_id references for files"
+  consent_records: ["consent_document_id"]
+Documents & media — required
+yaml
+document:
+  document_id: "uuid"
+  patient_id: "uuid"
+  type: "Consent | Report | Image | Prescription"
+  filename: "internal-safe-name.pdf"
+  uploaded_by: "clinician_id"
+  uploaded_at: "YYYY-MM-DDTHH:MM:SS"
+  storage_reference: "secure_internal_id"
+  access_restrictions: ["role:Physiotherapist","role:Admin"]

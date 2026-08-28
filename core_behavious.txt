@@ -1,0 +1,14 @@
+App behavior & validation rules (recommended)
+Mandatory fields: patient_id, clinician_id, date_time, consent.signed (true for treatment), working_diagnosis (or reason for visit).
+
+Validation: dates ISO 8601; numeric ranges for vitals and scales; enums for controlled fields.
+
+PHI minimization: do not include sensitive identifiers in filenames; store files in secure storage and reference by document_id.
+
+Audit: log every read/update of patient records.
+
+Retention: follow clinic policy; keep consent and audit logs beyond clinical retention period.
+
+Access: role‑based access; patients can view their own summary but not raw clinician notes unless consented.
+
+Localization: support regional languages and date formats for Indian users.
