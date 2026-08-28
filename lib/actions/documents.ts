@@ -8,9 +8,9 @@ import {
   createDocument as storeCreateDocument,
   getDocumentById,
   updatePatient as storeUpdatePatient,
-  getPatientById,
   CLINICIAN_ID,
 } from "@/lib/data/mock-store";
+import { findPatientById } from "@/lib/data/request-store";
 
 export async function getDocuments(patientId: string) {
   const data = getDocumentsByPatient(patientId);
@@ -30,7 +30,7 @@ export async function uploadDocument(formData: FormData) {
     return { error: "Missing required fields" };
   }
 
-  const patient = getPatientById(patientId);
+  const patient = await findPatientById(patientId);
   if (!patient) return { error: "Patient not found" };
 
   // Demo mode: store file as a data URL in memory (PHI-safe demo substitute

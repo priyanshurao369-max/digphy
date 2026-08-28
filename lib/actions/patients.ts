@@ -5,12 +5,15 @@ import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { patientSchema, type PatientFormData } from "@/lib/validators/schemas";
 import {
-  getAllPatients,
-  getPatientById,
   createPatient as storeCreatePatient,
   updatePatient as storeUpdatePatient,
   CLINICIAN_ID,
 } from "@/lib/data/mock-store";
+import {
+  findPatientById,
+  getAllPatientsForRequest,
+  persistPatientCookie,
+} from "@/lib/data/request-store";
 
 export async function signIn(formData: FormData) {
   // Demo mode: no real auth. Route to the clinician dashboard.
@@ -22,7 +25,7 @@ export async function signOut() {
 }
 
 export async function getPatients(search?: string) {
-  const data = getAllPatients(search);
+  const data = await getAllPatientsForRequest(search);
   for (const patient of data) {
     await logAudit({
       action: "READ",
@@ -34,7 +37,7 @@ export async function getPatients(search?: string) {
 }
 
 export async function getPatient(id: string) {
-  const data = getPatientById(id);
+  const data = await findPatientById(id);
   if (!data) throw new Error("Patient not found");
 
   await logAudit({ action: "READ", entity: "Patient", entityId: id });
@@ -57,6 +60,7 @@ export async function createPatient(formData: PatientFormData) {
   };
 
   const data = storeCreatePatient(payload);
+  await persistPatientCookie(data);
 
   await logAudit({ action: "CREATE", entity: "Patient", entityId: data.id });
   revalidatePath("/patients");
@@ -80,6 +84,8 @@ export async function updatePatient(id: string, formData: PatientFormData) {
 
   const data = storeUpdatePatient(id, payload);
   if (!data) return { error: "Patient not found" };
+
+  await persistPatientCookie(data);
 
   await logAudit({ action: "UPDATE", entity: "Patient", entityId: id });
   revalidatePath(`/patients/${id}`);

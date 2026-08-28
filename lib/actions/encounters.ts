@@ -15,9 +15,9 @@ import {
   getProgressEntries as storeGetProgressEntries,
   createProgressEntry as storeCreateProgressEntry,
   getRecentEncounters as storeGetRecentEncounters,
-  getPatientById,
   addAuditLog,
 } from "@/lib/data/mock-store";
+import { findPatientById } from "@/lib/data/request-store";
 
 export async function getEncounters(patientId: string) {
   const data = getEncountersByPatient(patientId);
@@ -40,7 +40,7 @@ export async function createEncounter(formData: EncounterFormData) {
     return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
   }
 
-  const patient = getPatientById(parsed.data.patient_id);
+  const patient = await findPatientById(parsed.data.patient_id);
   if (!patient?.consent_signed) {
     return { error: "Patient consent must be signed before creating an encounter" };
   }
