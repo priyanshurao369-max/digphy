@@ -5,6 +5,13 @@ import { Download, Eye, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatDateTime } from "@/lib/utils";
 import type { Document } from "@/types";
 
@@ -17,7 +24,7 @@ const KEY = (patientId: string) => `digphy_docs_${patientId}`;
 
 /**
  * Read documents persisted in the browser for this patient.
- * (The in-memory mock store resets across Vercel serverless instances, so we
+ * (The backend in-memory mock resets across Vercel serverless instances, so we
  * cache uploaded files in localStorage so View/Download keep working.)
  */
 function readLocal(patientId: string): Document[] {
@@ -30,8 +37,16 @@ function readLocal(patientId: string): Document[] {
   }
 }
 
+/** Detect whether a document's data URL can be rendered by an <img> tag. */
+function isImage(doc: Document): boolean {
+  const url = doc.storage_reference ?? "";
+  if (url.startsWith("data:image")) return true;
+  return /\.(png|jpe?g|gif|webp|svg|bmp)(\?|#|$)/i.test(doc.filename);
+}
+
 export function DocumentLibrary({ patientId, serverDocs }: DocumentLibraryProps) {
   const [localDocs, setLocalDocs] = useState<Document[]>([]);
+  const [preview, setPreview] = useState<Document | null>(null);
 
   useEffect(() => {
     setLocalDocs(readLocal(patientId));
@@ -47,51 +62,83 @@ export function DocumentLibrary({ patientId, serverDocs }: DocumentLibraryProps)
     );
   }, [serverDocs, localDocs]);
 
-  if (docs.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          No documents uploaded yet.
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-3">
-      {docs.map((doc) => {
-        const url = doc.storage_reference;
-        return (
-          <Card key={doc.id}>
-            <CardContent className="flex items-center gap-3 py-4">
-              <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{doc.filename}</p>
-                  <Badge variant="secondary">{doc.type}</Badge>
-                </div>
-                <p className="truncate text-sm text-muted-foreground">
-                  Uploaded {formatDateTime(doc.uploaded_at)}
+    <>
+      {docs.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            No documents uploaded yet.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {docs.map((doc) => {
+            const url = doc.storage_reference;
+            return (
+              <Card key={doc.id}>
+                <CardContent className="flex items-center gap-3 py-4">
+                  <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{doc.filename}</p>
+                      <Badge variant="secondary">{doc.type}</Badge>
+                    </div>
+                    <p className="truncate text-sm text-muted-foreground">
+                      Uploaded {formatDateTime(doc.uploaded_at)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setPreview(doc)}>
+                      <Eye className="h-4 w-4" />
+                      View
+                    </Button>
+                    <Button asChild size="sm">
+                      <a href={url} download={doc.filename}>
+                        <Download className="h-4 w-4" />
+                        Download
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog open={!!preview} onOpenChange={(open) => setPreview(open ? preview : null)}>
+        {preview && (
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="pr-8">{preview.filename}</DialogTitle>
+              {preview.type && (
+                <DialogDescription>Document type: {preview.type}</DialogDescription>
+              )}
+            </DialogHeader>
+            <div className="max-h-[80vh] overflow-auto rounded-md border bg-muted">
+              {isImage(preview) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={preview.storage_reference}
+                  alt={preview.filename}
+                  className="mx-auto h-auto max-w-full object-contain"
+                />
+              ) : (
+                <iframe
+                  title={preview.filename}
+                  src={preview.storage_reference}
+                  className="h-[80vh] w-full"
+                />
+              )}
+              {!preview.storage_reference && (
+                <p className="p-8 text-center text-muted-foreground">
+                  No preview available for this document. Use Download to save it.
                 </p>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <Button asChild variant="outline" size="sm">
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    <Eye className="h-4 w-4" />
-                    View
-                  </a>
-                </Button>
-                <Button asChild size="sm">
-                  <a href={url} download={doc.filename}>
-                    <Download className="h-4 w-4" />
-                    Download
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
+              )}
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
+    </>
   );
 }

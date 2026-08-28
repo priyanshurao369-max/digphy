@@ -42,6 +42,41 @@ const today = (): string => new Date().toISOString().split("T")[0]!;
 const daysFromDate = (from: string, n: number): string =>
   new Date(new Date(from).getTime() + n * 86400000).toISOString().split("T")[0]!;
 
+// ── Minimal valid PDF builder for demo seed documents ──
+// Creates a minimal one-page PDF with the supplied title text.
+function buildPdfDataUrl(line: string): string {
+  // Escape parentheses and backslashes in the text for PDF compatibility
+  const escaped = line.replace(/[()\\]/g, "\\$&");
+  const stream = `BT /F1 12 Tf 60 100 Td (${escaped}) Tj ET`;
+  const obj4 = `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`;
+
+  const objects: string[] = [
+    `<< /Type /Catalog /Pages 2 0 R >>`,
+    `<< /Type /Pages /Kids [3 0 R] /Count 1 >>`,
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 200] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>`,
+    obj4,
+    `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`,
+  ];
+
+  let pdf = "%PDF-1.4\n";
+  const offsets: number[] = [];
+  objects.forEach((obj, i) => {
+    offsets.push(pdf.length);
+    pdf += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+  });
+
+  const xrefPos = pdf.length;
+  pdf += "xref\n0 6\n0000000000 65535 f \n";
+  for (const off of offsets) {
+    pdf += `${String(off).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+
+  // Encode as Latin-1 (PDF uses single-byte chars) then base64
+  const encoded = Buffer.from(pdf, "latin1").toString("base64");
+  return `data:application/pdf;base64,${encoded}`;
+}
+
 // ── Encounter builder ──
 function buildEncounter(
   patientId: string, daysBack: number, type: "Initial" | "Follow-up",
@@ -206,11 +241,11 @@ function initMockData() {
   documents.push(
     { id: "doc-rajesh-consent", patient_id: PATIENT_RAJESH_ID, type: "Consent",
       filename: "Consent_Rajesh.pdf", uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
-      storage_reference: `data:application/pdf;base64,${btoa("Consent Form - Rajesh Kumar")}`,
+      storage_reference: buildPdfDataUrl("Consent Form - Rajesh Kumar"),
       access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
     { id: "doc-priya-consent", patient_id: PATIENT_PRIYA_ID, type: "Consent",
       filename: "Consent_Priya.pdf", uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
-      storage_reference: `data:application/pdf;base64,${btoa("Consent Form - Priya Mehta")}`,
+      storage_reference: buildPdfDataUrl("Consent Form - Priya Mehta"),
             access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
   );
 
