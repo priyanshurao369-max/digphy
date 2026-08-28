@@ -13,6 +13,8 @@ import { getDocuments } from "@/lib/actions/documents";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import type { AssessmentData, PlanData, SubjectiveData } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function PatientDetailPage({
   params,
 }: {

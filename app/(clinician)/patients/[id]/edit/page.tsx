@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getPatient } from "@/lib/actions/patients";
 import { PatientForm } from "@/components/patients/patient-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditPatientPage({
   params,
 }: {

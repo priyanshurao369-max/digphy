@@ -1,35 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { v4 as uuidv4 } from "uuid";
-import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 import { documentSchema } from "@/lib/validators/schemas";
+import {
+  getDocumentsByPatient,
+  createDocument as storeCreateDocument,
+  getDocumentById,
+  updatePatient as storeUpdatePatient,
+  getPatientById,
+  CLINICIAN_ID,
+} from "@/lib/data/mock-store";
 
 export async function getDocuments(patientId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("documents")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("uploaded_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
-
-  for (const doc of data ?? []) {
+  const data = getDocumentsByPatient(patientId);
+  for (const doc of data) {
     await logAudit({ action: "READ", entity: "Document", entityId: doc.id });
   }
-
-  return data ?? [];
+  return data;
 }
 
 export async function uploadDocument(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
-
   const file = formData.get("file") as File;
   const patientId = formData.get("patient_id") as string;
   const type = formData.get("type") as string;
@@ -39,17 +30,18 @@ export async function uploadDocument(formData: FormData) {
     return { error: "Missing required fields" };
   }
 
-  const storageRef = `${patientId}/${uuidv4()}`;
+  const patient = getPatientById(patientId);
+  if (!patient) return { error: "Patient not found" };
+
+  // Demo mode: store file as a data URL in memory (PHI-safe demo substitute
+  // for Supabase Storage; UUID paths unnecessary here).
   const arrayBuffer = await file.arrayBuffer();
-
-  const { error: uploadError } = await supabase.storage
-    .from("patient-documents")
-    .upload(storageRef, arrayBuffer, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (uploadError) return { error: uploadError.message };
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]!);
+  }
+  const storageRef = `data:${file.type || "application/octet-stream"};base64,${btoa(binary)}`;
 
   const docPayload = documentSchema.parse({
     patient_id: patientId,
@@ -59,39 +51,26 @@ export async function uploadDocument(formData: FormData) {
     access_restrictions: ["role:Physiotherapist", "role:Admin"],
   });
 
-  const { data: doc, error: docError } = await supabase
-    .from("documents")
-    .insert({
-      ...docPayload,
-      uploaded_by: user.id,
-    })
-    .select()
-    .single();
-
-  if (docError) return { error: docError.message };
+  const doc = storeCreateDocument({
+    ...docPayload,
+    uploaded_by: CLINICIAN_ID,
+  });
 
   await logAudit({ action: "CREATE", entity: "Document", entityId: doc.id });
 
   if (linkConsent && type === "Consent") {
-    await supabase
-      .from("patients")
-      .update({
-        consent_signed: true,
-        consent_date: new Date().toISOString().split("T")[0],
-        consent_document_id: doc.id,
-      })
-      .eq("id", patientId);
+    storeUpdatePatient(patientId, {
+      consent_signed: true,
+      consent_date: new Date().toISOString().split("T")[0],
+      consent_document_id: doc.id,
+    });
   }
 
   revalidatePath(`/patients/${patientId}`);
   return { data: doc };
 }
 
-export async function getDocumentUrl(storageReference: string) {
-  const supabase = await createClient();
-  const { data } = await supabase.storage
-    .from("patient-documents")
-    .createSignedUrl(storageReference, 3600);
-
-  return data?.signedUrl ?? null;
+export async function getDocumentUrl(documentId: string) {
+  const doc = getDocumentById(documentId);
+  return doc?.storage_reference ?? null;
 }

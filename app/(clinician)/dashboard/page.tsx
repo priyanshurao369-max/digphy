@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { getPatients } from "@/lib/actions/patients";
 import { getRecentEncounters } from "@/lib/actions/encounters";
 import { formatDateTime } from "@/lib/utils";
+import type { Encounter } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const [patients, recentEncounters] = await Promise.all([
@@ -82,7 +85,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="divide-y">
               {recentEncounters.map((enc) => {
-                const patient = enc.patients as { first_name: string; last_name: string } | null;
+                const patient = (enc as Encounter & { patients?: { first_name: string; last_name: string } | null }).patients;
                 const assessment = enc.assessment as { working_diagnosis?: string } | null;
                 return (
                   <Link

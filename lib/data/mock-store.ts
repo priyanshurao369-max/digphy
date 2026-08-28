@@ -21,12 +21,20 @@ export const PATIENT_ROLE = "patient";
 export const DEFAULT_PATIENT_ID = PATIENT_RAJESH_ID;
 
 // ── In-memory stores ──
-const profiles: Profile[] = [];
-const patients: Patient[] = [];
-const encounters: Encounter[] = [];
-const progressEntries: ProgressEntry[] = [];
-const documents: Doc[] = [];
-const auditLogs: AuditLog[] = [];
+// Cached on globalThis so Next.js dev-mode module re-evaluation (and warm
+// serverless invocations) reuse the same data instead of reseeding.
+const g = globalThis as unknown as {
+  __digphyStore?: {
+    profiles: Profile[]; patients: Patient[]; encounters: Encounter[];
+    progressEntries: ProgressEntry[]; documents: Doc[]; auditLogs: AuditLog[];
+  };
+};
+
+const store = (g.__digphyStore ??= {
+  profiles: [], patients: [], encounters: [],
+  progressEntries: [], documents: [], auditLogs: [],
+});
+const { profiles, patients, encounters, progressEntries, documents, auditLogs } = store;
 
 const daysAgo = (n: number): string =>
   new Date(Date.now() - n * 86400000).toISOString();
@@ -45,15 +53,15 @@ function buildEncounter(
   const fup = daysFromDate(dt, 7);
   const isRajesh = patientId === PATIENT_RAJESH_ID;
 
-  const rom = extra.kneeFlex
+  const rom: ObjectiveData["rom"] = extra.kneeFlex
     ? { arom: { knee_flexion: `${extra.kneeFlex} deg` }, prom: { knee_flexion: `${extra.kneeFlex} deg` }, end_feel: "soft" as const }
     : { arom: { lumbar_flexion: "40 deg" }, prom: { lumbar_flexion: "50 deg" }, end_feel: "firm" as const };
 
-  const strength = isRajesh
+  const strength: ObjectiveData["strength"] = isRajesh
     ? { mmt: { hip_flexion_L: 4, hip_flexion_R: 5 } }
     : { mmt: { quadriceps_R: 4, hamstrings_R: 4, quadriceps_L: 5 } };
 
-  const functional = extra.tugSec !== undefined
+  const functional: ObjectiveData["functional_tests"] = extra.tugSec !== undefined
     ? { tug_sec: extra.tugSec, six_mwt_m: 420, other: "" }
     : { tug_sec: 14.2, six_mwt_m: 380, other: "" };
 
@@ -357,6 +365,142 @@ export function updatePatient(id: string, data: Record<string, unknown>): Patien
   if (idx === -1) return null;
   patients[idx] = { ...patients[idx]!, ...data, updated_at: new Date().toISOString() } as Patient;
   return patients[idx]!;
+}
+
+// ── Encounters ──
+export function getEncountersByPatient(patientId: string): Encounter[] {
+  return [...encounters]
+    .filter((e) => e.patient_id === patientId)
+    .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime())
+    .map((e) => ({
+      ...e,
+      profiles: { full_name: getProfileById(e.clinician_id)?.full_name ?? "Unknown" },
+    }));
+}
+
+export function getEncounterById(id: string): Encounter | undefined {
+  return encounters.find((e) => e.id === id);
+}
+
+export function createEncounter(data: Record<string, unknown>): Encounter {
+  const now = new Date().toISOString();
+  const enc = {
+    id: uuidv4(),
+    patient_id: data.patient_id, clinician_id: data.clinician_id,
+    date_time: data.date_time, encounter_type: data.encounter_type,
+    location: data.location, confidentiality_level: data.confidentiality_level,
+    notes: data.notes ?? null,
+    subjective: data.subjective, objective: data.objective,
+    assessment: data.assessment, plan: data.plan,
+    created_at: now, updated_at: now,
+  } as Encounter;
+  encounters.push(enc);
+  return enc;
+}
+
+export function getRecentEncounters(limit = 5): Encounter[] {
+  return [...encounters]
+    .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime())
+    .slice(0, limit)
+    .map((e) => ({
+      ...e,
+      profiles: { full_name: getProfileById(e.clinician_id)?.full_name ?? "Unknown" },
+      patients: {
+        first_name: getPatientById(e.patient_id)?.first_name ?? "",
+        last_name: getPatientById(e.patient_id)?.last_name ?? "",
+      },
+    }));
+}
+
+// ── Progress entries ──
+export function getProgressEntries(patientId: string, metricKey?: string): ProgressEntry[] {
+  let result = progressEntries.filter((e) => e.patient_id === patientId);
+  if (metricKey) result = result.filter((e) => e.metric_key === metricKey);
+  return [...result].sort(
+    (a, b) => new Date(a.date_time).getTime() - new Date(b.date_time).getTime(),
+  );
+}
+
+export function createProgressEntry(data: Record<string, unknown>): ProgressEntry {
+  const now = new Date().toISOString();
+  const entry = {
+    id: uuidv4(),
+    patient_id: data.patient_id, date_time: data.date_time,
+    metric_key: data.metric_key, value: data.value, unit: data.unit,
+    source: data.source, clinician_id: data.clinician_id ?? null,
+    notes: data.notes ?? null, created_at: now,
+  } as ProgressEntry;
+  progressEntries.push(entry);
+  return entry;
+}
+
+// ── Documents ──
+export function getDocumentsByPatient(patientId: string): Doc[] {
+  return [...documents]
+    .filter((d) => d.patient_id === patientId)
+    .sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime());
+}
+
+export function createDocument(data: Record<string, unknown>): Doc {
+  const now = new Date().toISOString();
+  const doc = {
+    id: uuidv4(),
+    patient_id: data.patient_id, type: data.type, filename: data.filename,
+    uploaded_by: data.uploaded_by, uploaded_at: now,
+    storage_reference: data.storage_reference,
+    access_restrictions: data.access_restrictions || [],
+    created_at: now,
+  } as Doc;
+  documents.push(doc);
+  return doc;
+}
+
+export function getDocumentById(id: string): Doc | undefined {
+  return documents.find((d) => d.id === id);
+}
+
+// ── Audit logs ──
+export function getAuditLogs(limit = 50): AuditLog[] {
+  return [...auditLogs]
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, limit)
+    .map((log) => ({
+      ...log,
+      profiles: { full_name: getProfileById(log.user_id)?.full_name ?? "Unknown" },
+    }));
+}
+
+export function addAuditLog(data: {
+  user_id: string; action: AuditLog["action"]; entity: AuditLog["entity"];
+  entity_id: string; ip_address?: string | null;
+  metadata?: Record<string, unknown> | null;
+}): void {
+  auditLogs.push({
+    id: uuidv4(),
+    user_id: data.user_id, action: data.action, entity: data.entity,
+    entity_id: data.entity_id, timestamp: new Date().toISOString(),
+    ip_address: data.ip_address ?? null, metadata: data.metadata ?? null,
+  });
+}
+
+// ── Patient summary (for /my-summary portal) ──
+export function getPatientSummaryData(patientId: string) {
+  const patient = getPatientById(patientId) ?? null;
+  const painHistory = getProgressEntries(patientId, "pain_vas");
+  const latestPain = painHistory.length > 0
+    ? painHistory[painHistory.length - 1]!.value
+    : null;
+  const latestEnc = [...encounters]
+    .filter((e) => e.patient_id === patientId)
+    .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime())[0];
+  const plan = latestEnc?.plan as PlanData | undefined;
+  return {
+    patient,
+    painHistory,
+    latestPain: latestPain !== null ? Number(latestPain) : null,
+    homeProgram: plan?.treatment_plan?.home_program ?? "No home program assigned yet.",
+    nextFollowUp: plan?.next_follow_up ?? null,
+  };
 }
 
 

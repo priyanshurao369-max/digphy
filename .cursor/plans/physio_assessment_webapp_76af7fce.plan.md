@@ -4,37 +4,37 @@ overview: Build a demo-ready physiotherapy web app using Next.js + Supabase that
 todos:
   - id: scaffold
     content: Scaffold Next.js 15 + Supabase + shadcn/ui + TypeScript project structure
-    status: in_progress
+    status: completed
   - id: schema-rls
     content: "Create Supabase migrations: patients, encounters (JSONB SOAP), progress_entries, documents, audit_logs, profiles + RLS policies"
-    status: pending
+    status: completed
   - id: validators
     content: Build Zod validators from doc_id.txt enums, ranges, and mandatory fields from core_behavious.txt
-    status: pending
+    status: completed
   - id: auth-rbac
     content: Implement Supabase auth, role-based middleware, clinician vs patient route groups
-    status: pending
+    status: completed
   - id: patient-crud
     content: Build patient list/search, create/edit forms, detail page with consent status
-    status: pending
+    status: completed
   - id: soap-wizard
     content: Build multi-step SOAP encounter wizard (Subjective → Objective → Assessment → Plan)
-    status: pending
+    status: completed
   - id: progress-charts
     content: Add progress entry forms and recharts time-series on patient profile + encounter timeline
-    status: pending
+    status: completed
   - id: documents
     content: Implement secure document upload via Supabase Storage with UUID paths and consent linking
-    status: pending
+    status: completed
   - id: audit-log
     content: Wire audit logging into all server actions; add clinician audit log viewer
-    status: pending
+    status: completed
   - id: patient-portal
     content: "Build read-only /my-summary portal: pain score, home program, next appointment, pain trend chart"
-    status: pending
+    status: completed
   - id: seed-demo
     content: Create seed script with 2 demo patients, encounters, progress data; deploy to Vercel for event
-    status: pending
+    status: completed
 isProject: false
 ---
 

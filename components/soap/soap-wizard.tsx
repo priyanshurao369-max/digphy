@@ -123,7 +123,6 @@ export function SoapWizard({ patientId, clinicianId }: SoapWizardProps) {
     setForm((prev) => {
       const copy = structuredClone(prev);
       const keys = path.split(".");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let obj: any = copy;
       for (let i = 0; i < keys.length - 1; i++) {
         obj = obj[keys[i]!];

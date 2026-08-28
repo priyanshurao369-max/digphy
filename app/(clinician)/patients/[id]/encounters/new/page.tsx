@@ -4,7 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SoapWizard } from "@/components/soap/soap-wizard";
 import { getPatient } from "@/lib/actions/patients";
-import { createClient } from "@/lib/supabase/server";
+import { CLINICIAN_ID } from "@/lib/data/mock-store";
+
+export const dynamic = "force-dynamic";
 
 export default async function NewEncounterPage({
   params,
@@ -12,11 +14,6 @@ export default async function NewEncounterPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
   let patient;
   try {
@@ -45,7 +42,7 @@ export default async function NewEncounterPage({
           </p>
         </div>
       </div>
-      <SoapWizard patientId={id} clinicianId={user.id} />
+      <SoapWizard patientId={id} clinicianId={CLINICIAN_ID} />
     </div>
   );
 }

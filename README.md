@@ -2,9 +2,17 @@
 
 ## 🎯 Overview
 
-DigPhy is a **production-ready**, **HIPAA-aligned** physiotherapy clinic management system built with **Next.js 15**, **Supabase**, and **shadcn/ui**. It provides clinicians with patient registry, SOAP encounter documentation, progress tracking with real-time charts, secure document management, and full audit logging—plus a read-only patient portal for appointment reminders and home exercise programs.
+DigPhy is a **physiotherapy clinic management demo app** built with **Next.js 15**, **shadcn/ui**, and **TypeScript**. It provides clinicians with patient registry, SOAP encounter documentation, progress tracking with real-time charts, secure document management, and full audit logging—plus a read-only patient portal for appointment reminders and home exercise programs.
 
-**Status**: ✅ **MVP+ Complete** — All features implemented, built, and tested. Ready for event demo and Vercel deployment.
+**Status**: ✅ **Demo Mode** — No backend required. The app runs entirely on **in-memory mock data** (`lib/data/mock-store.ts`). On open, pick a role (**Therapist** or **Patient**) and the suitable workspace loads with pre-populated demo data. No Supabase, no login, no env vars.
+
+### 🚀 Quick Start
+
+```bash
+npm install
+npm run dev
+# open http://localhost:3000 → choose Therapist or Patient
+```
 
 ---
 
@@ -73,24 +81,23 @@ DigPhy is a **production-ready**, **HIPAA-aligned** physiotherapy clinic managem
 ```
 digphy/
 ├── app/
-│   ├── (auth)/login/
-│   ├── (clinician)/              # Protected routes
+│   ├── ✓ page.tsx                  # Landing — choose Therapist or Patient
+│   ├── login/                      # Redirects to "/"
+│   ├── (clinician)/                # Therapist workspace
 │   │   ├── dashboard/
 │   │   ├── patients/
 │   │   ├── audit/
-│   ├── (patient)/my-summary/
+│   ├── (patient)/my-summary/       # Read-only patient portal
 ├── components/
 │   ├── charts/ProgressChart.tsx
 │   ├── soap/soap-wizard.tsx
 │   ├── layout/clinician-nav.tsx
-│   └── ui/                       # shadcn/ui
+│   └── ui/                         # shadcn/ui
 ├── lib/
-│   ├── actions/                  # Server actions
-│   ├── supabase/                 # Clients
-│   ├── validators/schemas.ts     # Zod
+│   ├── actions/                    # Server actions
+│   ├── data/mock-store.ts          # In-memory demo data (no DB)
+│   ├── validators/schemas.ts       # Zod
 │   └── audit.ts
-├── supabase/migrations/          # SQL + RLS
-└── scripts/seed.ts               # Demo data
 ```
 
 ---
@@ -104,33 +111,24 @@ cd digphy
 npm install
 ```
 
-### 2. Supabase Setup
-1. Create project at [supabase.com](https://supabase.com)
-2. Copy **Project URL**, **Anon Key**, **Service Role Key**
-3. Run migrations in SQL Editor:
-   ```sql
-   -- 1. supabase/migrations/001_initial_schema.sql
-   -- 2. supabase/migrations/002_storage.sql
-   ```
+### 2. Run (no setup needed)
+No database, env vars, or Supabase required — the app runs entirely on
+in-memory mock data.
 
-### 3. Environment
 ```bash
-cp .env.example .env.local
-# Edit with your Supabase keys
+npm run dev   # Start server
 ```
 
-### 4. Seed & Run
-```bash
-npm run seed                    # Create demo data
-npm run dev                     # Start server
-```
-
+### 3. Open the app
 Open [http://localhost:3000](http://localhost:3000)
 
-### 5. Demo Login
-- **Clinician**: `clinician@digphy.demo` / `demo123456`
-- **Patient 1**: `rajesh@patient.demo` / `demo123456`
-- **Patient 2**: `priya@patient.demo` / `demo123456`
+Choose **"I'm a Therapist"** or **"I'm a Patient"** on the landing page.
+
+> **Deploy**: See [DEPLOYMENT.md](DEPLOYMENT.md) for pushing to Vercel.
+
+### Role-based views (no login)
+- **Therapist** → `/dashboard` — patients, SOAP encounters, progress, documents, audit log
+- **Patient** → `/my-summary` — pain score, pain trend, home program, next appointment
 
 ---
 
@@ -153,37 +151,35 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🔐 Security
+## 🔐 Security (demo)
 
-✅ **Authentication** — Supabase Auth with session cookies  
-✅ **Authorization** — PostgreSQL RLS enforces role-based access  
-✅ **PHI Protection** — UUID storage paths, no names in files  
-✅ **Audit Trail** — Immutable logs of all data access  
-✅ **Encryption** — HTTPS (Vercel), at-rest (Supabase managed)  
+✅ **Role Selector** — Landing page partitions Therapist vs Patient views  \
+✅ **Consent Enforcement** — App-level guard blocks encounters until signed  \
+✅ **Audit Trail** — Every data access logged (user, action, timestamp, IP)  \
+✅ **PHI Protection** — Files stored as base64 in memory, no names in paths  \
+✅ **Encryption** — HTTPS (Vercel) enforced  \
 
 ---
 
-## 📊 Database
+## 📊 Data (in-memory)
 
-**8 Tables**:
-- `profiles` — user metadata (role, clinic)
+All data is held in `lib/data/mock-store.ts` (no database):
+- `profiles` — fixed clinician + 2 patient profiles
 - `patients` — demographics, consent
-- `encounters` — SOAP header + 4 JSONB sections
-- `progress_entries` — time-series metrics
-- `documents` — file references
+- `encounters` — SOAP header + Subjective/Objective/Assessment/Plan
+- `progress_entries` — time-series metrics for charts
+- `documents` — file metadata + base64 references
 - `audit_logs` — action trails
-- `auth.users` — managed by Supabase
-- `storage.buckets` — file storage
 
-**RLS Policies**:
-- Clinicians: full access to clinic patients
-- Patients: read-only own record + summary portal
+**Access model**:
+- Therapist: full access to all patients (via role card)
+- Patient: read-only `/my-summary` (via role card)
 
 ---
 
 ## 📖 Docs
 
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** — Supabase setup, Vercel deploy
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** — Local run + Vercel deploy
 - **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** — API reference, types, queries
 - **[doc_id.txt](doc_id.txt)** — Data model spec
 - **[core_behavious.txt](core_behavious.txt)** — Validation rules
@@ -196,7 +192,6 @@ Open [http://localhost:3000](http://localhost:3000)
 npm run build        # Production build
 npm run dev          # Dev server with hot reload
 npm run lint         # ESLint check
-npm run seed         # Load demo data
 ```
 
 **Build Status**: ✅ Success (12.8s, 102 kB shared JS)
@@ -268,40 +263,33 @@ npm run dev      # Start server
 **Dashboard**: [http://localhost:3000/login](http://localhost:3000/login)
 
 Built with ❤️ for physiotherapy clinics.  
-Next.js • Supabase • shadcn/ui • TypeScript
+Next.js • shadcn/ui • TypeScript
 
 ```bash
-npm run seed
+npm run dev   # Start server → http://localhost:3000
 ```
 
-Demo accounts:
-| Role | Email | Password |
-|------|-------|----------|
-| Clinician | clinician@digphy.demo | demo123456 |
-| Patient | rajesh@patient.demo | demo123456 |
-| Patient | priya@patient.demo | demo123456 |
+No login — pick a role on the landing page.
 
 ## Deploy to Vercel
 
 1. Push to GitHub
 2. Import project in [vercel.com](https://vercel.com)
-3. Add environment variables from `.env.local`
-4. Run `npm run seed` locally against production Supabase before demo
+3. Build with no env vars (fully self-contained)
+4. Deploy — demo data re-seeds per serverless cold start
 
 ## Project Structure
 
 ```
 app/
-  (clinician)/     # Dashboard, patients, audit (clinician-only)
-  login/           # Auth
-  my-summary/      # Patient portal
-components/        # UI, SOAP wizard, charts, forms
+  ✓ page.tsx           # Landing — choose Therapist or Patient
+  (clinician)/         # Dashboard, patients, audit (therapist)
+  my-summary/          # Patient portal
+components/            # UI, SOAP wizard, charts, forms
 lib/
-  actions/         # Server actions
-  validators/      # Zod schemas
-  supabase/        # Client helpers
-supabase/migrations/
-scripts/seed.ts    # Demo data
+  actions/             # Server actions
+  data/mock-store.ts   # In-memory demo data (no DB)
+  validators/          # Zod schemas
 ```
 
 ## Validation Rules

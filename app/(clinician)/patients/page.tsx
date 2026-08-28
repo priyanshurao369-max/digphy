@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { getPatients } from "@/lib/actions/patients";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function PatientsPage({
   searchParams,
 }: {

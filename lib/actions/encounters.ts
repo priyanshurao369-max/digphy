@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 import {
   encounterSchema,
@@ -9,33 +8,28 @@ import {
   type EncounterFormData,
   type ProgressEntryFormData,
 } from "@/lib/validators/schemas";
+import {
+  getEncountersByPatient,
+  getEncounterById,
+  createEncounter as storeCreateEncounter,
+  getProgressEntries as storeGetProgressEntries,
+  createProgressEntry as storeCreateProgressEntry,
+  getRecentEncounters as storeGetRecentEncounters,
+  getPatientById,
+  addAuditLog,
+} from "@/lib/data/mock-store";
 
 export async function getEncounters(patientId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("encounters")
-    .select("*, profiles:clinician_id(full_name)")
-    .eq("patient_id", patientId)
-    .order("date_time", { ascending: false });
-
-  if (error) throw new Error(error.message);
-
-  for (const enc of data ?? []) {
+  const data = getEncountersByPatient(patientId);
+  for (const enc of data) {
     await logAudit({ action: "READ", entity: "Encounter", entityId: enc.id });
   }
-
-  return data ?? [];
+  return data;
 }
 
 export async function getEncounter(id: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("encounters")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error) throw new Error(error.message);
+  const data = getEncounterById(id);
+  if (!data) throw new Error("Encounter not found");
   await logAudit({ action: "READ", entity: "Encounter", entityId: id });
   return data;
 }
@@ -46,38 +40,25 @@ export async function createEncounter(formData: EncounterFormData) {
     return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
   }
 
-  const supabase = await createClient();
-
-  const { data: patient } = await supabase
-    .from("patients")
-    .select("consent_signed")
-    .eq("id", parsed.data.patient_id)
-    .single();
-
+  const patient = getPatientById(parsed.data.patient_id);
   if (!patient?.consent_signed) {
     return { error: "Patient consent must be signed before creating an encounter" };
   }
 
   const { subjective, objective, assessment, plan, ...header } = parsed.data;
 
-  const { data, error } = await supabase
-    .from("encounters")
-    .insert({
-      ...header,
-      subjective,
-      objective,
-      assessment,
-      plan,
-    })
-    .select()
-    .single();
-
-  if (error) return { error: error.message };
+  const data = storeCreateEncounter({
+    ...header,
+    subjective,
+    objective,
+    assessment,
+    plan,
+  });
 
   await logAudit({ action: "CREATE", entity: "Encounter", entityId: data.id });
 
   if (subjective.pain.intensity_vas !== undefined) {
-    await supabase.from("progress_entries").insert({
+    storeCreateProgressEntry({
       patient_id: parsed.data.patient_id,
       date_time: parsed.data.date_time,
       metric_key: "pain_vas",
@@ -87,6 +68,12 @@ export async function createEncounter(formData: EncounterFormData) {
       clinician_id: parsed.data.clinician_id,
       notes: "Recorded during encounter",
     });
+    addAuditLog({
+      user_id: parsed.data.clinician_id,
+      action: "CREATE",
+      entity: "ProgressEntry",
+      entity_id: data.id,
+    });
   }
 
   revalidatePath(`/patients/${parsed.data.patient_id}`);
@@ -94,25 +81,11 @@ export async function createEncounter(formData: EncounterFormData) {
 }
 
 export async function getProgressEntries(patientId: string, metricKey?: string) {
-  const supabase = await createClient();
-  let query = supabase
-    .from("progress_entries")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("date_time", { ascending: true });
-
-  if (metricKey) {
-    query = query.eq("metric_key", metricKey);
-  }
-
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
-
-  for (const entry of data ?? []) {
+  const data = storeGetProgressEntries(patientId, metricKey);
+  for (const entry of data) {
     await logAudit({ action: "READ", entity: "ProgressEntry", entityId: entry.id });
   }
-
-  return data ?? [];
+  return data;
 }
 
 export async function createProgressEntry(formData: ProgressEntryFormData) {
@@ -121,14 +94,7 @@ export async function createProgressEntry(formData: ProgressEntryFormData) {
     return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("progress_entries")
-    .insert(parsed.data)
-    .select()
-    .single();
-
-  if (error) return { error: error.message };
+  const data = storeCreateProgressEntry(parsed.data);
 
   await logAudit({ action: "CREATE", entity: "ProgressEntry", entityId: data.id });
   revalidatePath(`/patients/${parsed.data.patient_id}`);
@@ -137,13 +103,5 @@ export async function createProgressEntry(formData: ProgressEntryFormData) {
 }
 
 export async function getRecentEncounters(limit = 5) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("encounters")
-    .select("*, patients(first_name, last_name)")
-    .order("date_time", { ascending: false })
-    .limit(limit);
-
-  if (error) throw new Error(error.message);
-  return data ?? [];
+  return storeGetRecentEncounters(limit);
 }

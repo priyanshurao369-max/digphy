@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,10 @@ import { ProgressChart } from "@/components/charts/ProgressChart";
 import { ProgressForm } from "@/components/progress/progress-form";
 import { getPatient } from "@/lib/actions/patients";
 import { getProgressEntries } from "@/lib/actions/encounters";
-import { createClient } from "@/lib/supabase/server";
+import { CLINICIAN_ID } from "@/lib/data/mock-store";
 import { METRIC_PRESETS } from "@/lib/validators/schemas";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProgressPage({
   params,
@@ -16,11 +18,6 @@ export default async function ProgressPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
   let patient;
   try {
@@ -53,7 +50,7 @@ export default async function ProgressPage({
         </div>
       </div>
 
-      <ProgressForm patientId={id} clinicianId={user.id} />
+      <ProgressForm patientId={id} clinicianId={CLINICIAN_ID} />
 
       {metricsData.length === 0 ? (
         <Card>

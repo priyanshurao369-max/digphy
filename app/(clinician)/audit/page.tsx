@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getAuditLogs } from "@/lib/actions/portal";
 import { formatDateTime } from "@/lib/utils";
+import type { AuditLog } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function AuditPage() {
   const logs = await getAuditLogs(100);
@@ -34,7 +37,7 @@ export default async function AuditPage() {
                 </thead>
                 <tbody>
                   {logs.map((log) => {
-                    const profile = log.profiles as { full_name: string } | null;
+                    const profile = (log as AuditLog & { profiles?: { full_name: string } | null }).profiles;
                     return (
                       <tr key={log.id} className="border-b last:border-0">
                         <td className="py-2 pr-4 whitespace-nowrap">

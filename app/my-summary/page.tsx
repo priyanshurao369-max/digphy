@@ -7,6 +7,8 @@ import { getPatientSummary } from "@/lib/actions/portal";
 import { signOut } from "@/lib/actions/patients";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function MySummaryPage() {
   const summary = await getPatientSummary();
   if (!summary) redirect("/login");

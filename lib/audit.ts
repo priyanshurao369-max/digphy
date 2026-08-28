@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { addAuditLog, CLINICIAN_ID } from "@/lib/data/mock-store";
 import type { AuditAction, AuditEntity } from "@/types";
 
 interface AuditParams {
@@ -15,21 +15,19 @@ export async function logAudit({
   entityId,
   metadata,
 }: AuditParams): Promise<void> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let ip = "unknown";
+  try {
+    const headersList = await headers();
+    ip =
+      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      headersList.get("x-real-ip") ||
+      "unknown";
+  } catch {
+    // headers() unavailable (e.g. called outside request scope) — ignore
+  }
 
-  if (!user) return;
-
-  const headersList = await headers();
-  const ip =
-    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headersList.get("x-real-ip") ||
-    "unknown";
-
-  await supabase.from("audit_logs").insert({
-    user_id: user.id,
+  addAuditLog({
+    user_id: CLINICIAN_ID,
     action,
     entity,
     entity_id: entityId,
