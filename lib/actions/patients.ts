@@ -26,12 +26,11 @@ export async function signOut() {
 
 export async function getPatients(search?: string) {
   const data = await getAllPatientsForRequest(search);
+  // Audit logging is best-effort — don't let it crash the response
   for (const patient of data) {
-    await logAudit({
-      action: "READ",
-      entity: "Patient",
-      entityId: patient.id,
-    });
+    try {
+      await logAudit({ action: "READ", entity: "Patient", entityId: patient.id });
+    } catch {}
   }
   return data;
 }
@@ -39,64 +38,84 @@ export async function getPatients(search?: string) {
 export async function getPatient(id: string) {
   const data = await findPatientById(id);
   if (!data) throw new Error("Patient not found");
-
-  await logAudit({ action: "READ", entity: "Patient", entityId: id });
+  try {
+    await logAudit({ action: "READ", entity: "Patient", entityId: id });
+  } catch {}
   return data;
 }
 
 export async function createPatient(formData: PatientFormData) {
-  const parsed = patientSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
+  try {
+    const parsed = patientSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
+    }
+
+    const payload = {
+      ...parsed.data,
+      email: parsed.data.email || null,
+      consent_date: parsed.data.consent_signed
+        ? parsed.data.consent_date ?? new Date().toISOString().split("T")[0]
+        : null,
+      created_by: CLINICIAN_ID,
+    };
+
+    const data = storeCreatePatient(payload);
+    try {
+      await persistPatientCookie(data);
+    } catch {}
+
+    try {
+      await logAudit({ action: "CREATE", entity: "Patient", entityId: data.id });
+    } catch {}
+
+    revalidatePath("/patients");
+    revalidatePath("/dashboard");
+    return { data };
+  } catch (err: any) {
+    return { error: err?.message || "Failed to create patient" };
   }
-
-  const payload = {
-    ...parsed.data,
-    email: parsed.data.email || null,
-    consent_date: parsed.data.consent_signed
-      ? parsed.data.consent_date ?? new Date().toISOString().split("T")[0]
-      : null,
-    created_by: CLINICIAN_ID,
-  };
-
-  const data = storeCreatePatient(payload);
-  await persistPatientCookie(data);
-
-  await logAudit({ action: "CREATE", entity: "Patient", entityId: data.id });
-  revalidatePath("/patients");
-  revalidatePath("/dashboard");
-  return { data };
 }
 
 export async function updatePatient(id: string, formData: PatientFormData) {
-  const parsed = patientSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
+  try {
+    const parsed = patientSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
+    }
+
+    const payload = {
+      ...parsed.data,
+      email: parsed.data.email || null,
+      consent_date: parsed.data.consent_signed
+        ? parsed.data.consent_date ?? new Date().toISOString().split("T")[0]
+        : null,
+    };
+
+    const data = storeUpdatePatient(id, payload);
+    if (!data) return { error: "Patient not found" };
+
+    try {
+      await persistPatientCookie(data);
+    } catch {}
+
+    try {
+      await logAudit({ action: "UPDATE", entity: "Patient", entityId: id });
+    } catch {}
+
+    revalidatePath(`/patients/${id}`);
+    revalidatePath("/patients");
+    return { data };
+  } catch (err: any) {
+    return { error: err?.message || "Failed to update patient" };
   }
-
-  const payload = {
-    ...parsed.data,
-    email: parsed.data.email || null,
-    consent_date: parsed.data.consent_signed
-      ? parsed.data.consent_date ?? new Date().toISOString().split("T")[0]
-      : null,
-  };
-
-  const data = storeUpdatePatient(id, payload);
-  if (!data) return { error: "Patient not found" };
-
-  await persistPatientCookie(data);
-
-  await logAudit({ action: "UPDATE", entity: "Patient", entityId: id });
-  revalidatePath(`/patients/${id}`);
-  revalidatePath("/patients");
-  return { data };
 }
 
 export async function getPatientForPrint(id: string) {
   const data = await findPatientById(id);
   if (!data) throw new Error("Patient not found");
-
-  await logAudit({ action: "EXPORT", entity: "Patient", entityId: id });
+  try {
+    await logAudit({ action: "EXPORT", entity: "Patient", entityId: id });
+  } catch {}
   return data;
 }

@@ -28,28 +28,50 @@ const PREFIX = "digphy_p_";
 export async function persistPatientCookie(patient: Patient): Promise<void> {
   try {
     const store = await cookies();
-    store.set(`${PREFIX}${patient.id}`, JSON.stringify(patient), {
+    // Keep cookie lightweight to avoid HTTP header overflow (>4KB)
+    const lightweightPatient = {
+      id: patient.id,
+      first_name: patient.first_name,
+      last_name: patient.last_name,
+      date_of_birth: patient.date_of_birth,
+      sex: patient.sex,
+      contact_phone: patient.contact_phone,
+      email: patient.email,
+      address: patient.address,
+      primary_diagnosis: patient.primary_diagnosis,
+      branch_specialty: patient.branch_specialty || "Orthopedic",
+      comorbidities: patient.comorbidities || [],
+      current_medications: patient.current_medications || [],
+      allergies: patient.allergies || [],
+      mobility_aids: patient.mobility_aids || [],
+      consent_signed: patient.consent_signed,
+      consent_date: patient.consent_date,
+      created_at: patient.created_at,
+      updated_at: patient.updated_at,
+    };
+    store.set(`${PREFIX}${patient.id}`, JSON.stringify(lightweightPatient), {
       path: "/",
       sameSite: "lax",
+      maxAge: 86400 * 7, // 7 days
     });
   } catch {
-    // `cookies()` unavailable outside a request scope — swallow; the in-memory
-    // store still holds the record for the current process.
+    // `cookies()` unavailable outside a request scope — swallow safely
   }
 }
 
-/** Read all mirrored patients out of the request cookies. */
+/** Read all mirrored patients out of the request cookies safely. */
 async function readPatientCookies(): Promise<Patient[]> {
   try {
     const store = await cookies();
+    const allCookies = store.getAll();
     const list: Patient[] = [];
-    for (const cookie of store.getAll()) {
+    for (const cookie of allCookies) {
       if (cookie.name.startsWith(PREFIX)) {
         try {
           const parsed = JSON.parse(cookie.value) as Patient;
           if (parsed && parsed.id) list.push(parsed);
         } catch {
-          // Skip malformed/oversized rows.
+          // Skip malformed/oversized rows
         }
       }
     }

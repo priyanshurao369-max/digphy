@@ -217,6 +217,7 @@ function initMockData() {
       email: "rajesh@patient.demo", address: "12 MG Road, Bangalore",
       emergency_contact: { name: "Sita Kumar", phone: "+91-9876543211", relationship: "Spouse" },
       primary_diagnosis: "Lumbar disc herniation L4-L5",
+      branch_specialty: "Orthopedic",
       comorbidities: ["Hypertension"], current_medications: ["Amlodipine 5mg"],
       allergies: ["Penicillin"], mobility_aids: [],
       caregiver: { name: "Sita Kumar", phone: "+91-9876543211", relationship: "Spouse" },
@@ -230,6 +231,7 @@ function initMockData() {
       email: "priya@patient.demo", address: "45 Park Street, Mumbai",
       emergency_contact: { name: "Rohan Mehta", phone: "+91-9123456790", relationship: "Brother" },
       primary_diagnosis: "Post-ACL reconstruction rehab",
+      branch_specialty: "Orthopedic",
       comorbidities: [], current_medications: [], allergies: [],
       mobility_aids: ["Knee brace"], caregiver: null,
       consent_signed: true, consent_date: "2026-02-01", consent_document_id: "doc-priya-consent",
@@ -246,7 +248,7 @@ function initMockData() {
     { id: "doc-priya-consent", patient_id: PATIENT_PRIYA_ID, type: "Consent",
       filename: "Consent_Priya.pdf", uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
       storage_reference: buildPdfDataUrl("Consent Form - Priya Mehta"),
-            access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
   );
 
   // ── Encounters ──
@@ -379,6 +381,7 @@ export function createPatient(data: Record<string, unknown>): Patient {
     address: data.address || null,
     emergency_contact: data.emergency_contact ?? null,
     primary_diagnosis: data.primary_diagnosis,
+    branch_specialty: (data.branch_specialty as any) || "Orthopedic",
     comorbidities: data.comorbidities || [],
     current_medications: data.current_medications || [],
     allergies: data.allergies || [],

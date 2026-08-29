@@ -42,7 +42,11 @@ export default async function NewEncounterPage({
           </p>
         </div>
       </div>
-      <SoapWizard patientId={id} clinicianId={CLINICIAN_ID} />
+      <SoapWizard
+        patientId={id}
+        clinicianId={CLINICIAN_ID}
+        patientBranchSpecialty={patient.branch_specialty}
+      />
     </div>
   );
 }

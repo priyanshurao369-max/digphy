@@ -22,7 +22,9 @@ import { findPatientById } from "@/lib/data/request-store";
 export async function getEncounters(patientId: string) {
   const data = getEncountersByPatient(patientId);
   for (const enc of data) {
-    await logAudit({ action: "READ", entity: "Encounter", entityId: enc.id });
+    try {
+      await logAudit({ action: "READ", entity: "Encounter", entityId: enc.id });
+    } catch {}
   }
   return data;
 }
@@ -30,54 +32,64 @@ export async function getEncounters(patientId: string) {
 export async function getEncounter(id: string) {
   const data = getEncounterById(id);
   if (!data) throw new Error("Encounter not found");
-  await logAudit({ action: "READ", entity: "Encounter", entityId: id });
+  try {
+    await logAudit({ action: "READ", entity: "Encounter", entityId: id });
+  } catch {}
   return data;
 }
 
 export async function createEncounter(formData: EncounterFormData) {
-  const parsed = encounterSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
-  }
+  try {
+    const parsed = encounterSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { error: parsed.error.errors[0]?.message ?? "Validation failed" };
+    }
 
-  const patient = await findPatientById(parsed.data.patient_id);
-  if (!patient?.consent_signed) {
-    return { error: "Patient consent must be signed before creating an encounter" };
-  }
+    const patient = await findPatientById(parsed.data.patient_id);
+    if (!patient?.consent_signed) {
+      return { error: "Patient consent must be signed before creating an encounter" };
+    }
 
-  const { subjective, objective, assessment, plan, ...header } = parsed.data;
+    const { subjective, objective, assessment, plan, ...header } = parsed.data;
 
-  const data = storeCreateEncounter({
-    ...header,
-    subjective,
-    objective,
-    assessment,
-    plan,
-  });
-
-  await logAudit({ action: "CREATE", entity: "Encounter", entityId: data.id });
-
-  if (subjective.pain.intensity_vas !== undefined) {
-    storeCreateProgressEntry({
-      patient_id: parsed.data.patient_id,
-      date_time: parsed.data.date_time,
-      metric_key: "pain_vas",
-      value: subjective.pain.intensity_vas,
-      unit: "score",
-      source: "clinic",
-      clinician_id: parsed.data.clinician_id,
-      notes: "Recorded during encounter",
+    const data = storeCreateEncounter({
+      ...header,
+      subjective,
+      objective,
+      assessment,
+      plan,
     });
-    addAuditLog({
-      user_id: parsed.data.clinician_id,
-      action: "CREATE",
-      entity: "ProgressEntry",
-      entity_id: data.id,
-    });
-  }
 
-  revalidatePath(`/patients/${parsed.data.patient_id}`);
-  return { data };
+    try {
+      await logAudit({ action: "CREATE", entity: "Encounter", entityId: data.id });
+    } catch {}
+
+    if (subjective.pain.intensity_vas !== undefined) {
+      storeCreateProgressEntry({
+        patient_id: parsed.data.patient_id,
+        date_time: parsed.data.date_time,
+        metric_key: "pain_vas",
+        value: subjective.pain.intensity_vas,
+        unit: "score",
+        source: "clinic",
+        clinician_id: parsed.data.clinician_id,
+        notes: "Recorded during encounter",
+      });
+      try {
+        addAuditLog({
+          user_id: parsed.data.clinician_id,
+          action: "CREATE",
+          entity: "ProgressEntry",
+          entity_id: data.id,
+        });
+      } catch {}
+    }
+
+    revalidatePath(`/patients/${parsed.data.patient_id}`);
+    return { data };
+  } catch (err: any) {
+    return { error: err?.message || "Failed to create encounter" };
+  }
 }
 
 export async function getProgressEntries(patientId: string, metricKey?: string) {

@@ -7,6 +7,13 @@ const isoDateTime = z.string().datetime({ offset: true }).or(
 const phoneRegex = /^\+91-\d{10}$/;
 
 export const sexEnum = z.enum(["Male", "Female", "Other"]);
+export const branchSpecialtyEnum = z.enum([
+  "Orthopedic",
+  "Cardiorespiratory",
+  "Neurological",
+  "Geriatric",
+  "Pediatric",
+]);
 export const encounterTypeEnum = z.enum([
   "Initial",
   "Follow-up",
@@ -33,173 +40,224 @@ const mmtGrade = z.number().min(0).max(5);
 const tendernessGrade = z.number().min(0).max(4);
 
 export const emergencyContactSchema = z.object({
-  name: z.string().min(1),
-  phone: z.string().regex(phoneRegex, "Phone must be +91-XXXXXXXXXX"),
-  relationship: z.string().min(1),
+  name: z.string().optional().nullable().or(z.literal("")),
+  phone: z.string().optional().nullable().or(z.literal("")),
+  relationship: z.string().optional().nullable().or(z.literal("")),
 });
 
 export const caregiverSchema = z.object({
-  name: z.string().min(1),
-  phone: z.string().regex(phoneRegex, "Phone must be +91-XXXXXXXXXX"),
-  relationship: z.string().min(1),
+  name: z.string().optional().nullable().or(z.literal("")),
+  phone: z.string().optional().nullable().or(z.literal("")),
+  relationship: z.string().optional().nullable().or(z.literal("")),
 });
 
 export const patientSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  date_of_birth: isoDate,
+  date_of_birth: z.string().min(1, "Date of birth is required"),
   sex: sexEnum,
-  contact_phone: z.string().regex(phoneRegex, "Phone must be +91-XXXXXXXXXX"),
-  email: z.string().email().optional().or(z.literal("")),
-  address: z.string().optional(),
+  contact_phone: z.string().min(1, "Contact phone is required"),
+  email: z.string().optional().nullable().or(z.literal("")),
+  address: z.string().optional().nullable().or(z.literal("")),
   emergency_contact: emergencyContactSchema.optional().nullable(),
   primary_diagnosis: z.string().min(1, "Primary diagnosis is required"),
+  branch_specialty: branchSpecialtyEnum.default("Orthopedic"),
   comorbidities: z.array(z.string()).default([]),
   current_medications: z.array(z.string()).default([]),
   allergies: z.array(z.string()).default([]),
   mobility_aids: z.array(z.string()).default([]),
   caregiver: caregiverSchema.optional().nullable(),
-  consent_signed: z.boolean(),
-  consent_date: isoDate.optional().nullable(),
+  consent_signed: z.boolean().default(true),
+  consent_date: z.string().optional().nullable(),
 });
 
 export const encounterHeaderSchema = z.object({
-  patient_id: z.string().uuid(),
-  clinician_id: z.string().uuid(),
-  date_time: isoDateTime,
+  patient_id: z.string().min(1),
+  clinician_id: z.string().min(1),
+  date_time: z.string().min(1),
   encounter_type: encounterTypeEnum,
-  location: z.string().min(1),
-  confidentiality_level: confidentialityEnum,
-  notes: z.string().optional(),
+  location: z.string().default("Clinic"),
+  confidentiality_level: confidentialityEnum.default("Standard"),
+  notes: z.string().optional().nullable(),
 });
 
 export const subjectiveSchema = z.object({
   chief_complaint: z.string().min(1, "Chief complaint is required"),
   history_of_present_illness: z.object({
-    onset_date: isoDate,
-    mechanism: z.string(),
-    mode_of_onset: modeOfOnsetEnum,
-    duration_category: durationCategoryEnum,
+    onset_date: z.string().optional().default(""),
+    mechanism: z.string().optional().default(""),
+    mode_of_onset: modeOfOnsetEnum.default("Gradual"),
+    duration_category: durationCategoryEnum.default("Subacute"),
+  }).default({
+    onset_date: "",
+    mechanism: "",
+    mode_of_onset: "Gradual",
+    duration_category: "Subacute",
   }),
   pain: z.object({
-    site: z.string(),
-    type: painTypeEnum,
+    site: z.string().optional().default(""),
+    type: painTypeEnum.default("Muscle"),
     descriptors: z.array(z.string()).default([]),
-    intensity_vas: vasScore,
-    aggravating_factors: z.string(),
-    relieving_factors: z.string(),
+    intensity_vas: z.number().min(0).max(10).default(0),
+    aggravating_factors: z.string().optional().default(""),
+    relieving_factors: z.string().optional().default(""),
   }),
-  past_medical_history: z.string(),
-  surgical_history: z.string(),
+  past_medical_history: z.string().optional().default(""),
+  surgical_history: z.string().optional().default(""),
   medications: z.array(z.string()).default([]),
   social_history: z.object({
-    occupation: z.string(),
-    tobacco: z.string(),
-    alcohol: z.string(),
-    living_situation: z.string(),
+    occupation: z.string().optional().default(""),
+    tobacco: z.string().optional().default(""),
+    alcohol: z.string().optional().default(""),
+    living_situation: z.string().optional().default(""),
+  }).default({
+    occupation: "",
+    tobacco: "",
+    alcohol: "",
+    living_situation: "",
   }),
-  patient_goals: z.string(),
-  consent_for_treatment_and_data_sharing: z.literal(true, {
-    errorMap: () => ({ message: "Consent for treatment is required" }),
-  }),
+  patient_goals: z.string().optional().default(""),
+  consent_for_treatment_and_data_sharing: z.boolean().default(true),
 });
 
 export const objectiveSchema = z.object({
   vitals: z.object({
-    heart_rate_bpm: z.number().min(40).max(200).nullable(),
-    blood_pressure_mmHg: z.string(),
-    respiratory_rate_bpm: z.number().min(8).max(40).nullable(),
-    spo2_percent: z.number().min(70).max(100).nullable(),
-    temperature_c: z.number().min(35).max(42).nullable(),
+    heart_rate_bpm: z.number().nullable().optional(),
+    blood_pressure_mmHg: z.string().optional().default(""),
+    respiratory_rate_bpm: z.number().nullable().optional(),
+    spo2_percent: z.number().nullable().optional(),
+    temperature_c: z.number().nullable().optional(),
+  }).default({
+    heart_rate_bpm: null,
+    blood_pressure_mmHg: "",
+    respiratory_rate_bpm: null,
+    spo2_percent: null,
+    temperature_c: null,
   }),
-  general_condition: generalConditionEnum,
-  ambulatory_status: ambulatoryStatusEnum,
+  general_condition: generalConditionEnum.default("Good"),
+  ambulatory_status: ambulatoryStatusEnum.default("Independent"),
   observation: z.object({
     posture: z.object({
-      anterior: z.string(),
-      posterior: z.string(),
-      lateral: z.string(),
-    }),
+      anterior: z.string().optional().default(""),
+      posterior: z.string().optional().default(""),
+      lateral: z.string().optional().default(""),
+    }).default({ anterior: "", posterior: "", lateral: "" }),
     gait: z.object({
-      barefoot: z.string(),
-      with_aids: z.string(),
-    }),
+      barefoot: z.string().optional().default(""),
+      with_aids: z.string().optional().default(""),
+    }).default({ barefoot: "", with_aids: "" }),
+  }).default({
+    posture: { anterior: "", posterior: "", lateral: "" },
+    gait: { barefoot: "", with_aids: "" },
   }),
   palpation: z.object({
-    tenderness_grade: tendernessGrade,
-    tone: z.string(),
-    crepitus: z.string(),
-  }),
+    tenderness_grade: z.number().default(0),
+    tone: z.string().optional().default("normal"),
+    crepitus: z.string().optional().default("none"),
+  }).default({ tenderness_grade: 0, tone: "normal", crepitus: "none" }),
   rom: z.object({
-    arom: z.record(z.string()),
-    prom: z.record(z.string()),
-    end_feel: z.string(),
-  }),
+    arom: z.record(z.string()).default({}),
+    prom: z.record(z.string()).default({}),
+    end_feel: z.string().optional().default("firm"),
+  }).default({ arom: {}, prom: {}, end_feel: "firm" }),
   strength: z.object({
-    mmt: z.record(mmtGrade),
-  }),
+    mmt: z.record(z.number()).default({}),
+  }).default({ mmt: {} }),
   neuro: z.object({
-    sensation: z.string(),
-    reflexes: z.record(z.string()),
-  }),
+    sensation: z.string().optional().default("normal"),
+    reflexes: z.record(z.string()).default({}),
+  }).default({ sensation: "normal", reflexes: {} }),
   functional_tests: z.object({
-    tug_sec: z.number().min(0).nullable(),
-    six_mwt_m: z.number().min(0).nullable(),
-    other: z.string(),
-  }),
+    tug_sec: z.number().nullable().optional(),
+    six_mwt_m: z.number().nullable().optional(),
+    other: z.string().optional().default(""),
+  }).default({ tug_sec: null, six_mwt_m: null, other: "" }),
   measurements: z.object({
-    limb_length_true_cm: z.number().nullable(),
-    girth_cm: z.record(z.number()),
-  }),
+    limb_length_true_cm: z.number().nullable().optional(),
+    girth_cm: z.record(z.number()).default({}),
+  }).default({ limb_length_true_cm: null, girth_cm: {} }),
+  branch_specific: z.object({
+    orthopedic: z.object({
+      special_tests: z.array(z.string()).default([]),
+      joint_play: z.string().default("Normal"),
+      swelling_grade: z.string().default("None"),
+    }).optional(),
+    cardiorespiratory: z.object({
+      auscultation_notes: z.string().default("Vesicular breath sounds"),
+      cough_strength: z.string().default("Strong"),
+      sputum_characteristics: z.string().default("Clear"),
+      borg_dyspnea_score: z.number().nullable().optional(),
+      chest_expansion_cm: z.number().nullable().optional(),
+    }).optional(),
+    neurological: z.object({
+      modified_ashworth_scale: z.number().nullable().optional(),
+      berg_balance_score: z.number().nullable().optional(),
+      coordination_notes: z.string().default("Intact"),
+    }).optional(),
+    geriatric: z.object({
+      thirty_sec_chair_stand_reps: z.number().nullable().optional(),
+      adl_index_score: z.number().nullable().optional(),
+      fall_history_count: z.number().nullable().optional(),
+    }).optional(),
+    pediatric: z.object({
+      gmfm_percentage: z.number().nullable().optional(),
+      pedi_score: z.number().nullable().optional(),
+      tone_assessment: z.string().default("Normal"),
+      milestones_achieved: z.array(z.string()).default([]),
+    }).optional(),
+  }).optional(),
   attachments: z.array(z.string()).default([]),
 });
 
 export const assessmentSchema = z.object({
   problem_list: z.array(z.string()).min(1, "At least one problem required"),
   working_diagnosis: z.string().min(1, "Working diagnosis is required"),
-  red_flags_present: z.boolean(),
-  clinical_impression: z.string(),
+  red_flags_present: z.boolean().default(false),
+  clinical_impression: z.string().optional().default(""),
 });
 
 export const goalSchema = z.object({
-  goal_id: z.string().uuid(),
+  goal_id: z.string().min(1),
   description: z.string().min(1),
-  baseline_value: z.string(),
-  target_value: z.string(),
-  target_date: isoDate,
-  owner_clinician_id: z.string().uuid(),
+  baseline_value: z.string().default(""),
+  target_value: z.string().default(""),
+  target_date: z.string().default(""),
+  owner_clinician_id: z.string().min(1),
 });
 
 export const interventionSchema = z.object({
-  exercise_id: z.string().uuid(),
+  exercise_id: z.string().min(1),
   name: z.string().min(1),
-  reps: z.number().min(0),
-  sets: z.number().min(0),
-  hold_seconds: z.number().min(0),
-  progression_rule: z.string(),
-  resource_ref: z.string(),
+  reps: z.number().min(0).default(10),
+  sets: z.number().min(0).default(3),
+  hold_seconds: z.number().min(0).default(0),
+  progression_rule: z.string().default(""),
+  resource_ref: z.string().default(""),
 });
 
 export const planSchema = z.object({
   short_term_goals: z.array(goalSchema).default([]),
   long_term_goals: z.array(goalSchema).default([]),
   treatment_plan: z.object({
-    treatment_id: z.string().uuid(),
-    title: z.string().min(1),
-    start_date: isoDate,
-    end_date: isoDate,
-    frequency_per_week: z.number().min(1).max(7),
-    duration_minutes: z.number().min(15).max(180),
+    treatment_id: z.string().min(1),
+    title: z.string().optional().default("Rehabilitation Plan"),
+    start_date: z.string().optional().default(""),
+    end_date: z.string().optional().default(""),
+    frequency_per_week: z.number().min(1).max(7).default(3),
+    duration_minutes: z.number().min(15).max(180).default(45),
     interventions: z.array(interventionSchema).default([]),
     modalities: z.array(z.string()).default([]),
     education: z.array(z.string()).default([]),
-    home_program: z.string(),
+    home_program: z.string().optional().default(""),
   }),
   monitoring: z.object({
     metrics_to_track: z.array(z.string()).default([]),
-    review_interval_days: z.number().min(1),
+    review_interval_days: z.number().min(1).default(7),
+  }).default({
+    metrics_to_track: ["pain_vas"],
+    review_interval_days: 7,
   }),
-  next_follow_up: isoDate,
+  next_follow_up: z.string().optional().default(""),
 });
 
 export const encounterSchema = encounterHeaderSchema.extend({
@@ -233,8 +291,14 @@ export type EncounterFormData = z.infer<typeof encounterSchema>;
 export type ProgressEntryFormData = z.infer<typeof progressEntrySchema>;
 
 export const METRIC_PRESETS = [
-  { key: "pain_vas", label: "Pain (VAS)", unit: "score" },
-  { key: "rom_knee_flexion_deg", label: "Knee Flexion ROM", unit: "deg" },
-  { key: "tug_sec", label: "Timed Up and Go", unit: "sec" },
-  { key: "six_mwt_m", label: "6-Minute Walk Test", unit: "m" },
+  { key: "pain_vas", label: "Pain (VAS 0-10)", unit: "score" },
+  { key: "rom_knee_flexion_deg", label: "Knee Flexion ROM (Orthopedic)", unit: "deg" },
+  { key: "six_mwt_m", label: "6-Minute Walk Distance (Cardiorespiratory)", unit: "m" },
+  { key: "borg_dyspnea", label: "Borg Dyspnea Scale (Cardiorespiratory)", unit: "score" },
+  { key: "berg_balance_score", label: "Berg Balance Score (Neurological)", unit: "score" },
+  { key: "mas_spasticity_grade", label: "Modified Ashworth Scale (Neurological)", unit: "grade" },
+  { key: "tug_sec", label: "Timed Up & Go (Geriatric)", unit: "sec" },
+  { key: "thirty_sec_chair_stand", label: "30s Chair Stand Reps (Geriatric)", unit: "reps" },
+  { key: "gmfm_pct", label: "GMFM-88/66 Score (Pediatric)", unit: "%" },
+  { key: "pedi_score", label: "PEDI Functional Score (Pediatric)", unit: "score" },
 ] as const;

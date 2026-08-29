@@ -27,6 +27,13 @@ export type AmbulatoryStatus =
 
 export type DocumentType = "Consent" | "Report" | "Image" | "Prescription";
 
+export type BranchSpecialty =
+  | "Orthopedic"
+  | "Cardiorespiratory"
+  | "Neurological"
+  | "Geriatric"
+  | "Pediatric";
+
 export type AuditAction = "CREATE" | "READ" | "UPDATE" | "DELETE" | "EXPORT";
 
 export type AuditEntity = "Patient" | "Encounter" | "Document" | "ProgressEntry";
@@ -65,6 +72,7 @@ export interface Patient {
   address: string | null;
   emergency_contact: EmergencyContact | null;
   primary_diagnosis: string;
+  branch_specialty?: BranchSpecialty;
   comorbidities: string[];
   current_medications: string[];
   allergies: string[];
@@ -110,6 +118,47 @@ export interface SubjectiveData {
   consent_for_treatment_and_data_sharing: boolean;
 }
 
+export interface OrthopedicObjectiveData {
+  special_tests: string[];
+  joint_play: string;
+  swelling_grade: string;
+}
+
+export interface CardiorespiratoryObjectiveData {
+  auscultation_notes: string;
+  cough_strength: string;
+  sputum_characteristics: string;
+  borg_dyspnea_score: number | null;
+  chest_expansion_cm: number | null;
+}
+
+export interface NeurologicalObjectiveData {
+  modified_ashworth_scale: number | null;
+  berg_balance_score: number | null;
+  coordination_notes: string;
+}
+
+export interface GeriatricObjectiveData {
+  thirty_sec_chair_stand_reps: number | null;
+  adl_index_score: number | null;
+  fall_history_count: number | null;
+}
+
+export interface PediatricObjectiveData {
+  gmfm_percentage: number | null;
+  pedi_score: number | null;
+  tone_assessment: string;
+  milestones_achieved: string[];
+}
+
+export interface BranchSpecificObjectiveData {
+  orthopedic?: OrthopedicObjectiveData;
+  cardiorespiratory?: CardiorespiratoryObjectiveData;
+  neurological?: NeurologicalObjectiveData;
+  geriatric?: GeriatricObjectiveData;
+  pediatric?: PediatricObjectiveData;
+}
+
 export interface ObjectiveData {
   vitals: {
     heart_rate_bpm: number | null;
@@ -150,6 +199,7 @@ export interface ObjectiveData {
     limb_length_true_cm: number | null;
     girth_cm: Record<string, number>;
   };
+  branch_specific?: BranchSpecificObjectiveData;
   attachments: string[];
 }
 

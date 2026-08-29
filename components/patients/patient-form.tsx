@@ -28,6 +28,9 @@ export function PatientForm({ patient }: PatientFormProps) {
   const [loading, setLoading] = useState(false);
   const [consentSigned, setConsentSigned] = useState(patient?.consent_signed ?? false);
   const [sex, setSex] = useState(patient?.sex ?? "Male");
+  const [branchSpecialty, setBranchSpecialty] = useState(
+    patient?.branch_specialty ?? "Orthopedic"
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -44,6 +47,7 @@ export function PatientForm({ patient }: PatientFormProps) {
       email: form.get("email") as string,
       address: form.get("address") as string,
       primary_diagnosis: form.get("primary_diagnosis") as string,
+      branch_specialty: branchSpecialty,
       comorbidities: (form.get("comorbidities") as string)
         .split(",")
         .map((s) => s.trim())
@@ -62,20 +66,20 @@ export function PatientForm({ patient }: PatientFormProps) {
         .filter(Boolean),
       consent_signed: consentSigned,
       consent_date: consentSigned ? (form.get("consent_date") as string) || null : null,
-      emergency_contact: form.get("ec_name")
+      emergency_contact: (form.get("ec_name") as string)?.trim()
         ? {
-            name: form.get("ec_name") as string,
-            phone: form.get("ec_phone") as string,
-            relationship: form.get("ec_relationship") as string,
+            name: ((form.get("ec_name") as string) || "").trim(),
+            phone: ((form.get("ec_phone") as string) || "").trim(),
+            relationship: ((form.get("ec_relationship") as string) || "").trim(),
           }
-        : null,
-      caregiver: form.get("cg_name")
+        : patient?.emergency_contact ?? null,
+      caregiver: (form.get("cg_name") as string)?.trim()
         ? {
-            name: form.get("cg_name") as string,
-            phone: form.get("cg_phone") as string,
-            relationship: form.get("cg_relationship") as string,
+            name: ((form.get("cg_name") as string) || "").trim(),
+            phone: ((form.get("cg_phone") as string) || "").trim(),
+            relationship: ((form.get("cg_relationship") as string) || "").trim(),
           }
-        : null,
+        : patient?.caregiver ?? null,
     };
 
     const result = patient
@@ -101,7 +105,7 @@ export function PatientForm({ patient }: PatientFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Demographics</CardTitle>
+          <CardTitle className="text-lg">Demographics (Intake Only)</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -158,10 +162,10 @@ export function PatientForm({ patient }: PatientFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Clinical Info</CardTitle>
+          <CardTitle className="text-lg">Case Classification & Clinical Branch *</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
+          <div>
             <Label htmlFor="primary_diagnosis">Primary Diagnosis *</Label>
             <Input
               id="primary_diagnosis"
@@ -169,6 +173,24 @@ export function PatientForm({ patient }: PatientFormProps) {
               defaultValue={patient?.primary_diagnosis}
               required
             />
+          </div>
+          <div>
+            <Label>Physiotherapy Branch / Specialty *</Label>
+            <Select
+              value={branchSpecialty}
+              onValueChange={(v) => setBranchSpecialty(v as typeof branchSpecialty)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Orthopedic">Orthopedic (ROM, MMT, Joint Play, Special Tests)</SelectItem>
+                <SelectItem value="Cardiorespiratory">Cardiorespiratory (6MWT, Auscultation, Borg, SpO2)</SelectItem>
+                <SelectItem value="Neurological">Neurological (MAS Spasticity, Berg Balance, Reflexes)</SelectItem>
+                <SelectItem value="Geriatric">Geriatric (TUG, 30s Chair Stand, ADL/IADL Index)</SelectItem>
+                <SelectItem value="Pediatric">Pediatric (GMFM %, PEDI Score, Developmental Milestones)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="comorbidities">Comorbidities (comma-separated)</Label>
@@ -203,7 +225,48 @@ export function PatientForm({ patient }: PatientFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Consent</CardTitle>
+          <CardTitle className="text-lg">Emergency Contact & Caregiver Details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="ec_name">Emergency Contact Name</Label>
+            <Input
+              id="ec_name"
+              name="ec_name"
+              defaultValue={patient?.emergency_contact?.name ?? ""}
+            />
+          </div>
+          <div>
+            <Label htmlFor="ec_phone">Emergency Contact Phone (+91-XXXXXXXXXX)</Label>
+            <Input
+              id="ec_phone"
+              name="ec_phone"
+              placeholder="+91-9876543210"
+              defaultValue={patient?.emergency_contact?.phone ?? ""}
+            />
+          </div>
+          <div>
+            <Label htmlFor="ec_relationship">Relationship</Label>
+            <Input
+              id="ec_relationship"
+              name="ec_relationship"
+              defaultValue={patient?.emergency_contact?.relationship ?? ""}
+            />
+          </div>
+          <div>
+            <Label htmlFor="cg_name">Caregiver Name (If applicable)</Label>
+            <Input
+              id="cg_name"
+              name="cg_name"
+              defaultValue={patient?.caregiver?.name ?? ""}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Consent (Intake Baseline)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">
@@ -212,7 +275,7 @@ export function PatientForm({ patient }: PatientFormProps) {
               checked={consentSigned}
               onCheckedChange={(c) => setConsentSigned(c === true)}
             />
-            <Label htmlFor="consent_signed">Consent signed for treatment *</Label>
+            <Label htmlFor="consent_signed">Consent signed for treatment & data processing *</Label>
           </div>
           {consentSigned && (
             <div>
