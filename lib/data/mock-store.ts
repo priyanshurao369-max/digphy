@@ -103,26 +103,43 @@ function buildEncounter(
 
   const subj: SubjectiveData = {
     chief_complaint: isRajesh ? "Lower back pain with left leg radiation" : "Knee pain and stiffness after ACL reconstruction",
-    history_of_present_illness: {
+        history_of_present_illness: {
       onset_date: isRajesh ? "2025-12-01" : "2026-01-15",
       mechanism: isRajesh ? "Prolonged sitting, sudden onset when standing" : "Post-surgical rehabilitation",
       mode_of_onset: "Gradual", duration_category: "Subacute",
+      condition_course: "Improved",
+      current_treatment: isRajesh ? "NSAIDs, physiotherapy" : "Post-op care, physiotherapy",
+      investigations: isRajesh ? ["MRI"] : ["X-ray"],
+      investigation_findings: isRajesh ? "L4-L5 disc bulge with left S1 nerve root involvement" : "ACL graft intact, no loosening",
     },
     pain: {
       site: isRajesh ? "Lumbar spine, left leg" : "Right knee",
+      side: isRajesh ? "Left" : "Right",
       type: isRajesh ? "Nerve" : "Joint",
+      frequency: "Periodic",
       descriptors: isRajesh ? ["sharp", "burning"] : ["dull", "tight"],
       intensity_vas: painVas,
       aggravating_factors: isRajesh ? "Sitting, bending" : "Prolonged standing, stairs",
       relieving_factors: isRajesh ? "Walking, heat pack" : "Rest, elevation",
+      nature_notes: isRajesh ? "Radiating down left leg to foot" : "Stiffness, worse in morning",
     },
     past_medical_history: isRajesh ? "Hypertension" : "None significant",
     surgical_history: isRajesh ? "None" : "Right ACL reconstruction (2026-01-15)",
     medications: isRajesh ? ["Amlodipine 5mg"] : [],
-    social_history: {
+        social_history: {
       occupation: isRajesh ? "Software engineer" : "Yoga instructor",
-      tobacco: "no", alcohol: isRajesh ? "occasional" : "social",
+      tobacco: "no", tobacco_details: "none",
+      smoking_details: "none",
+      alcohol: isRajesh ? "occasional" : "social", alcohol_details: isRajesh ? "1-2 drinks/month" : "1-2 drinks/week",
+      sleep_habits: isRajesh ? "6-7 hrs, disturbed" : "7-8 hrs, good",
+      physical_activity: isRajesh ? "Walking daily" : "Yoga, walking",
       living_situation: isRajesh ? "with family" : "alone",
+      family_history: "none significant",
+      hereditary_diseases: "none",
+      social_status: "middle class",
+            educational_status: "graduate",
+      environmental_history: "office work",
+      consanguinity: "No",
     },
     patient_goals: isRajesh ? "Return to work without pain" : "Return to yoga teaching and normal activities",
     consent_for_treatment_and_data_sharing: true,
@@ -138,14 +155,21 @@ function buildEncounter(
     },
     general_condition: "Good",
     ambulatory_status: isRajesh ? "Independent" : "WithAid",
-    observation: {
+        observation: {
+      sensorium: "Alert",
+      body_build: isRajesh ? "Mesomorphic" : "Ectomorphic",
+      deformities: isRajesh ? "None" : "None",
+      external_aids: isRajesh ? "None" : "Knee brace",
       posture: { anterior: "Normal", posterior: "Normal", lateral: "Normal" },
       gait: { barefoot: "Antalgic gait", with_aids: "N/A" },
     },
-    palpation: { tenderness_grade: 2, tone: "normal", crepitus: "none" },
+    palpation: { tenderness_grade: 2, tone: "normal", crepitus: "none", ligamentous_snaps: "Absent", cracking_distraction: "Absent", capillary_refill: "Normal", nodules: "", pulses: "Palpable & symmetrical", scar_status: "", edema_type: "None", edema_notes: "", swelling_type: "" },
     rom, strength,
-    neuro: { sensation: "Normal", reflexes: { patella: "++" } },
+        neuro: { sensation: "Normal", reflexes: { patella: "++" } },
     functional_tests: functional,
+    gait_parameters: isRajesh
+      ? { step_length_cm: 14, stride_length_cm: 28, cadence_steps_min: 100, base_width_cm: 4 }
+      : { step_length_cm: 18, stride_length_cm: 36, cadence_steps_min: 110, base_width_cm: 6 },
     skin_and_soft_tissues: isRajesh
       ? {
           swelling: "None",
@@ -257,7 +281,17 @@ function buildEncounter(
           items: { work_occupation: true, sports_hobbies: true },
           comments: "Paused yoga teaching classes; no sport participation since surgery.",
         },
-    measurements: { limb_length_true_cm: null, girth_cm: {} },
+        measurements: { limb_length_true_cm: null, girth_cm: {} },
+    functional_ul: isRajesh
+      ? { dressing_upper: "Mild", eating_feeding: "None", combing_hair: "None", toileting: "Mild" }
+      : { dressing_upper: "Mild", eating_feeding: "None", combing_hair: "Mild", toileting: "None" },
+    functional_ll: isRajesh
+      ? { walking_distance: "Moderate", stair_climbing: "Mild", standing_tolerance: "Moderate", lifting_carrying: "Severe", squatting_kneeling: "Severe" }
+      : { walking_distance: "Mild", stair_climbing: "Moderate", standing_tolerance: "Mild", squatting_kneeling: "Moderate", cycling: "None" },
+    dermatomes: isRajesh ? "L5/S1 dermatome diminished on left" : "No focal sensory level",
+    myotomes: isRajesh ? "L5 myotome weak on left (great toe extension)" : "No focal motor deficit",
+    capsular_pattern: isRajesh ? "Lumbar: flexion ↓, extension limited" : "Knee: flexion contracture 5°",
+    loose_close_packed: "",
     attachments: [],
   };
 
@@ -266,8 +300,14 @@ function buildEncounter(
       ? ["1) Lumbar radiculopathy L5", "2) Reduced lumbar ROM"]
       : ["1) Right knee pain post-ACL reconstruction", "2) Reduced ROM and strength"],
     working_diagnosis: diagnosis,
+    differential_diagnosis: isRajesh
+      ? ["Lumbar disc herniation L4-L5", "Piriformis syndrome", "Spondylolisthesis"]
+      : ["Arthrofibrosis", "Graft insufficiency", "Meniscal tear"],
     red_flags_present: false,
     clinical_impression: "Improving with rehabilitation.",
+    final_diagnosis: isRajesh
+      ? "Lumbar disc herniation L4-L5 with left L5 radiculopathy"
+      : "Right knee post-ACL reconstruction with residual stiffness",
   };
 
   const plan: PlanData = {

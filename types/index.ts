@@ -15,7 +15,9 @@ export type ModeOfOnset = "Sudden" | "Gradual" | "Insidious" | "Periodic";
 
 export type DurationCategory = "Acute" | "Subacute" | "Chronic";
 
-export type PainType = "Muscle" | "Joint" | "Nerve" | "Bone" | "Vascular";
+export type PainType = "Muscle" | "Ligament" | "Joint" | "Nerve" | "Bone" | "Vascular" | "Sympathetic";
+
+export type ConditionCourse = "Improved" | "Stationary" | "Worsened";
 
 export type GeneralCondition = "Good" | "Fair" | "Poor";
 
@@ -89,11 +91,14 @@ export interface Patient {
 
 export interface PainData {
   site: string;
+  side: string;
   type: PainType;
+  frequency: string;
   descriptors: string[];
   intensity_vas: number;
   aggravating_factors: string;
   relieving_factors: string;
+  nature_notes: string;
 }
 
 export interface SubjectiveData {
@@ -103,6 +108,10 @@ export interface SubjectiveData {
     mechanism: string;
     mode_of_onset: ModeOfOnset;
     duration_category: DurationCategory;
+    condition_course: ConditionCourse;
+    current_treatment: string;
+    investigations: string[];
+    investigation_findings: string;
   };
   pain: PainData;
   past_medical_history: string;
@@ -111,8 +120,19 @@ export interface SubjectiveData {
   social_history: {
     occupation: string;
     tobacco: string;
+    tobacco_details: string;
+    smoking_details: string;
     alcohol: string;
+    alcohol_details: string;
+    sleep_habits: string;
+    physical_activity: string;
     living_situation: string;
+    family_history: string;
+    hereditary_diseases: string;
+    consanguinity: string;
+    social_status: string;
+    educational_status: string;
+    environmental_history: string;
   };
   patient_goals: string;
   consent_for_treatment_and_data_sharing: boolean;
@@ -244,6 +264,10 @@ export interface ObjectiveData {
   general_condition: GeneralCondition;
   ambulatory_status: AmbulatoryStatus;
   observation: {
+    sensorium: string;
+    body_build: string;
+    deformities: string;
+    external_aids: string;
     posture: { anterior: string; posterior: string; lateral: string };
     gait: { barefoot: string; with_aids: string };
   };
@@ -251,7 +275,28 @@ export interface ObjectiveData {
     tenderness_grade: number;
     tone: string;
     crepitus: string;
+    ligamentous_snaps: string;
+    cracking_distraction: string;
+    capillary_refill: string;
+    nodules: string;
+    pulses: string;
+    scar_status: string;
+    edema_type: string;
+    edema_notes: string;
+    swelling_type: string;
   };
+  dermatomes: string;
+  myotomes: string;
+  capsular_pattern: string;
+  loose_close_packed: string;
+    gait_parameters: {
+    step_length_cm: number | null;
+    stride_length_cm: number | null;
+    cadence_steps_min: number | null;
+    base_width_cm: number | null;
+  };
+  functional_ul: Record<string, string>;
+  functional_ll: Record<string, string>;
   rom: {
     arom: Record<string, string>;
     prom: Record<string, string>;
@@ -285,8 +330,10 @@ export interface ObjectiveData {
 export interface AssessmentData {
   problem_list: string[];
   working_diagnosis: string;
+  differential_diagnosis: string[];
   red_flags_present: boolean;
   clinical_impression: string;
+  final_diagnosis: string;
 }
 
 export interface Goal {

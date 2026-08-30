@@ -81,6 +81,16 @@ const MAS_OPTIONS = [
   { value: "4", label: "4 — Affected part rigid" },
 ] as const;
 
+// Functional Evaluation — specific ICF d-category tasks
+const UL_FUNCTIONAL_TASKS = [
+  "washing_bathing", "dressing_upper", "eating_feeding", "combing_hair",
+  "toileting", "reaching_overhead", "fine_motor_lift_carry",
+] as const;
+const LL_FUNCTIONAL_TASKS = [
+  "walking_distance", "stair_climbing", "cycling", "standing_tolerance",
+  "squatting_kneeling", "lifting_carrying", "prolonged_standing",
+] as const;
+
 interface SoapWizardProps {
   patientId: string;
   clinicianId: string;
@@ -129,28 +139,44 @@ export function SoapWizard({
     notes: "",
     subjective: {
       chief_complaint: "",
-      history_of_present_illness: {
+            history_of_present_illness: {
         onset_date: today,
         mechanism: "",
         mode_of_onset: "Gradual",
         duration_category: "Subacute",
+        condition_course: "Improved",
+        current_treatment: "",
+        investigations: [],
+        investigation_findings: "",
       },
       pain: {
         site: "",
+        side: "",
         type: "Muscle",
+        frequency: "Not specified",
         descriptors: [],
         intensity_vas: 5,
         aggravating_factors: "",
         relieving_factors: "",
+        nature_notes: "",
       },
       past_medical_history: "",
       surgical_history: "",
       medications: [],
       social_history: {
         occupation: "",
-        tobacco: "no",
-        alcohol: "no",
+        tobacco: "no", tobacco_details: "",
+        smoking_details: "",
+        alcohol: "no", alcohol_details: "",
+        sleep_habits: "",
+        physical_activity: "",
         living_situation: "with family",
+        family_history: "",
+        hereditary_diseases: "",
+        social_status: "",
+                educational_status: "",
+        environmental_history: "",
+        consanguinity: "",
       },
       patient_goals: "",
       consent_for_treatment_and_data_sharing: true,
@@ -165,11 +191,15 @@ export function SoapWizard({
       },
       general_condition: "Good",
       ambulatory_status: "Independent",
-      observation: {
+            observation: {
+        sensorium: "Alert",
+        body_build: "Mesomorphic",
+        deformities: "",
+        external_aids: "",
         posture: { anterior: "Symmetrical", posterior: "Normal alignment", lateral: "Normal lordosis/kyphosis" },
         gait: { barefoot: "Normal cadence", with_aids: "N/A" },
       },
-      palpation: { tenderness_grade: 0, tone: "normal", crepitus: "none" },
+      palpation: { tenderness_grade: 0, tone: "normal", crepitus: "none", ligamentous_snaps: "Absent", cracking_distraction: "Absent", capillary_refill: "Normal", nodules: "", pulses: "Palpable & symmetrical", scar_status: "", edema_type: "None", edema_notes: "", swelling_type: "" },
       rom: { arom: {}, prom: {}, end_feel: "firm" },
       strength: { mmt: {} },
       neuro: { sensation: "normal", reflexes: {} },
@@ -198,10 +228,17 @@ export function SoapWizard({
         babinski: { right: false, left: false },
         comments: "",
       },
-      activity_limitations: { items: {}, comments: "" },
+            activity_limitations: { items: {}, comments: "" },
       participation_restrictions: { items: {}, comments: "" },
       functional_tests: { tug_sec: null, six_mwt_m: null, other: "" },
+      functional_ul: {},
+      functional_ll: {},
       measurements: { limb_length_true_cm: null, girth_cm: {} },
+      gait_parameters: { step_length_cm: null, stride_length_cm: null, cadence_steps_min: null, base_width_cm: null },
+      dermatomes: "",
+      myotomes: "",
+      capsular_pattern: "",
+      loose_close_packed: "",
       branch_specific: {
         orthopedic: { special_tests: [], special_test_results: [], end_feel: "Firm", joint_play: "Normal", swelling_grade: "None", limb_length_apparent_cm: null },
         cardiorespiratory: { auscultation_notes: "", auscultation_finding: "Vesicular", cough_strength: "Strong", sputum_characteristics: "Clear", borg_dyspnea_score: 0, chest_expansion_cm: 3, iswt_m: null },
@@ -214,8 +251,10 @@ export function SoapWizard({
     assessment: {
       problem_list: [""],
       working_diagnosis: "",
+      differential_diagnosis: [],
       red_flags_present: false,
       clinical_impression: "",
+      final_diagnosis: "",
     },
     plan: {
       short_term_goals: [],
@@ -389,12 +428,147 @@ export function SoapWizard({
                 onChange={(e) => updateField("subjective.chief_complaint", e.target.value)}
               />
             </div>
+            <div className="sm:col-span-2 pt-2 border-t">
+              <Label className="font-semibold text-primary">History of Present Illness</Label>
+            </div>
+            <div>
+              <Label>Date of Onset of Injury</Label>
+              <Input
+                type="date"
+                value={form.subjective?.history_of_present_illness?.onset_date ?? ""}
+                onChange={(e) => updateField("subjective.history_of_present_illness.onset_date", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Mechanism of Injury</Label>
+              <Input
+                placeholder="e.g. RTA, direct/indirect blow, bending, twisting, rotational"
+                value={form.subjective?.history_of_present_illness?.mechanism ?? ""}
+                onChange={(e) => updateField("subjective.history_of_present_illness.mechanism", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Mode of Onset</Label>
+              <Select
+                value={form.subjective?.history_of_present_illness?.mode_of_onset ?? "Gradual"}
+                onValueChange={(v) => updateField("subjective.history_of_present_illness.mode_of_onset", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Sudden", "Gradual", "Insidious", "Periodic"].map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Duration (Acute / Sub-acute / Chronic)</Label>
+              <Select
+                value={form.subjective?.history_of_present_illness?.duration_category ?? "Subacute"}
+                onValueChange={(v) => updateField("subjective.history_of_present_illness.duration_category", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Acute", "Subacute", "Chronic"].map((d) => (
+                    <SelectItem key={d} value={d}>{d}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Condition Since Onset</Label>
+              <Select
+                value={form.subjective?.history_of_present_illness?.condition_course ?? "Stationary"}
+                onValueChange={(v) => updateField("subjective.history_of_present_illness.condition_course", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Improved", "Stationary", "Worsened"].map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Current Treatment (if any)</Label>
+              <Input
+                placeholder="e.g. NSAIDs, physiotherapy elsewhere"
+                value={form.subjective?.history_of_present_illness?.current_treatment ?? ""}
+                onChange={(e) => updateField("subjective.history_of_present_illness.current_treatment", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Investigations Done</Label>
+              <Input
+                placeholder="e.g. X-ray, MRI, CT, bone scan (comma separated)"
+                value={form.subjective?.history_of_present_illness?.investigations?.join(", ") ?? ""}
+                onChange={(e) =>
+                  updateField(
+                    "subjective.history_of_present_illness.investigations",
+                    e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                  )
+                }
+              />
+            </div>
+            <div>
+              <Label>Pathological / Radiological Findings</Label>
+              <Input
+                placeholder="e.g. L4-L5 disc bulge on MRI"
+                value={form.subjective?.history_of_present_illness?.investigation_findings ?? ""}
+                onChange={(e) => updateField("subjective.history_of_present_illness.investigation_findings", e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2 pt-2 border-t">
+              <Label className="font-semibold text-primary">Pain Assessment</Label>
+            </div>
             <div>
               <Label>Pain Site</Label>
               <Input
                 value={form.subjective?.pain.site}
                 onChange={(e) => updateField("subjective.pain.site", e.target.value)}
               />
+            </div>
+            <div>
+              <Label>Pain Side</Label>
+              <Select
+                value={form.subjective?.pain.side || "Not specified"}
+                onValueChange={(v) => updateField("subjective.pain.side", v === "Not specified" ? "" : v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Not specified", "Right", "Left", "Bilateral", "Central"].map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Pain Type</Label>
+              <Select
+                value={form.subjective?.pain.type ?? "Muscle"}
+                onValueChange={(v) => updateField("subjective.pain.type", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Muscle", "Ligament", "Joint", "Nerve", "Bone", "Vascular", "Sympathetic"].map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Pain Frequency</Label>
+              <Select
+                value={form.subjective?.pain.frequency || "Not specified"}
+                onValueChange={(v) => updateField("subjective.pain.frequency", v === "Not specified" ? "" : v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Not specified", "Constant", "Periodic", "Episodic"].map((f) => (
+                    <SelectItem key={f} value={f}>{f}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Pain VAS (0-10)</Label>
@@ -406,6 +580,14 @@ export function SoapWizard({
                 onChange={(e) =>
                   updateField("subjective.pain.intensity_vas", Number(e.target.value))
                 }
+              />
+            </div>
+            <div>
+              <Label>Pain Nature / Character</Label>
+              <Input
+                placeholder="e.g. dull aching, sharp, burning, throbbing"
+                value={form.subjective?.pain.nature_notes ?? ""}
+                onChange={(e) => updateField("subjective.pain.nature_notes", e.target.value)}
               />
             </div>
             <div>
@@ -424,6 +606,98 @@ export function SoapWizard({
                 onChange={(e) =>
                   updateField("subjective.pain.relieving_factors", e.target.value)
                 }
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Operations & Hospitalizations / Surgical History</Label>
+              <Input
+                placeholder="e.g. Appendectomy 2015, right knee arthroscopy 2024"
+                value={form.subjective?.surgical_history ?? ""}
+                onChange={(e) => updateField("subjective.surgical_history", e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2 pt-2 border-t">
+              <Label className="font-semibold text-primary">Personal History</Label>
+            </div>
+            <div>
+              <Label>Sleeping Habits</Label>
+              <Input
+                placeholder="e.g. 6-7 hrs, disturbed by pain"
+                value={form.subjective?.social_history?.sleep_habits ?? ""}
+                onChange={(e) => updateField("subjective.social_history.sleep_habits", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Physical Activities (occupational / recreational / exercise)</Label>
+              <Input
+                placeholder="e.g. sedentary work, walks 30 min daily"
+                value={form.subjective?.social_history?.physical_activity ?? ""}
+                onChange={(e) => updateField("subjective.social_history.physical_activity", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Tobacco Use (duration, frequency, amount)</Label>
+              <Input
+                placeholder="e.g. no / 10 yrs, 5 cigarettes/day"
+                value={form.subjective?.social_history?.tobacco_details ?? ""}
+                onChange={(e) => updateField("subjective.social_history.tobacco_details", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Alcohol Use (duration, frequency, amount)</Label>
+              <Input
+                placeholder="e.g. no / social, 2-3 drinks/week"
+                value={form.subjective?.social_history?.alcohol_details ?? ""}
+                onChange={(e) => updateField("subjective.social_history.alcohol_details", e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2 pt-2 border-t">
+              <Label className="font-semibold text-primary">Family & Social History</Label>
+            </div>
+            <div>
+              <Label>Similar Problems in Relatives / Hereditary Diseases</Label>
+              <Input
+                placeholder="e.g. father had low back pain; no hereditary disease"
+                value={form.subjective?.social_history?.family_history ?? ""}
+                onChange={(e) => updateField("subjective.social_history.family_history", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Consanguinity</Label>
+              <Select
+                value={form.subjective?.social_history?.consanguinity ?? "No"}
+                onValueChange={(v) => updateField("subjective.social_history.consanguinity", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["No", "Yes"].map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Social Status</Label>
+              <Input
+                placeholder="e.g. middle class, married, 2 children"
+                value={form.subjective?.social_history?.social_status ?? ""}
+                onChange={(e) => updateField("subjective.social_history.social_status", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Educational Status</Label>
+              <Input
+                placeholder="e.g. graduate"
+                value={form.subjective?.social_history?.educational_status ?? ""}
+                onChange={(e) => updateField("subjective.social_history.educational_status", e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Environmental History (home & workplace)</Label>
+              <Input
+                placeholder="e.g. 2nd floor walk-up; desk job with dual monitors"
+                value={form.subjective?.social_history?.environmental_history ?? ""}
+                onChange={(e) => updateField("subjective.social_history.environmental_history", e.target.value)}
               />
             </div>
             <div className="sm:col-span-2">
@@ -534,6 +808,51 @@ export function SoapWizard({
                 </Select>
               </div>
 
+              <div>
+                <Label>Sensorium</Label>
+                <Select
+                  value={form.objective?.observation?.sensorium ?? "Alert"}
+                  onValueChange={(v) => updateField("objective.observation.sensorium", v)}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Alert", "Lethargic", "Stupor", "Coma"].map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Body Build</Label>
+                <Select
+                  value={form.objective?.observation?.body_build ?? "Mesomorphic"}
+                  onValueChange={(v) => updateField("objective.observation.body_build", v)}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Ectomorphic", "Mesomorphic", "Endomorphic"].map((b) => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Deformities (congenital / acquired)</Label>
+                <Input
+                  placeholder="e.g. kyphosis, genu valgum, none"
+                  value={form.objective?.observation?.deformities ?? ""}
+                  onChange={(e) => updateField("objective.observation.deformities", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Use of External Aids (orthotics, prosthesis, walking aids)</Label>
+                <Input
+                  placeholder="e.g. knee brace, single-point cane"
+                  value={form.objective?.observation?.external_aids ?? ""}
+                  onChange={(e) => updateField("objective.observation.external_aids", e.target.value)}
+                />
+              </div>
+
               {/* Posture Analysis from ASSESSMENT.pdf */}
               <div className="sm:col-span-2 pt-2 border-t">
                 <Label className="font-semibold text-primary">Posture Observation (Anterior / Posterior / Lateral)</Label>
@@ -566,9 +885,91 @@ export function SoapWizard({
                       onChange={(e) =>
                         updateField("objective.observation.posture.lateral", e.target.value)
                       }
-                    />
+                                        />
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+                    {/* Gait Parameters — structured measurement */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-muted/40 pb-3">
+              <CardTitle className="text-base font-semibold">Gait Parameters (Kinematics)</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Step Length (cm) — R</Label>
+                <Input
+                  type="number" step="0.1" placeholder="e.g. 40"
+                  value={form.objective?.gait_parameters?.step_length_cm ?? ""}
+                  onChange={(e) => updateField("objective.gait_parameters.step_length_cm", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+              <div>
+                <Label>Stride Length (cm)</Label>
+                <Input
+                  type="number" step="0.1" placeholder="e.g. 80"
+                  value={form.objective?.gait_parameters?.stride_length_cm ?? ""}
+                  onChange={(e) => updateField("objective.gait_parameters.stride_length_cm", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+              <div>
+                <Label>Cadence (steps/min)</Label>
+                <Input
+                  type="number" placeholder="e.g. 110"
+                  value={form.objective?.gait_parameters?.cadence_steps_min ?? ""}
+                  onChange={(e) => updateField("objective.gait_parameters.cadence_steps_min", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+              <div>
+                <Label>Base Width (cm)</Label>
+                <Input
+                  type="number" step="0.1" placeholder="e.g. 5"
+                  value={form.objective?.gait_parameters?.base_width_cm ?? ""}
+                  onChange={(e) => updateField("objective.gait_parameters.base_width_cm", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dermatomes / Myotomes / Capsular Pattern */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-muted/40 pb-3">
+              <CardTitle className="text-base font-semibold">Neurological Mapping</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Dermatomes (sensory level / distribution)</Label>
+                <Input
+                  placeholder="e.g. L4-L5, S1 dermatome diminished on left"
+                  value={form.objective?.dermatomes ?? ""}
+                  onChange={(e) => updateField("objective.dermatomes", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Myotomes (motor level / strength pattern)</Label>
+                <Input
+                  placeholder="e.g. L5 myotome weak on left, L4 intact"
+                  value={form.objective?.myotomes ?? ""}
+                  onChange={(e) => updateField("objective.myotomes", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Capsular Pattern (joint-specific restriction)</Label>
+                <Input
+                  placeholder="e.g. Hip: flexion + IR, extension + ER; lumbar: flexion ↓"
+                  value={form.objective?.capsular_pattern ?? ""}
+                  onChange={(e) => updateField("objective.capsular_pattern", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Loose / Close-Packed Position</Label>
+                <Input
+                  placeholder="e.g. Glenohumeral: loose-packed 15° abduction/30° forward flexion"
+                  value={form.objective?.loose_close_packed ?? ""}
+                  onChange={(e) => updateField("objective.loose_close_packed", e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
@@ -1281,6 +1682,63 @@ export function SoapWizard({
                 </div>
               )}
             </CardContent>
+                    </Card>
+
+          {/* Functional Evaluation — specific UL/LL tasks (ICF d-category) */}
+          <Card className="shadow-sm border-primary/40">
+            <CardHeader className="bg-primary/5 pb-3">
+              <CardTitle className="text-base font-semibold">Functional Evaluation</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              <div>
+                <Label className="font-medium text-sm text-primary">Upper Limb Functional Tasks</Label>
+                <p className="text-xs text-muted-foreground mb-2">Rate difficulty on ICF qualifier scale</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {UL_FUNCTIONAL_TASKS.map((task) => (
+                    <div key={task} className="flex items-center gap-2">
+                      <span className="text-xs font-medium w-1/2">{task.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
+                      <Select
+                        value={form.objective?.functional_ul?.[task] ?? "None"}
+                        onValueChange={(v) => updateField(`objective.functional_ul.${task}`, v)}
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ICF_QUALIFIERS.map((q) => (
+                            <SelectItem key={q} value={q}>{q}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="font-medium text-sm text-primary">Lower Limb Functional Tasks</Label>
+                <p className="text-xs text-muted-foreground mb-2">Rate difficulty on ICF qualifier scale</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {LL_FUNCTIONAL_TASKS.map((task) => (
+                    <div key={task} className="flex items-center gap-2">
+                      <span className="text-xs font-medium w-1/2">{task.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
+                      <Select
+                        value={form.objective?.functional_ll?.[task] ?? "None"}
+                        onValueChange={(v) => updateField(`objective.functional_ll.${task}`, v)}
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ICF_QUALIFIERS.map((q) => (
+                            <SelectItem key={q} value={q}>{q}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
           {/* ICF: Activity Limitations Card */}
@@ -1584,11 +2042,32 @@ export function SoapWizard({
                 }
               />
             </div>
+                        <div>
+              <Label>Differential Diagnosis (one per line)</Label>
+              <Textarea
+                placeholder="List alternative diagnoses being considered"
+                value={form.assessment?.differential_diagnosis?.join("\n") ?? ""}
+                onChange={(e) =>
+                  updateField(
+                    "assessment.differential_diagnosis",
+                    e.target.value.split("\n").filter(Boolean)
+                  )
+                }
+              />
+            </div>
             <div>
               <Label>Clinical Impression</Label>
               <Textarea
                 value={form.assessment?.clinical_impression}
                 onChange={(e) => updateField("assessment.clinical_impression", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Final Diagnosis (confirmed after assessment)</Label>
+              <Input
+                placeholder="e.g. Lumbar disc herniation L4-L5 with L5 radiculopathy"
+                value={form.assessment?.final_diagnosis ?? ""}
+                onChange={(e) => updateField("assessment.final_diagnosis", e.target.value)}
               />
             </div>
             <div className="flex items-center gap-2">
