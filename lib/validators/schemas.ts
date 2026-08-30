@@ -120,6 +120,54 @@ export const subjectiveSchema = z.object({
   consent_for_treatment_and_data_sharing: z.boolean().default(true),
 });
 
+export const skinSoftTissueSeverityEnum = z.enum(["None", "Minor", "Important"]);
+
+export const icfQualifierEnum = z.enum(["None", "Mild", "Moderate", "Severe", "Complete"]);
+
+export const skinSoftTissuesSchema = z.object({
+  swelling: skinSoftTissueSeverityEnum.default("None"),
+  callus: skinSoftTissueSeverityEnum.default("None"),
+  scar: skinSoftTissueSeverityEnum.default("None"),
+  wound: skinSoftTissueSeverityEnum.default("None"),
+  temperature: skinSoftTissueSeverityEnum.default("None"),
+  infection: skinSoftTissueSeverityEnum.default("None"),
+  pain: skinSoftTissueSeverityEnum.default("None"),
+  abnormal_sensation: skinSoftTissueSeverityEnum.default("None"),
+});
+
+export const sensationItemSchema = z.object({
+  right: z.boolean().default(false),
+  left: z.boolean().default(false),
+  specification: z.string().default(""),
+});
+
+export const sensationTableSchema = z.object({
+  superficial: sensationItemSchema.default({ right: false, left: false, specification: "" }),
+  deep: sensationItemSchema.default({ right: false, left: false, specification: "" }),
+  numbness: sensationItemSchema.default({ right: false, left: false, specification: "" }),
+  paresthesia: sensationItemSchema.default({ right: false, left: false, specification: "" }),
+  other: sensationItemSchema.default({ right: false, left: false, specification: "" }),
+});
+
+export const reflexGradeEnum = z.enum(["+", "-", "normal"]);
+
+export const reflexItemSchema = z.object({
+  right: reflexGradeEnum.default("normal"),
+  left: reflexGradeEnum.default("normal"),
+});
+
+export const reflexesTableSchema = z.object({
+  btr: reflexItemSchema.default({ right: "normal", left: "normal" }),
+  ttr: reflexItemSchema.default({ right: "normal", left: "normal" }),
+  ktr: reflexItemSchema.default({ right: "normal", left: "normal" }),
+  atr: reflexItemSchema.default({ right: "normal", left: "normal" }),
+  babinski: z.object({
+    right: z.boolean().default(false),
+    left: z.boolean().default(false),
+  }).default({ right: false, left: false }),
+  comments: z.string().default(""),
+});
+
 export const objectiveSchema = z.object({
   vitals: z.object({
     heart_rate_bpm: z.number().nullable().optional(),
@@ -167,6 +215,17 @@ export const objectiveSchema = z.object({
     sensation: z.string().optional().default("normal"),
     reflexes: z.record(z.string()).default({}),
   }).default({ sensation: "normal", reflexes: {} }),
+  skin_and_soft_tissues: skinSoftTissuesSchema.optional(),
+  sensation_table: sensationTableSchema.optional(),
+  reflexes_table: reflexesTableSchema.optional(),
+  activity_limitations: z.object({
+    items: z.record(icfQualifierEnum).default({}),
+    comments: z.string().optional().default(""),
+  }).default({ items: {}, comments: "" }),
+  participation_restrictions: z.object({
+    items: z.record(z.boolean()).default({}),
+    comments: z.string().optional().default(""),
+  }).default({ items: {}, comments: "" }),
   functional_tests: z.object({
     tug_sec: z.number().nullable().optional(),
     six_mwt_m: z.number().nullable().optional(),
@@ -179,25 +238,36 @@ export const objectiveSchema = z.object({
   branch_specific: z.object({
     orthopedic: z.object({
       special_tests: z.array(z.string()).default([]),
+      special_test_results: z.array(z.object({
+        name: z.string().min(1),
+        result: z.enum(["positive", "negative", "nt"]).default("nt"),
+      })).default([]),
+      end_feel: z.string().default("Firm"),
       joint_play: z.string().default("Normal"),
       swelling_grade: z.string().default("None"),
+      limb_length_apparent_cm: z.number().nullable().optional(),
     }).optional(),
     cardiorespiratory: z.object({
       auscultation_notes: z.string().default("Vesicular breath sounds"),
+      auscultation_finding: z.string().default("Vesicular"),
       cough_strength: z.string().default("Strong"),
       sputum_characteristics: z.string().default("Clear"),
       borg_dyspnea_score: z.number().nullable().optional(),
       chest_expansion_cm: z.number().nullable().optional(),
+      iswt_m: z.number().nullable().optional(),
     }).optional(),
     neurological: z.object({
       modified_ashworth_scale: z.number().nullable().optional(),
       berg_balance_score: z.number().nullable().optional(),
       coordination_notes: z.string().default("Intact"),
+      coordination_result: z.string().default("Normal"),
     }).optional(),
     geriatric: z.object({
       thirty_sec_chair_stand_reps: z.number().nullable().optional(),
       adl_index_score: z.number().nullable().optional(),
       fall_history_count: z.number().nullable().optional(),
+      katz_items: z.record(z.boolean()).default({}),
+      lawton_items: z.record(z.boolean()).default({}),
     }).optional(),
     pediatric: z.object({
       gmfm_percentage: z.number().nullable().optional(),
@@ -260,11 +330,20 @@ export const planSchema = z.object({
   next_follow_up: z.string().optional().default(""),
 });
 
+// Manual progress metric samples captured inside the encounter wizard
+export const progressMetricSampleSchema = z.object({
+  metric_key: z.string().min(1),
+  value: z.number(),
+  unit: z.string().min(1),
+  notes: z.string().optional().default(""),
+});
+
 export const encounterSchema = encounterHeaderSchema.extend({
   subjective: subjectiveSchema,
   objective: objectiveSchema,
   assessment: assessmentSchema,
   plan: planSchema,
+  progress_metrics: z.array(progressMetricSampleSchema).default([]),
 });
 
 export const progressEntrySchema = z.object({
@@ -285,6 +364,8 @@ export const documentSchema = z.object({
   storage_reference: z.string().min(1),
   access_restrictions: z.array(z.string()).default([]),
 });
+
+export type ProgressMetricSample = z.infer<typeof progressMetricSampleSchema>;
 
 export type PatientFormData = z.infer<typeof patientSchema>;
 export type EncounterFormData = z.infer<typeof encounterSchema>;

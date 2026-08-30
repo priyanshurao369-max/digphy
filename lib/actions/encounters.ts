@@ -18,6 +18,7 @@ import {
   addAuditLog,
 } from "@/lib/data/mock-store";
 import { findPatientById } from "@/lib/data/request-store";
+import { extractMetricSamples } from "@/lib/metrics";
 
 export async function getEncounters(patientId: string) {
   const data = getEncountersByPatient(patientId);
@@ -50,7 +51,7 @@ export async function createEncounter(formData: EncounterFormData) {
       return { error: "Patient consent must be signed before creating an encounter" };
     }
 
-    const { subjective, objective, assessment, plan, ...header } = parsed.data;
+    const { subjective, objective, assessment, plan, progress_metrics, ...header } = parsed.data;
 
     const data = storeCreateEncounter({
       ...header,
@@ -83,6 +84,39 @@ export async function createEncounter(formData: EncounterFormData) {
           entity_id: data.id,
         });
       } catch {}
+    }
+
+    // Auto-log every chartable objective metric (ROM per joint, TUG, 6MWT,
+    // girth, branch-specific numerics) so progress charts reflect the
+    // metrics relevant to the patient's branch. Manual metrics captured in
+    // the wizard take precedence over auto-extracted ones for the same key.
+    const manualKeys = new Set(progress_metrics.map((m) => m.metric_key));
+
+    for (const sample of extractMetricSamples(objective)) {
+      if (manualKeys.has(sample.metric_key)) continue;
+      storeCreateProgressEntry({
+        patient_id: parsed.data.patient_id,
+        date_time: parsed.data.date_time,
+        metric_key: sample.metric_key,
+        value: sample.value,
+        unit: sample.unit,
+        source: "clinic",
+        clinician_id: parsed.data.clinician_id,
+        notes: "Recorded during encounter",
+      });
+    }
+
+    for (const sample of progress_metrics) {
+      storeCreateProgressEntry({
+        patient_id: parsed.data.patient_id,
+        date_time: parsed.data.date_time,
+        metric_key: sample.metric_key,
+        value: sample.value,
+        unit: sample.unit,
+        source: "clinic",
+        clinician_id: parsed.data.clinician_id,
+        notes: sample.notes || "Recorded during encounter",
+      });
     }
 
     revalidatePath(`/patients/${parsed.data.patient_id}`);

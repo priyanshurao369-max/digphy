@@ -8,6 +8,7 @@ import type {
   Patient, Encounter, ProgressEntry, Document as Doc,
   AuditLog, Profile, SubjectiveData, ObjectiveData, AssessmentData, PlanData,
 } from "@/types";
+import { extractMetricSamples } from "@/lib/metrics";
 
 // ── Static IDs ──
 export const CLINICIAN_ID = "550e8400-e29b-41d4-a716-446655440000";
@@ -81,7 +82,7 @@ function buildPdfDataUrl(line: string): string {
 function buildEncounter(
   patientId: string, daysBack: number, type: "Initial" | "Follow-up",
   painVas: number, diagnosis: string, homeProgram: string,
-  extra: { tugSec?: number | null; kneeFlex?: number } = {},
+  extra: { tugSec?: number | null; kneeFlex?: number; lumbarFlexion?: number } = {},
 ): Encounter {
   const dt = daysAgo(daysBack);
   const dateStr = new Date(dt).toISOString().split("T")[0]!;
@@ -90,7 +91,7 @@ function buildEncounter(
 
   const rom: ObjectiveData["rom"] = extra.kneeFlex
     ? { arom: { knee_flexion: `${extra.kneeFlex} deg` }, prom: { knee_flexion: `${extra.kneeFlex} deg` }, end_feel: "soft" as const }
-    : { arom: { lumbar_flexion: "40 deg" }, prom: { lumbar_flexion: "50 deg" }, end_feel: "firm" as const };
+    : { arom: { lumbar_flexion: `${extra.lumbarFlexion ?? 40} deg` }, prom: { lumbar_flexion: `${(extra.lumbarFlexion ?? 40) + 10} deg` }, end_feel: "firm" as const };
 
   const strength: ObjectiveData["strength"] = isRajesh
     ? { mmt: { hip_flexion_L: 4, hip_flexion_R: 5 } }
@@ -145,6 +146,117 @@ function buildEncounter(
     rom, strength,
     neuro: { sensation: "Normal", reflexes: { patella: "++" } },
     functional_tests: functional,
+    skin_and_soft_tissues: isRajesh
+      ? {
+          swelling: "None",
+          callus: "None",
+          scar: "None",
+          wound: "None",
+          temperature: "Minor",
+          infection: "None",
+          pain: "Important",
+          abnormal_sensation: "Important",
+        }
+      : {
+          swelling: "Minor",
+          callus: "None",
+          scar: "Important",
+          wound: "None",
+          temperature: "Minor",
+          infection: "None",
+          pain: "Minor",
+          abnormal_sensation: "None",
+        },
+    sensation_table: isRajesh
+      ? {
+          superficial: { right: false, left: true, specification: "Diminished over L5 dermatome" },
+          deep: { right: false, left: true, specification: "Reduced joint position sense, left great toe" },
+          numbness: { right: false, left: true, specification: "Lateral leg and dorsum of foot" },
+          paresthesia: { right: false, left: true, specification: "Tingling in left foot, worse with sitting" },
+          other: { right: false, left: false, specification: "" },
+        }
+      : {
+          superficial: { right: true, left: false, specification: "Hypoesthesia around infrapatellar scar" },
+          deep: { right: false, left: false, specification: "" },
+          numbness: { right: true, left: false, specification: "Numb patch lateral to surgical scar" },
+          paresthesia: { right: false, left: false, specification: "" },
+          other: { right: false, left: false, specification: "" },
+        },
+    reflexes_table: isRajesh
+      ? {
+          btr: { right: "normal", left: "normal" },
+          ttr: { right: "normal", left: "-" },
+          ktr: { right: "normal", left: "normal" },
+          atr: { right: "normal", left: "-" },
+          babinski: { right: false, left: false },
+          comments: "Left TTR and ATR depressed, consistent with L5-S1 radiculopathy. Babinski negative bilaterally.",
+        }
+      : {
+          btr: { right: "normal", left: "normal" },
+          ttr: { right: "normal", left: "normal" },
+          ktr: { right: "+", left: "normal" },
+          atr: { right: "normal", left: "normal" },
+          babinski: { right: false, left: false },
+          comments: "Right knee jerk slightly brisker than left; symmetrical otherwise.",
+        },
+    branch_specific: isRajesh
+      ? {
+          orthopedic: {
+            special_tests: [],
+            special_test_results: [
+              { name: "Straight Leg Raise", result: "positive" as const },
+              { name: "Slump Test", result: "positive" as const },
+            ],
+            end_feel: "Firm",
+            joint_play: "Hypomobile",
+            swelling_grade: "None",
+            limb_length_apparent_cm: null,
+          },
+        }
+      : {
+          orthopedic: {
+            special_tests: [],
+            special_test_results: [
+              { name: "Lachman", result: "negative" as const },
+              { name: "Anterior Drawer", result: "negative" as const },
+              { name: "McMurray", result: "negative" as const },
+            ],
+            end_feel: "Soft",
+            joint_play: "Normal",
+            swelling_grade: "Mild",
+            limb_length_apparent_cm: null,
+          },
+        },
+    activity_limitations: isRajesh
+      ? {
+          items: {
+            sitting_tolerance: "Severe",
+            standing_tolerance: "Moderate",
+            walking_distance: "Moderate",
+            stair_climbing: "Mild",
+            lifting_carrying: "Severe",
+            household_tasks: "Mild",
+          },
+          comments: "Sitting limited to 20 min; avoids lifting > 5 kg due to pain radiation.",
+        }
+      : {
+          items: {
+            stair_climbing: "Moderate",
+            walking_distance: "Mild",
+            squatting: "Severe",
+            household_tasks: "Mild",
+          },
+          comments: "Independent in ADLs; stairs and prolonged walking still affected.",
+        },
+    participation_restrictions: isRajesh
+      ? {
+          items: { work_occupation: true, social_leisure: true, sleep_rest: true },
+          comments: "Working from home only; unable to commute. Sleep disturbed by night pain.",
+        }
+      : {
+          items: { work_occupation: true, sports_hobbies: true },
+          comments: "Paused yoga teaching classes; no sport participation since surgery.",
+        },
     measurements: { limb_length_true_cm: null, girth_cm: {} },
     attachments: [],
   };
@@ -256,15 +368,15 @@ function initMockData() {
     buildEncounter(PATIENT_RAJESH_ID, 21, "Initial", 7,
       "Lumbar disc herniation L4-L5",
       "1. Pelvic tilts — 3x10 daily\n2. Cat-cow stretches — 2x10\n3. Short walks — 15 min twice daily\n4. Avoid prolonged sitting > 30 min",
-      { tugSec: 12.5 }),
+      { tugSec: 12.5, lumbarFlexion: 40 }),
     buildEncounter(PATIENT_RAJESH_ID, 14, "Follow-up", 5,
       "Lumbar disc herniation L4-L5 — improving",
       "1. Pelvic tilts — 3x15 daily\n2. Bird-dog — 3x8 each side\n3. Walking — 20 min daily\n4. Core bracing during lifts",
-      { tugSec: 10.5 }),
+      { tugSec: 10.5, lumbarFlexion: 45 }),
     buildEncounter(PATIENT_RAJESH_ID, 7, "Follow-up", 3,
       "Lumbar disc herniation L4-L5 — near resolution",
       "1. Bird-dog — 3x10\n2. Plank — 3x20 sec\n3. Return-to-work exercises\n4. Maintain walking 30 min/day",
-      { tugSec: 9.0 }),
+      { tugSec: 9.0, lumbarFlexion: 50 }),
   ];
 
   const priyaEncs = [
@@ -285,6 +397,9 @@ function initMockData() {
   encounters.push(...rajeshEncs, ...priyaEncs);
 
   // ── Progress entries ──
+  // Auto-derive entries from each encounter's objective (pain, TUG, 6MWT,
+  // per-joint ROM, girth, branch-specific numerics) so charts cover every
+  // metric relevant to the patient's branch.
   let i = 0;
   for (const enc of [...rajeshEncs, ...priyaEncs]) {
     const dt = enc.date_time;
@@ -296,26 +411,13 @@ function initMockData() {
       notes: "Recorded during encounter", created_at: dt,
     });
 
-    const tug = enc.objective.functional_tests.tug_sec;
-    if (tug !== null && tug !== undefined) {
+    for (const sample of extractMetricSamples(enc.objective)) {
       progressEntries.push({
         id: `prog-${i++}`, patient_id: enc.patient_id, date_time: dt,
-        metric_key: "tug_sec", value: tug, unit: "sec",
-        source: "clinic", clinician_id: CLINICIAN_ID, notes: "", created_at: dt,
+        metric_key: sample.metric_key, value: sample.value, unit: sample.unit,
+        source: "clinic", clinician_id: CLINICIAN_ID,
+        notes: "Recorded during encounter", created_at: dt,
       });
-    }
-
-    const romStr = enc.objective.rom.arom;
-    const kneeKey = Object.keys(romStr).find((k) => k.includes("knee"));
-    if (kneeKey) {
-      const val = parseInt((romStr as Record<string, string>)[kneeKey]?.split(" ")[0] ?? "0");
-      if (val > 0) {
-        progressEntries.push({
-          id: `prog-${i++}`, patient_id: enc.patient_id, date_time: dt,
-          metric_key: "rom_knee_flexion_deg", value: val, unit: "deg",
-                    source: "clinic", clinician_id: CLINICIAN_ID, notes: "", created_at: dt,
-        });
-      }
     }
   }
 

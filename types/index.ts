@@ -118,30 +118,45 @@ export interface SubjectiveData {
   consent_for_treatment_and_data_sharing: boolean;
 }
 
+export type SpecialTestResultStatus = "positive" | "negative" | "nt";
+
+export interface SpecialTestResult {
+  name: string;
+  result: SpecialTestResultStatus;
+}
+
 export interface OrthopedicObjectiveData {
   special_tests: string[];
+  special_test_results?: SpecialTestResult[];
+  end_feel?: string;
   joint_play: string;
   swelling_grade: string;
+  limb_length_apparent_cm?: number | null;
 }
 
 export interface CardiorespiratoryObjectiveData {
   auscultation_notes: string;
+  auscultation_finding?: string;
   cough_strength: string;
   sputum_characteristics: string;
   borg_dyspnea_score: number | null;
   chest_expansion_cm: number | null;
+  iswt_m?: number | null;
 }
 
 export interface NeurologicalObjectiveData {
   modified_ashworth_scale: number | null;
   berg_balance_score: number | null;
   coordination_notes: string;
+  coordination_result?: string;
 }
 
 export interface GeriatricObjectiveData {
   thirty_sec_chair_stand_reps: number | null;
   adl_index_score: number | null;
   fall_history_count: number | null;
+  katz_items?: Record<string, boolean>;
+  lawton_items?: Record<string, boolean>;
 }
 
 export interface PediatricObjectiveData {
@@ -157,6 +172,65 @@ export interface BranchSpecificObjectiveData {
   neurological?: NeurologicalObjectiveData;
   geriatric?: GeriatricObjectiveData;
   pediatric?: PediatricObjectiveData;
+}
+
+export type SkinSoftTissueSeverity = "None" | "Minor" | "Important";
+
+export interface SkinSoftTissuesProblem {
+  swelling?: SkinSoftTissueSeverity;
+  callus?: SkinSoftTissueSeverity;
+  scar?: SkinSoftTissueSeverity;
+  wound?: SkinSoftTissueSeverity;
+  temperature?: SkinSoftTissueSeverity;
+  infection?: SkinSoftTissueSeverity;
+  pain?: SkinSoftTissueSeverity;
+  abnormal_sensation?: SkinSoftTissueSeverity;
+}
+
+export interface SensationItemDetail {
+  right: boolean;
+  left: boolean;
+  specification: string;
+}
+
+export interface SensationTableData {
+  superficial: SensationItemDetail;
+  deep: SensationItemDetail;
+  numbness: SensationItemDetail;
+  paresthesia: SensationItemDetail;
+  other: SensationItemDetail;
+}
+
+export type ReflexGradeStatus = "+" | "-" | "normal";
+
+export interface ReflexItemDetail {
+  right: ReflexGradeStatus;
+  left: ReflexGradeStatus;
+}
+
+export interface ReflexesTableData {
+  btr: ReflexItemDetail;
+  ttr: ReflexItemDetail;
+  ktr: ReflexItemDetail;
+  atr: ReflexItemDetail;
+  babinski: { right: boolean; left: boolean };
+  comments: string;
+}
+
+// ── ICF: Activity Limitations & Participation Restrictions ──
+
+export type IcfQualifier = "None" | "Mild" | "Moderate" | "Severe" | "Complete";
+
+export interface ActivityLimitationsData {
+  /** activity key -> ICF performance qualifier */
+  items?: Record<string, IcfQualifier>;
+  comments?: string;
+}
+
+export interface ParticipationRestrictionsData {
+  /** restriction key -> whether the restriction is present */
+  items?: Record<string, boolean>;
+  comments?: string;
 }
 
 export interface ObjectiveData {
@@ -190,6 +264,11 @@ export interface ObjectiveData {
     sensation: string;
     reflexes: Record<string, string>;
   };
+  skin_and_soft_tissues?: SkinSoftTissuesProblem;
+  sensation_table?: SensationTableData;
+  reflexes_table?: ReflexesTableData;
+  activity_limitations?: ActivityLimitationsData;
+  participation_restrictions?: ParticipationRestrictionsData;
   functional_tests: {
     tug_sec: number | null;
     six_mwt_m: number | null;
