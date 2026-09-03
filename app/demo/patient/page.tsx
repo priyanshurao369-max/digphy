@@ -79,15 +79,6 @@ export default function PatientDemoPage() {
                     </Card>
                 </div>
 
-                {/* Branch Progress Analytics Dashboard */}
-                <div className="mb-8">
-                    <BranchProgressDashboard
-                        patient={demoPatient}
-                        progressEntries={demoEntries}
-                        isPatientView={true}
-                    />
-                </div>
-
                 {/* Home Program */}
                 <Card className="mb-8">
                     <CardHeader>

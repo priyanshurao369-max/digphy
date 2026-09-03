@@ -5,6 +5,7 @@ import {
   getAuditLogs as storeGetAuditLogs,
   getCurrentProfile as storeGetCurrentProfile,
   getPatientSummaryData,
+  getPatientAccounts as storeGetPatientAccounts,
   DEFAULT_PATIENT_ID,
 } from "@/lib/data/mock-store";
 
@@ -16,14 +17,18 @@ export async function getCurrentProfile() {
   return storeGetCurrentProfile();
 }
 
-export async function getPatientSummary() {
-  const summary = getPatientSummaryData(DEFAULT_PATIENT_ID);
+export async function getPatientAccounts() {
+  return storeGetPatientAccounts();
+}
+
+export async function getPatientSummary(patientId: string = DEFAULT_PATIENT_ID) {
+  const summary = getPatientSummaryData(patientId);
   if (!summary.patient) return null;
 
   await logAudit({
     action: "READ",
     entity: "Patient",
-    entityId: DEFAULT_PATIENT_ID,
+    entityId: patientId,
     metadata: { portal: "patient_summary" },
   });
 

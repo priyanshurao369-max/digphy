@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import type {
   Patient, Encounter, ProgressEntry, Document as Doc,
   AuditLog, Profile, SubjectiveData, ObjectiveData, AssessmentData, PlanData,
+  BranchSpecialty,
 } from "@/types";
 import { extractMetricSamples } from "@/lib/metrics";
 
@@ -16,6 +17,15 @@ export const PATIENT_RAJESH_USER_ID = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 export const PATIENT_PRIYA_USER_ID = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 export const PATIENT_RAJESH_ID = "72f1fab4-1c6a-4b3d-9254-0a6c7b8e9d01";
 export const PATIENT_PRIYA_ID = "72f1fab4-1c6a-4b3d-9254-0a6c7b8e9d02";
+// Branch-specific demo patients (Cardiorespiratory, Neurological, Geriatric, Pediatric)
+export const PATIENT_MAYA_ID = "72f1fab4-1c6a-4b3d-9254-0a6c7b8e9d03";
+export const PATIENT_MAYA_USER_ID = "6ba7b812-9dad-11d1-80b4-00c04fd430c8";
+export const PATIENT_ARJUN_ID = "72f1fab4-1c6a-4b3d-9254-0a6c7b8e9d04";
+export const PATIENT_ARJUN_USER_ID = "6ba7b813-9dad-11d1-80b4-00c04fd430c8";
+export const PATIENT_GOPAL_ID = "72f1fab4-1c6a-4b3d-9254-0a6c7b8e9d05";
+export const PATIENT_GOPAL_USER_ID = "6ba7b814-9dad-11d1-80b4-00c04fd430c8";
+export const PATIENT_ISHAAN_ID = "72f1fab4-1c6a-4b3d-9254-0a6c7b8e9d06";
+export const PATIENT_ISHAAN_USER_ID = "6ba7b815-9dad-11d1-80b4-00c04fd430c8";
 export const ROLE_COOKIE = "digphy-role";
 export const CLINICIAN_ROLE = "therapist";
 export const PATIENT_ROLE = "patient";
@@ -349,6 +359,165 @@ function buildEncounter(
   };
 }
 
+/**
+ * Lightweight encounter builder for the branch-specific demo patients
+ * (Cardiorespiratory, Neurological, Geriatric, Pediatric). Seeded encounters
+ * don't need to pass Zod validation, only satisfy the Encounter type, so we
+ * fill a complete but generic ObjectiveData per branch.
+ */
+function buildBranchEncounter(
+  patientId: string,
+  branch: BranchSpecialty,
+  daysBack: number,
+  type: "Initial" | "Follow-up",
+  painVas: number,
+  diagnosis: string,
+  homeProgram: string,
+): Encounter {
+  const dt = daysAgo(daysBack);
+  const isCardio = branch === "Cardiorespiratory";
+
+  const objective = {
+    vitals: {
+      heart_rate_bpm: isCardio ? 96 : 74,
+      blood_pressure_mmHg: "128/82",
+      respiratory_rate_bpm: isCardio ? 22 : 16,
+      spo2_percent: isCardio ? 91 : 98,
+      temperature_c: 36.7,
+    },
+    general_condition: "Good",
+    ambulatory_status: branch === "Geriatric" ? "WithAid" : "Independent",
+    observation: {
+      sensorium: "Alert",
+      body_build: "Mesomorphic",
+      deformities: "None",
+      external_aids: "None",
+      posture: { anterior: "Normal", posterior: "Normal", lateral: "Normal" },
+      gait: { barefoot: "Antalgic", with_aids: "N/A" },
+    },
+    palpation: { tenderness_grade: 1, tone: "normal", crepitus: "none" },
+    rom: { arom: { lumbar_flexion: "45 deg" }, prom: { lumbar_flexion: "55 deg" }, end_feel: "firm" },
+    strength: { mmt: { hip_flexion_R: 5 } },
+    neuro: { sensation: "Normal", reflexes: { patella: "++" } },
+    functional_tests: { tug_sec: 12, six_mwt_m: 420, other: "" },
+    measurements: { limb_length_true_cm: null, girth_cm: {} },
+    functional_ul: {},
+    functional_ll: {},
+    gait_parameters: { step_length_cm: 40, stride_length_cm: 76, cadence_steps_min: 105, base_width_cm: 8 },
+    attachments: [],
+  } as unknown as ObjectiveData;
+
+  const subjective: SubjectiveData = {
+    chief_complaint: diagnosis,
+    history_of_present_illness: {
+      onset_date: "2026-01-01",
+      mechanism: "Ongoing rehabilitation",
+      mode_of_onset: "Gradual",
+      duration_category: "Subacute",
+      condition_course: "Improved",
+      current_treatment: "Physiotherapy",
+      investigations: [],
+      investigation_findings: "",
+    },
+    pain: {
+      site: "General",
+      side: "Right",
+      type: "Muscle",
+      frequency: "Periodic",
+      descriptors: [],
+      intensity_vas: painVas,
+      aggravating_factors: "",
+      relieving_factors: "",
+      nature_notes: "",
+    },
+    past_medical_history: "As per chart",
+    surgical_history: "None",
+    medications: [],
+    social_history: {
+      occupation: "General",
+      tobacco: "no", tobacco_details: "none",
+      smoking_details: "none",
+      alcohol: "no", alcohol_details: "none",
+      sleep_habits: "",
+      physical_activity: "",
+      living_situation: "",
+      family_history: "",
+      hereditary_diseases: "",
+      social_status: "",
+      educational_status: "",
+      environmental_history: "",
+      consanguinity: "No",
+    },
+    patient_goals: "Functional recovery",
+    consent_for_treatment_and_data_sharing: true,
+  };
+
+  const assessment: AssessmentData = {
+    problem_list: [],
+    working_diagnosis: diagnosis,
+    differential_diagnosis: [],
+    red_flags_present: false,
+    clinical_impression: "Responding well to rehabilitation.",
+    final_diagnosis: diagnosis,
+  };
+
+  const plan: PlanData = {
+    short_term_goals: [],
+    long_term_goals: [],
+    treatment_plan: {
+      treatment_id: uuidv4(),
+      title: `${branch} rehabilitation`,
+      start_date: daysFromDate(dt, 0),
+      end_date: daysFromDate(dt, 21),
+      frequency_per_week: 3,
+      duration_minutes: 45,
+      interventions: [],
+      modalities: [],
+      education: [],
+      home_program: homeProgram,
+    },
+    monitoring: { metrics_to_track: [], review_interval_days: 7 },
+    next_follow_up: daysFromDate(dt, 7),
+  };
+
+  return {
+    id: uuidv4(), patient_id: patientId, clinician_id: CLINICIAN_ID,
+    date_time: dt, encounter_type: type, location: "DigPhy Clinic",
+    confidentiality_level: "Standard",
+    notes: type === "Initial" ? "Initial branch assessment." : "Follow-up on treatment plan.",
+    subjective, objective, assessment, plan,
+    created_at: dt, updated_at: dt,
+  };
+}
+
+/**
+ * Push a dense multi-session time-series of progress entries for a patient.
+ * Used to seed the branch-specific demo patients with rich chart data.
+ */
+function pushProgressSeries(
+  patientId: string,
+  dates: string[],
+  series: { key: string; vals: number[]; unit: string }[],
+  prefix: string,
+) {
+  for (const item of series) {
+    item.vals.forEach((val, idx) => {
+      progressEntries.push({
+        id: `${prefix}-${item.key}-${idx}`,
+        patient_id: patientId,
+        date_time: dates[idx]!,
+        metric_key: item.key,
+        value: val,
+        unit: item.unit,
+        source: "clinic",
+        clinician_id: CLINICIAN_ID,
+        notes: `Clinical progress check - session ${idx + 1}`,
+        created_at: dates[idx]!,
+      });
+    });
+  }
+}
+
 // ── Initialize demo data ──
 function initMockData() {
   if (profiles.length > 0) return;
@@ -365,6 +534,22 @@ function initMockData() {
     {
       id: PATIENT_PRIYA_USER_ID, role: "Patient", full_name: "Priya Mehta",
       clinic_name: null, patient_id: PATIENT_PRIYA_ID, created_at: new Date().toISOString()
+    },
+    {
+      id: PATIENT_MAYA_USER_ID, role: "Patient", full_name: "Maya Iyer",
+      clinic_name: null, patient_id: PATIENT_MAYA_ID, created_at: new Date().toISOString()
+    },
+    {
+      id: PATIENT_ARJUN_USER_ID, role: "Patient", full_name: "Arjun Nair",
+      clinic_name: null, patient_id: PATIENT_ARJUN_ID, created_at: new Date().toISOString()
+    },
+    {
+      id: PATIENT_GOPAL_USER_ID, role: "Patient", full_name: "Gopal Krishnan",
+      clinic_name: null, patient_id: PATIENT_GOPAL_ID, created_at: new Date().toISOString()
+    },
+    {
+      id: PATIENT_ISHAAN_USER_ID, role: "Patient", full_name: "Ishaan Verma",
+      clinic_name: null, patient_id: PATIENT_ISHAAN_ID, created_at: new Date().toISOString()
     },
   );
 
@@ -396,6 +581,58 @@ function initMockData() {
       user_id: PATIENT_PRIYA_USER_ID, created_by: CLINICIAN_ID,
       created_at: daysAgo(30), updated_at: daysAgo(30),
     },
+    {
+      id: PATIENT_MAYA_ID, first_name: "Maya", last_name: "Iyer",
+      date_of_birth: "1985-11-03", sex: "Female", contact_phone: "+91-9876001122",
+      email: "maya@patient.demo", address: "8 Lodi Garden, Delhi",
+      emergency_contact: { name: "Sanjay Iyer", phone: "+91-9876001123", relationship: "Husband" },
+      primary_diagnosis: "COPD — Pulmonary Rehabilitation",
+      branch_specialty: "Cardiorespiratory",
+      comorbidities: ["COPD", "Hypertension"], current_medications: ["Salbutamol inhaler", "Amlodipine 5mg"],
+      allergies: [], mobility_aids: [], caregiver: null,
+      consent_signed: true, consent_date: "2026-01-20", consent_document_id: "doc-maya-consent",
+      user_id: PATIENT_MAYA_USER_ID, created_by: CLINICIAN_ID,
+      created_at: daysAgo(30), updated_at: daysAgo(30),
+    },
+    {
+      id: PATIENT_ARJUN_ID, first_name: "Arjun", last_name: "Nair",
+      date_of_birth: "1969-04-18", sex: "Male", contact_phone: "+91-9887700456",
+      email: "arjun@patient.demo", address: "92 Marine Drive, Kochi",
+      emergency_contact: { name: "Kavya Nair", phone: "+91-9887700457", relationship: "Spouse" },
+      primary_diagnosis: "Post-stroke (CVA) rehabilitation",
+      branch_specialty: "Neurological",
+      comorbidities: ["Hypertension", "Diabetes"], current_medications: ["Metoprolol", "Metformin"],
+      allergies: [], mobility_aids: ["Quad cane"], caregiver: { name: "Kavya Nair", phone: "+91-9887700457", relationship: "Spouse" },
+      consent_signed: true, consent_date: "2026-01-25", consent_document_id: "doc-arjun-consent",
+      user_id: PATIENT_ARJUN_USER_ID, created_by: CLINICIAN_ID,
+      created_at: daysAgo(30), updated_at: daysAgo(30),
+    },
+    {
+      id: PATIENT_GOPAL_ID, first_name: "Gopal", last_name: "Krishnan",
+      date_of_birth: "1944-09-09", sex: "Male", contact_phone: "+91-9900112345",
+      email: "gopal@patient.demo", address: "17 Residency Road, Chennai",
+      emergency_contact: { name: "Lakshmi Krishnan", phone: "+91-9900112346", relationship: "Daughter" },
+      primary_diagnosis: "Age-related functional decline / fall risk",
+      branch_specialty: "Geriatric",
+      comorbidities: ["Osteoarthritis", "Hypertension"], current_medications: ["Paracetamol", "Losartan"],
+      allergies: [], mobility_aids: ["Walking stick"], caregiver: null,
+      consent_signed: true, consent_date: "2026-01-12", consent_document_id: "doc-gopal-consent",
+      user_id: PATIENT_GOPAL_USER_ID, created_by: CLINICIAN_ID,
+      created_at: daysAgo(30), updated_at: daysAgo(30),
+    },
+    {
+      id: PATIENT_ISHAAN_ID, first_name: "Ishaan", last_name: "Verma",
+      date_of_birth: "2017-02-27", sex: "Male", contact_phone: "+91-9778899001",
+      email: "ishaan@patient.demo", address: "5 Shantinagar, Pune",
+      emergency_contact: { name: "Nidhi Verma", phone: "+91-9778899002", relationship: "Mother" },
+      primary_diagnosis: "Cerebral palsy — gross motor delay",
+      branch_specialty: "Pediatric",
+      comorbidities: [], current_medications: [], allergies: ["None"],
+      mobility_aids: ["Walker"], caregiver: { name: "Nidhi Verma", phone: "+91-9778899002", relationship: "Mother" },
+      consent_signed: true, consent_date: "2026-01-30", consent_document_id: "doc-ishaan-consent",
+      user_id: PATIENT_ISHAAN_USER_ID, created_by: CLINICIAN_ID,
+      created_at: daysAgo(30), updated_at: daysAgo(30),
+    },
   );
 
   documents.push(
@@ -411,6 +648,22 @@ function initMockData() {
       storage_reference: buildPdfDataUrl("Consent Form - Priya Mehta"),
       access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30)
     },
+    { id: "doc-maya-consent", patient_id: PATIENT_MAYA_ID, type: "Consent", filename: "Consent_Maya.pdf",
+      uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
+      storage_reference: buildPdfDataUrl("Consent Form - Maya Iyer"),
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
+    { id: "doc-arjun-consent", patient_id: PATIENT_ARJUN_ID, type: "Consent", filename: "Consent_Arjun.pdf",
+      uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
+      storage_reference: buildPdfDataUrl("Consent Form - Arjun Nair"),
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
+    { id: "doc-gopal-consent", patient_id: PATIENT_GOPAL_ID, type: "Consent", filename: "Consent_Gopal.pdf",
+      uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
+      storage_reference: buildPdfDataUrl("Consent Form - Gopal Krishnan"),
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
+    { id: "doc-ishaan-consent", patient_id: PATIENT_ISHAAN_ID, type: "Consent", filename: "Consent_Ishaan.pdf",
+      uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
+      storage_reference: buildPdfDataUrl("Consent Form - Ishaan Verma"),
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
   );
 
   // ── Encounters ──
@@ -445,6 +698,46 @@ function initMockData() {
   ];
 
   encounters.push(...rajeshEncs, ...priyaEncs);
+
+  // Branch-specific demo patients get 3 encounters each so their patient detail
+  // and progress analytics have a realistic encounter history.
+  const mayaEncs = [
+    buildBranchEncounter(PATIENT_MAYA_ID, "Cardiorespiratory", 28, "Initial", 7,
+      "COPD — pulmonary rehab", "1. Pursed-lip breathing 4x5 min\\n2. Diaphragmatic breathing 3x5\\n3. Progressive walking 10 min\\n4. Aerobic cycle 5 min"),
+    buildBranchEncounter(PATIENT_MAYA_ID, "Cardiorespiratory", 14, "Follow-up", 4,
+      "COPD — improving exercise tolerance", "1. Breathing exercises 5x daily\\n2. Interval walking 20 min\\n3. Strength: sit-to-stand 3x8\\n4. Upper-limb theraband 3x10"),
+    buildBranchEncounter(PATIENT_MAYA_ID, "Cardiorespiratory", 7, "Follow-up", 2,
+      "COPD — maintenance phase", "1. Daily 30 min walk\\n2. Circuit of ADL tasks\\n3. Continue breathing techniques"),
+  ];
+
+  const arjunEncs = [
+    buildBranchEncounter(PATIENT_ARJUN_ID, "Neurological", 28, "Initial", 5,
+      "Post-stroke (CVA) hemiparesis", "1. Passive ROM 10 min\\n2. Bed mobility drills\\n3. Tactile stimulation\\n4. Supported sitting balance"),
+    buildBranchEncounter(PATIENT_ARJUN_ID, "Neurological", 14, "Follow-up", 3,
+      "Post-stroke — balance improving", "1. Sit-to-stand 3x10\\n2. Weight shifting 3x10\\n3. Standing balance 5 min\\n4. Gait re-education 10 min"),
+    buildBranchEncounter(PATIENT_ARJUN_ID, "Neurological", 7, "Follow-up", 1,
+      "Post-stroke — community ambulation", "1. Gait training 20 min\\n2. Stair practice\\n3. Dynamic balance 10 min"),
+  ];
+
+  const gopalEncs = [
+    buildBranchEncounter(PATIENT_GOPAL_ID, "Geriatric", 28, "Initial", 6,
+      "Mobility decline / fall risk", "1. Seated march 3x10\\n2. Mini squats 3x8\\n3. Heel raises 3x10\\n4. Balance training 5 min"),
+    buildBranchEncounter(PATIENT_GOPAL_ID, "Geriatric", 14, "Follow-up", 4,
+      "Fall risk reduced", "1. Sit-to-stand 3x10\\n2. Tandem walking 5 min\\n3. Step-ups 3x8\\n4. Task-specific balance 10 min"),
+    buildBranchEncounter(PATIENT_GOPAL_ID, "Geriatric", 7, "Follow-up", 2,
+      "Geriatric — near discharge", "1. Gait endurance 20 min\\n2. Lower-limb strength 3x10\\n3. Home safety program"),
+  ];
+
+  const ishaanEncs = [
+    buildBranchEncounter(PATIENT_ISHAAN_ID, "Pediatric", 28, "Initial", 3,
+      "Cerebral palsy — gross motor delay", "1. Play-based stretching 10 min\\n2. Rolling to sit 3x\\n3. Supported sitting 5 min\\n4. Reach & grasp play"),
+    buildBranchEncounter(PATIENT_ISHAAN_ID, "Pediatric", 14, "Follow-up", 2,
+      "Increased independent sitting", "1. Pull-to-stand 3x\\n2. Cruising along furniture 5 min\\n3. Balance games\\n4. Kicking play"),
+    buildBranchEncounter(PATIENT_ISHAAN_ID, "Pediatric", 7, "Follow-up", 1,
+      "Pediatric — walking with support", "1. Supported walking 10 min\\n2. Stair step-ups with assist\\n3. Motor skill games"),
+  ];
+
+  encounters.push(...mayaEncs, ...arjunEncs, ...gopalEncs, ...ishaanEncs);
 
   // ── Progress entries ──
   // Auto-derive entries from each encounter's objective (pain, TUG, 6MWT,
@@ -527,6 +820,45 @@ function initMockData() {
     });
   }
 
+  // ── Rich time-series for Cardiorespiratory (Maya) ──
+  const mayaDates = [daysAgo(42), daysAgo(35), daysAgo(28), daysAgo(21), daysAgo(14), daysAgo(7)];
+  pushProgressSeries(PATIENT_MAYA_ID, mayaDates, [
+    { key: "pain_vas", vals: [7, 6, 5, 4, 3, 2], unit: "score" },
+    { key: "six_mwt_m", vals: [210, 255, 310, 365, 420, 470], unit: "m" },
+    { key: "borg_dyspnea", vals: [7, 6, 5, 4, 3, 2], unit: "score" },
+    { key: "chest_expansion_cm", vals: [3.0, 3.5, 4.0, 4.5, 5.1, 5.6], unit: "cm" },
+    { key: "heart_rate_bpm", vals: [96, 92, 88, 84, 80, 76], unit: "bpm" },
+    { key: "respiratory_rate_bpm", vals: [22, 21, 20, 18, 16, 15], unit: "bpm" },
+  ], "prog-maya");
+
+  // ── Rich time-series for Neurological (Arjun) ──
+  const arjunDates = mayaDates;
+  pushProgressSeries(PATIENT_ARJUN_ID, arjunDates, [
+    { key: "pain_vas", vals: [5, 4, 4, 3, 2, 1], unit: "score" },
+    { key: "berg_balance_score", vals: [28, 34, 40, 46, 50, 54], unit: "score" },
+    { key: "mas_spasticity_grade", vals: [3, 3, 2, 2, 1, 1], unit: "grade" },
+    { key: "tug_sec", vals: [24, 20, 18, 15, 12, 10], unit: "sec" },
+    { key: "gait_cadence", vals: [60, 72, 82, 92, 100, 106], unit: "steps/min" },
+    { key: "step_length_cm", vals: [22, 28, 34, 42, 48, 54], unit: "cm" },
+  ], "prog-arjun");
+
+  // ── Rich time-series for Geriatric (Gopal) ──
+  pushProgressSeries(PATIENT_GOPAL_ID, mayaDates, [
+    { key: "pain_vas", vals: [6, 5, 4, 4, 3, 2], unit: "score" },
+    { key: "tug_sec", vals: [16.5, 15.0, 13.5, 12.0, 10.5, 9.0], unit: "sec" },
+    { key: "thirty_sec_chair_stand", vals: [6, 7, 9, 10, 12, 14], unit: "reps" },
+    { key: "berg_balance_score", vals: [36, 40, 44, 48, 50, 52], unit: "score" },
+    { key: "gait_cadence", vals: [70, 78, 86, 92, 96, 100], unit: "steps/min" },
+  ], "prog-gopal");
+
+  // ── Rich time-series for Pediatric (Ishaan) ──
+  const ishaanDates = [daysAgo(56), daysAgo(49), daysAgo(42), daysAgo(35), daysAgo(28), daysAgo(21)];
+  pushProgressSeries(PATIENT_ISHAAN_ID, ishaanDates, [
+    { key: "pain_vas", vals: [3, 3, 3, 2, 2, 1], unit: "score" },
+    { key: "gmfm_pct", vals: [45, 50, 56, 63, 70, 78], unit: "%" },
+    { key: "pedi_score", vals: [30, 36, 42, 50, 58, 66], unit: "score" },
+  ], "prog-ishaan");
+
   // ── Audit logs ──
   auditLogs.push(
     {
@@ -587,6 +919,18 @@ export function getAllPatients(search?: string): Patient[] {
 
 export function getPatientById(id: string): Patient | undefined {
   return patients.find((p) => p.id === id);
+}
+
+/**
+ * Demo patient accounts for the patient portal — patients that have a linked
+ * login identity (`user_id`). Used to switch between "accounts" and let each
+ * patient view their own development.
+ */
+export function getPatientAccounts(): Patient[] {
+  const accs = patients.filter((p) => p.user_id !== null && p.user_id !== "");
+  return [...accs].sort((a, b) =>
+    (a.last_name + a.first_name).localeCompare(b.last_name + b.first_name),
+  );
 }
 
 export function createPatient(data: Record<string, unknown>): Patient {
@@ -742,8 +1086,8 @@ export function addAuditLog(data: {
 // ── Patient summary (for /my-summary portal) ──
 export function getPatientSummaryData(patientId: string) {
   const patient = getPatientById(patientId) ?? null;
-  const painHistory = getProgressEntriesByPatient(patientId, "pain_vas");
-  const allProgressEntries = getProgressEntriesByPatient(patientId);
+  const painHistory = getProgressEntries(patientId, "pain_vas");
+  const allProgressEntries = getProgressEntries(patientId);
   const latestPain = painHistory.length > 0
     ? painHistory[painHistory.length - 1]!.value
     : null;

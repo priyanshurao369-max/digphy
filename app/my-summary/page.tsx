@@ -1,20 +1,32 @@
 import { redirect } from "next/navigation";
-import { Activity, Calendar, Heart, LogOut } from "lucide-react";
+import Link from "next/link";
+import { Activity, Calendar, Heart, LogOut, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressChart } from "@/components/charts/ProgressChart";
 import { BranchProgressDashboard } from "@/components/progress/BranchProgressDashboard";
-import { getPatientSummary } from "@/lib/actions/portal";
+import { getPatientSummary, getPatientAccounts } from "@/lib/actions/portal";
 import { signOut } from "@/lib/actions/patients";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function MySummaryPage() {
-  const summary = await getPatientSummary();
-  if (!summary) redirect("/login");
+export default async function MySummaryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ patientId?: string }>;
+}) {
+  const params = await searchParams;
+  const activeId = params?.patientId || undefined;
+
+  const [summary, accounts] = await Promise.all([
+    getPatientSummary(activeId),
+    getPatientAccounts(),
+  ]);
+  if (!summary?.patient) redirect("/login");
 
   const { patient, painHistory, latestPain, homeProgram, nextFollowUp } = summary;
+  const currentId = patient.id;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-cyan-50">
@@ -40,6 +52,33 @@ export default async function MySummaryPage() {
           </h1>
           <p className="text-muted-foreground">Your physiotherapy progress summary</p>
         </div>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Users className="h-4 w-4" />
+              Switch Patient Account
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            {accounts.map((acc) => {
+              const active = acc.id === currentId;
+              return (
+                <Link
+                  key={acc.id}
+                  href={`/my-summary?patientId=${acc.id}`}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "bg-muted/40 hover:bg-muted"
+                  }`}
+                >
+                  {acc.first_name} {acc.last_name} · {acc.branch_specialty ?? "General"}
+                </Link>
+              );
+            })}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Card>

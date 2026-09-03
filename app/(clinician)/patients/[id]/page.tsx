@@ -31,9 +31,9 @@ export default async function PatientDetailPage({
     notFound();
   }
 
-  const [encounters, painProgress, documents] = await Promise.all([
+  const [encounters, allProgress, documents] = await Promise.all([
     getEncounters(id),
-    getProgressEntries(id, "pain_vas"),
+    getProgressEntries(id),
     getDocuments(id),
   ]);
 

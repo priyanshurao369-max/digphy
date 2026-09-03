@@ -39,11 +39,43 @@ export function describeMetric(key: string): MetricMeta {
 // ── Branch-recommended metrics ──
 
 export const BRANCH_METRICS: Record<BranchSpecialty, string[]> = {
-  Orthopedic: ["pain_vas", "rom_knee_flexion_deg", "rom_lumbar_flexion_deg", "tug_sec", "girth_knee_R_cm"],
-  Cardiorespiratory: ["pain_vas", "six_mwt_m", "borg_dyspnea", "chest_expansion_cm"],
-  Neurological: ["pain_vas", "berg_balance_score", "mas_spasticity_grade", "tug_sec"],
-  Geriatric: ["pain_vas", "tug_sec", "thirty_sec_chair_stand"],
-  Pediatric: ["pain_vas", "gmfm_pct", "pedi_score"],
+  Orthopedic: [
+    "pain_vas",
+    "rom_knee_flexion_deg",
+    "rom_lumbar_flexion_deg",
+    "tug_sec",
+    "girth_knee_R_cm",
+    "gait_cadence",
+    "step_length_cm",
+  ],
+  Cardiorespiratory: [
+    "pain_vas",
+    "six_mwt_m",
+    "borg_dyspnea",
+    "chest_expansion_cm",
+    "heart_rate_bpm",
+    "respiratory_rate_bpm",
+  ],
+  Neurological: [
+    "pain_vas",
+    "berg_balance_score",
+    "mas_spasticity_grade",
+    "tug_sec",
+    "gait_cadence",
+    "step_length_cm",
+  ],
+  Geriatric: [
+    "pain_vas",
+    "tug_sec",
+    "thirty_sec_chair_stand",
+    "berg_balance_score",
+    "gait_cadence",
+  ],
+  Pediatric: [
+    "pain_vas",
+    "gmfm_pct",
+    "pedi_score",
+  ],
 };
 
 // ── Extraction of metric samples from an encounter's objective data ──

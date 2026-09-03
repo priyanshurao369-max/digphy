@@ -54,8 +54,13 @@ export function BranchProgressDashboard({
   // Derive branch-recommended metric keys
   const branchKeys = BRANCH_METRICS[branch] ?? ["pain_vas"];
 
+  // Always render a graph for EVERY metric recommended for the patient's branch,
+  // plus any additional tracked metrics. This guarantees a detailed, branch-specific
+  // dashboard even when the clinician hasn't recorded every metric yet.
+  const metricKeys = [...new Set([...branchKeys, ...trackedKeys])];
+
   // Prepare metric data objects
-  const allMetricsData = trackedKeys
+  const allMetricsData = metricKeys
     .map((key) => {
       const meta = describeMetric(key);
       const data = patientEntries
@@ -312,6 +317,30 @@ export function BranchProgressDashboard({
             const { stats, data } = metric;
             const isImproving = stats.improving === true;
             const isDeclining = stats.improving === false;
+
+            // Branch-recommended metric with no readings yet → show a placeholder
+            // card instead of rendering an empty/broken chart.
+            if (data.length === 0) {
+              return (
+                <Card key={metric.key} className="overflow-hidden border-dashed shadow-sm">
+                  <CardHeader className="pb-2 bg-muted/10 border-b">
+                    <CardTitle className="text-base font-bold flex items-center gap-2">
+                      <LineChartIcon className="h-4 w-4 text-muted-foreground" />
+                      {metric.label}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-10 text-center text-muted-foreground space-y-2">
+                    <Activity className="mx-auto h-8 w-8 opacity-30 stroke-1" />
+                    <p className="text-sm font-medium text-foreground">No readings logged</p>
+                    <p className="text-xs max-w-xs mx-auto">
+                      {metric.isBranchKey
+                        ? `Recommended ${branch} metric — record it during the next encounter to start this chart.`
+                        : "No progress entries have been logged for this metric yet."}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            }
 
             const chartData = data.map((d) => ({
               date: formatDateTime(d.date_time),
