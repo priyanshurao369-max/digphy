@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
@@ -19,24 +19,79 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createEncounter } from "@/lib/actions/encounters";
 import type { EncounterFormData, ProgressMetricSample } from "@/lib/validators/schemas";
 import { METRIC_PRESETS } from "@/lib/validators/schemas";
-import type { BranchSpecialty } from "@/types";
+import type { BranchSpecialty, Encounter } from "@/types";
+import { detectFilledBlocks, buildFollowupPatch, type FilledItem, type FilledBlock } from "@/components/soap/followup-detection";
 
 const STEPS = ["Header", "Subjective", "Objective", "Assessment", "Plan"] as const;
 
 // Joint-specific assessment dropdowns (Objective step)
 const ROM_JOINTS = [
-  "Cervical Spine", "Thoracic Spine", "Lumbar Spine", "Shoulder", "Elbow",
-  "Wrist", "Hip", "Knee", "Ankle", "Foot",
+  // Craniofacial / Spine
+  "Temporomandibular Joint", "Cervical Spine", "Thoracic Spine", "Lumbar Spine",
+  // Upper limb
+  "Sternoclavicular Joint", "Acromioclavicular Joint", "Shoulder", "Scapulothoracic",
+  "Elbow", "Forearm", "Wrist", "Hand MCP", "Hand PIP", "Hand DIP", "Thumb CMC", "Thumb MCP", "Thumb IP",
+  // Lower limb
+  "Hip", "Knee", "Superior Tibiofibular", "Ankle", "Subtalar Joint", "Midtarsal Joint",
+  "Foot Tarsometatarsal", "Toes MTP", "Toes PIP", "Great Toe MTP", "Great Toe IP",
 ] as const;
 const ROM_MOTIONS = [
   "Flexion", "Extension", "Abduction", "Adduction", "Internal Rotation",
-  "External Rotation", "Rotation", "Lateral Flexion", "Dorsiflexion", "Plantarflexion",
+  "External Rotation", "Rotation", "Lateral Flexion", "Protraction", "Retraction",
+  "Elevation", "Depression", "Upward Rotation", "Downward Rotation", "Tilt (Anterior/Posterior)",
+  // Forearm / wrist / hand
+  "Pronation", "Supination", "Radial Deviation", "Ulnar Deviation", "Opposition",
+  // Spine / TMJ
+  "Protrusion", "Retrusion", "Lateral Excursion",
+  // Ankle / foot
+  "Dorsiflexion", "Plantarflexion", "Inversion", "Eversion",
 ] as const;
 const MMT_GROUPS = [
-  "Cervical Flexors", "Shoulder Abductors", "Elbow Flexors", "Elbow Extensors",
-  "Wrist Extensors", "Hip Flexors", "Hip Abductors", "Knee Extensors",
-  "Knee Flexors", "Ankle Dorsiflexors", "Plantarflexors",
+  // Cervical
+  "Cervical Flexors", "Cervical Extensors", "Cervical Rotators", "Cervical Lateral Flexors",
+  // Scapular
+  "Upper Trapezius (Elevators)", "Middle Trapezius (Retractors)", "Lower Trapezius (Depressors)",
+  "Serratus Anterior (Protractors)", "Rhomboids (Retractors)",
+  // Shoulder
+  "Shoulder Flexors (Ant. Deltoid)", "Shoulder Extensors (Lat/Post. Deltoid)",
+  "Shoulder Abductors (Mid. Deltoid)", "Shoulder Adductors (Pec/Lat)",
+  "Shoulder Internal Rotators", "Shoulder External Rotators",
+  // Elbow / forearm
+  "Elbow Flexors", "Elbow Extensors", "Forearm Pronators", "Forearm Supinators",
+  // Wrist
+  "Wrist Flexors", "Wrist Extensors", "Wrist Radial Deviators", "Wrist Ulnar Deviators",
+  // Hand / digits
+  "Finger Flexors (FDS/FDP)", "Finger Extensors (EDC)", "Finger Abductors (Dorsal Interossei)",
+  "Finger Adductors (Palmar Interossei)", "Thumb Flexors", "Thumb Extensors",
+  "Thumb Abductors", "Thumb Adductors", "Thumb Opponens",
+  // Trunk
+  "Trunk Flexors (Abdominals)", "Trunk Extensors (Erector Spinae)", "Trunk Rotators (Obliques)",
+  "Trunk Lateral Flexors (QL)",
+  // Hip
+  "Hip Flexors", "Hip Extensors (Gluteus Maximus)", "Hip Abductors (Gluteus Medius)",
+  "Hip Adductors", "Hip Internal Rotators", "Hip External Rotators",
+  // Knee
+  "Knee Extensors (Quadriceps)", "Knee Flexors (Hamstrings)",
+  // Ankle / foot
+  "Ankle Dorsiflexors (Tibialis Anterior)", "Ankle Plantarflexors (Gastrocnemius/Soleus)",
+  "Ankle Invertors (Tibialis Posterior)", "Ankle Evertors (Peroneals)",
+  "Toe Flexors", "Toe Extensors (EHL)",
 ] as const;
+
+// Slugify a joint/motion/group name into a safe object key
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+// Reverse lookups: "shoulder_knee-style composite key" -> readable label
+const ROM_KEY_TO_LABEL = new Map<string, string>(
+  ROM_JOINTS.flatMap((j) =>
+    ROM_MOTIONS.map((m) => [`${slugify(j)}_${slugify(m)}`, `${j} â€” ${m}`] as const)
+  )
+);
+const MMT_KEY_TO_LABEL = new Map<string, string>(MMT_GROUPS.map((g) => [slugify(g), g]));
 
 // ICF Activity Limitations & Participation Restrictions (Objective step)
 const ICF_QUALIFIERS = ["None", "Mild", "Moderate", "Severe", "Complete"] as const;
@@ -95,12 +150,15 @@ interface SoapWizardProps {
   patientId: string;
   clinicianId: string;
   patientBranchSpecialty?: BranchSpecialty;
+  /** The most recent saved encounter — used to offer follow-up test re-assessment. */
+  previousEncounter?: Encounter | null;
 }
 
 export function SoapWizard({
   patientId,
   clinicianId,
   patientBranchSpecialty = "Orthopedic",
+  previousEncounter = null,
 }: SoapWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -125,6 +183,9 @@ export function SoapWizard({
   const [mmtJoint, setMmtJoint] = useState<string>("");
   const [mmtSide, setMmtSide] = useState<"Right" | "Left">("Right");
   const [mmtGrade, setMmtGrade] = useState<string>("");
+
+  // ── Follow-up re-assessment selection ──
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
   const now = new Date().toISOString();
   const today = now.split("T")[0];
@@ -312,6 +373,8 @@ export function SoapWizard({
   }
 
   async function handleSubmit() {
+    // For follow-ups, pre-fill the objective with the previously-selected tests.
+    if (isFollowUp && previousEncounter && detection) applyReassessment();
     setLoading(true);
     setError(null);
     const result = await createEncounter({ ...form, progress_metrics: extraMetrics } as EncounterFormData);
@@ -324,10 +387,78 @@ export function SoapWizard({
     router.refresh();
   }
 
+  // ── Follow-up re-assessment helpers ──
+  const isFollowUp = form.encounter_type === "Follow-up" || form.encounter_type === "HomeVisit";
+  const detection = useMemo(
+    () => (previousEncounter ? detectFilledBlocks(previousEncounter) : null),
+    [previousEncounter]
+  );
+  const steps = useMemo(
+    () =>
+      isFollowUp
+        ? ["Header", "Follow-up Tests", "Subjective", "Objective", "Assessment", "Plan"]
+        : ["Header", "Subjective", "Objective", "Assessment", "Plan"],
+    [isFollowUp]
+  );
+  const reassessIdx = isFollowUp ? 1 : -1;
+  const subjIdx = isFollowUp ? 2 : 1;
+  const objIdx = isFollowUp ? 3 : 2;
+  const assessIdx = isFollowUp ? 4 : 3;
+  const planIdx = isFollowUp ? 5 : 4;
+
+  const selectedCount = selectedKeys.size;
+
+  function toggleItem(key: string, checked: boolean) {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }
+
+  function toggleBlock(block: FilledBlock, checked: boolean) {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      for (const it of block.items) {
+        if (checked) next.add(it.key);
+        else next.delete(it.key);
+      }
+      return next;
+    });
+  }
+
+  function selectAllFilled() {
+    const keys = (detection?.blocks ?? []).flatMap((b) => b.items.map((i) => i.key));
+    setSelectedKeys(new Set(keys));
+  }
+
+  function selectNone() {
+    setSelectedKeys(new Set());
+  }
+
+  function applyReassessment() {
+    if (!isFollowUp || !previousEncounter || !detection || selectedKeys.size === 0) return;
+    const patch = buildFollowupPatch(
+      previousEncounter.objective as unknown as Record<string, unknown>,
+      selectedKeys,
+      detection.itemsById
+    );
+    for (const entry of patch) {
+      updateField(`objective.${entry.path}`, entry.value);
+    }
+  }
+
+  function goNext() {
+    // Apply selected follow-up tests when leaving the re-assessment step.
+    if (step === reassessIdx) applyReassessment();
+    setStep(step + 1);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex gap-2 overflow-x-auto pb-2">
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <button
             key={s}
             type="button"
@@ -434,7 +565,100 @@ export function SoapWizard({
         </Card>
       )}
 
-      {step === 1 && (
+      {step === reassessIdx && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Follow-up: Select Tests to Re-assess</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Tick the specific tests / blocks / criteria that were filled during
+              the previous encounter and should be re-assessed now. Only the selected
+              items will be carried into the Objective step — all others are skipped.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!previousEncounter ? (
+              <div className="rounded-md border-dashed border p-6 text-sm text-muted-foreground">
+                No previous encounter found for this patient. Complete an{" "}
+                <span className="font-medium text-foreground">Initial</span> assessment
+                before creating a follow-up with re-assessment selection.
+              </div>
+            ) : detection && detection.total === 0 ? (
+              <div className="rounded-md border-dashed border p-6 text-sm text-muted-foreground">
+                No measurable tests were recorded in the previous encounter. Fill
+                quantitative findings during the next assessment to enable re-assessment selection.
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button type="button" variant="secondary" size="sm" onClick={selectAllFilled}>
+                    Select all filled tests
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={selectNone}>
+                    Clear selection
+                  </Button>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {selectedCount} of {detection?.total ?? 0} tests selected
+                  </span>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {detection?.blocks.map((block) => {
+                    const allChecked =
+                      block.items.length > 0 && block.items.every((it) => selectedKeys.has(it.key));
+                    const someChecked = block.items.some((it) => selectedKeys.has(it.key));
+                    return (
+                      <Card key={block.id} className="border bg-card shadow-sm">
+                        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-sm font-semibold">{block.title}</CardTitle>
+                          <Checkbox
+                            checked={allChecked}
+                            onCheckedChange={(c) => toggleBlock(block, c === true)}
+                            aria-label={`Select all ${block.title}`}
+                          />
+                        </CardHeader>
+                        <CardContent className="pt-1 space-y-1.5 max-h-56 overflow-auto">
+                          {block.items.map((it) => (
+                            <label
+                              key={it.key}
+                              className="flex items-center justify-between gap-2 rounded-md px-2 py-1 text-sm hover:bg-muted/60 cursor-pointer"
+                            >
+                              <span className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={selectedKeys.has(it.key)}
+                                  onCheckedChange={(c) => toggleItem(it.key, c === true)}
+                                />
+                                <span className="font-medium">{it.label}</span>
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {it.previous}
+                              </span>
+                            </label>
+                          ))}
+                        </CardContent>
+                        {someChecked && !allChecked ? (
+                          <p className="px-4 pb-3 text-xs text-muted-foreground">
+                            Partially selected
+                          </p>
+                        ) : null}
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {selectedCount > 0 && (
+                  <div className="rounded-md bg-primary/5 border border-primary/30 p-3 text-sm">
+                    <span className="font-semibold">{selectedCount} test(s)</span> selected will be
+                    pre-filled into the Objective step with their previous values — edit them as
+                    the patient&apos;s current status requires.
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {step === subjIdx && (
         <Card>
           <CardHeader>
             <CardTitle>Subjective (S)</CardTitle>
@@ -970,7 +1194,7 @@ export function SoapWizard({
         </Card>
       )}
 
-      {step === 2 && (
+      {step === objIdx && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -2187,7 +2411,7 @@ export function SoapWizard({
                 variant="secondary"
                 disabled={!romArom || !romJoint || !romMotion}
                 onClick={() => {
-                  const key = `${romJoint.toLowerCase().replace(/\s+/g, "_")}_${romMotion.toLowerCase().replace(/\s+/g, "_")}`;
+                  const key = `${slugify(romJoint)}_${slugify(romMotion)}`;
                   if (romArom) updateField(`objective.rom.arom.${key}`, `${romArom} deg`);
                   if (romProm) updateField(`objective.rom.prom.${key}`, `${romProm} deg`);
                   setRomArom("");
@@ -2208,7 +2432,7 @@ export function SoapWizard({
                   {Object.entries(form.objective?.rom?.arom ?? {}).map(([key, aromVal]) => (
                     <div key={key} className="grid grid-cols-12 px-3 py-1.5 items-center">
                       <div className="col-span-4 font-medium text-xs sm:text-sm">
-                        {key.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                        {ROM_KEY_TO_LABEL.get(key) ?? key.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
                       </div>
                       <div className="col-span-3">{aromVal}</div>
                       <div className="col-span-3">{(form.objective?.rom?.prom as any)?.[key] ?? "—"}</div>
@@ -2291,7 +2515,7 @@ export function SoapWizard({
                 variant="secondary"
                 disabled={!mmtJoint || mmtGrade === ""}
                 onClick={() => {
-                  const key = `${mmtJoint.toLowerCase().replace(/\s+/g, "_")}_${mmtSide === "Right" ? "R" : "L"}`;
+                  const key = `${slugify(mmtJoint)}_${mmtSide === "Right" ? "R" : "L"}`;
                   updateField(`objective.strength.mmt.${key}`, Number(mmtGrade));
                   setMmtGrade("");
                 }}
@@ -2309,7 +2533,7 @@ export function SoapWizard({
                   {Object.entries(form.objective?.strength?.mmt ?? {}).map(([key, grade]) => (
                     <div key={key} className="grid grid-cols-12 px-3 py-1.5 items-center">
                       <div className="col-span-6 font-medium text-xs sm:text-sm">
-                        {key.replace(/_(R|L)$/, "").split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                        {MMT_KEY_TO_LABEL.get(key.replace(/_(R|L)$/, "")) ?? key.replace(/_(R|L)$/, "").split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
                         <span className="ml-1 text-muted-foreground">({key.endsWith("_R") ? "R" : "L"})</span>
                       </div>
                       <div className="col-span-3 font-semibold">{grade as number} / 5</div>
@@ -2670,7 +2894,7 @@ export function SoapWizard({
         </div>
       )}
 
-      {step === 3 && (
+      {step === assessIdx && (
         <Card>
           <CardHeader>
             <CardTitle>Assessment</CardTitle>
@@ -2734,7 +2958,7 @@ export function SoapWizard({
         </Card>
       )}
 
-      {step === 4 && (
+      {step === planIdx && (
         <Card>
           <CardHeader>
             <CardTitle>Plan</CardTitle>
@@ -2898,8 +3122,8 @@ export function SoapWizard({
         <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>
           Previous
         </Button>
-        {step < STEPS.length - 1 ? (
-          <Button type="button" onClick={() => setStep(step + 1)}>
+        {step < steps.length - 1 ? (
+          <Button type="button" onClick={goNext}>
             Next
           </Button>
         ) : (

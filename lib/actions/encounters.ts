@@ -15,6 +15,7 @@ import {
   getProgressEntries as storeGetProgressEntries,
   createProgressEntry as storeCreateProgressEntry,
   getRecentEncounters as storeGetRecentEncounters,
+  getPreviousEncounter as storeGetPreviousEncounter,
   addAuditLog,
 } from "@/lib/data/mock-store";
 import { findPatientById } from "@/lib/data/request-store";
@@ -150,4 +151,13 @@ export async function createProgressEntry(formData: ProgressEntryFormData) {
 
 export async function getRecentEncounters(limit = 5) {
   return storeGetRecentEncounters(limit);
+}
+
+export async function getPreviousEncounter(patientId: string) {
+  const data = storeGetPreviousEncounter(patientId);
+  if (!data) return null;
+  try {
+    await logAudit({ action: "READ", entity: "Encounter", entityId: data.id });
+  } catch {}
+  return data;
 }

@@ -4,7 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SoapWizard } from "@/components/soap/soap-wizard";
 import { getPatient } from "@/lib/actions/patients";
+import { getPreviousEncounter } from "@/lib/actions/encounters";
 import { CLINICIAN_ID } from "@/lib/data/mock-store";
+import type { Encounter } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,8 @@ export default async function NewEncounterPage({
     redirect(`/patients/${id}`);
   }
 
+  const previousEncounter = (await getPreviousEncounter(id)) as Encounter | null;
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center gap-4">
@@ -46,6 +50,7 @@ export default async function NewEncounterPage({
         patientId={id}
         clinicianId={CLINICIAN_ID}
         patientBranchSpecialty={patient.branch_specialty}
+        previousEncounter={previousEncounter}
       />
     </div>
   );

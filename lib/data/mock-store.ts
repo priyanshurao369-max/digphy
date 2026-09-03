@@ -982,6 +982,16 @@ export function getEncounterById(id: string): Encounter | undefined {
   return encounters.find((e) => e.id === id);
 }
 
+/**
+ * The most recent encounter for a patient (newest first). Used by the
+ * follow-up wizard to detect which previously-filled tests to re-assess.
+ */
+export function getPreviousEncounter(patientId: string): Encounter | undefined {
+  return [...encounters]
+    .filter((e) => e.patient_id === patientId)
+    .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime())[0];
+}
+
 export function createEncounter(data: Record<string, unknown>): Encounter {
   const now = new Date().toISOString();
   const enc = {
