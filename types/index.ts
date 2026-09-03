@@ -101,6 +101,83 @@ export interface PainData {
   nature_notes: string;
 }
 
+export interface DetailedAdlDifficulties {
+  ambulation?: string;
+  bed_activities?: string;
+  dressing?: string;
+  eating?: string;
+  toilet_activities?: string;
+}
+
+export interface DetailedWeakness {
+  side?: string;
+  site?: string;
+  duration_adl?: string;
+}
+
+export interface DetailedPresentHistory {
+  mode_of_transportation?: string;
+  consciousness_status?: string;
+  bleeding_sites?: string;
+  nature_severity?: string;
+  associated_symptoms?: string;
+}
+
+export interface DetailedPastHistory {
+  general_health_prior?: string;
+  pregnancies_miscarriages?: string;
+  past_physio_treatment?: string;
+  past_prognosis?: string;
+}
+
+export interface DetailedPersonalHistory {
+  marital_history?: string;
+  habits?: string;
+}
+
+export interface DetailedFamilyHistory {
+  similar_symptoms?: string;
+  hereditary_diseases?: string;
+  infectious_diseases?: string;
+}
+
+export interface DetailedEconomicalHistory {
+  occupation_income?: string;
+  source_of_income?: string;
+  family_expenses?: string;
+}
+
+export interface DetailedSocialEducation {
+  education_patient?: string;
+  education_spouse?: string;
+  education_family?: string;
+}
+
+export interface DetailedEnvironmentalHistory {
+  home_environment?: string;
+  work_environment?: string;
+}
+
+export interface DetailedGeneralObservation {
+  built?: string;
+  posture?: string;
+  respiration_pattern?: string;
+  appliances?: string;
+  trophic_changes?: string;
+  wounds_edema_sutures?: string;
+  limb_attitude?: string;
+  involuntary_movements?: string;
+  muscle_wasting?: string;
+}
+
+export interface DetailedPalpation {
+  tenderness_grade?: number;
+  temperature?: string;
+  spasm_tension?: string;
+  swelling?: string;
+  tone?: string;
+}
+
 export interface SubjectiveData {
   chief_complaint: string;
   history_of_present_illness: {
@@ -136,6 +213,26 @@ export interface SubjectiveData {
   };
   patient_goals: string;
   consent_for_treatment_and_data_sharing: boolean;
+  // Extended Clinical Header & Branch Specific Subjective Fields
+  ip_number?: string;
+  date_of_admission?: string;
+  provisional_diagnosis?: string;
+  referred_by?: string;
+  laboratory_reports?: string;
+  handedness_dominance?: string;
+  adl_difficulties?: DetailedAdlDifficulties;
+  weakness_detail?: DetailedWeakness;
+  sensory_problems?: string;
+  balance_problems?: string;
+  present_history_detailed?: DetailedPresentHistory;
+  past_history_detailed?: DetailedPastHistory;
+  personal_history_detailed?: DetailedPersonalHistory;
+  family_history_detailed?: DetailedFamilyHistory;
+  economical_history?: DetailedEconomicalHistory;
+  social_education?: DetailedSocialEducation;
+  environmental_detailed?: DetailedEnvironmentalHistory;
+  observation_detailed?: DetailedGeneralObservation;
+  palpation_detailed?: DetailedPalpation;
 }
 
 export type SpecialTestResultStatus = "positive" | "negative" | "nt";
@@ -162,6 +259,111 @@ export interface CardiorespiratoryObjectiveData {
   borg_dyspnea_score: number | null;
   chest_expansion_cm: number | null;
   iswt_m?: number | null;
+  // Extended Cardiovascular Evaluation Fields
+  evaluation_date?: string;
+  bp_systolic_resting?: number | null;
+  bp_diastolic_resting?: number | null;
+  bp_systolic_post_exercise?: number | null;
+  bp_diastolic_post_exercise?: number | null;
+  hr_resting_bpm?: number | null;
+  hr_post_exercise_bpm?: number | null;
+  respiratory_rate_bpm?: number | null;
+  spo2_percent?: number | null;
+  ecg_results?: string;
+  cardiac_auscultation_details?: string;
+  echocardiogram_findings?: string;
+  stress_test_results?: string;
+  holter_monitor_data?: string;
+  coronary_angiography_findings?: string;
+  cardiac_biomarkers?: { troponin?: string; ck_mb?: string };
+  hrv_sdnn_ms?: number | null;
+  exercise_tolerance_test?: string;
+  lipid_profile?: { cholesterol?: number | null; hdl?: number | null; ldl?: number | null; triglycerides?: number | null };
+  blood_glucose?: { fasting_mg_dl?: number | null; hba1c_pct?: number | null };
+  bmi_kg_m2?: number | null;
+  inflammatory_markers?: { crp_mg_l?: number | null; esr_mm_hr?: number | null };
+  chest_pain_characteristics?: { onset?: string; duration?: string; intensity_0_10?: number; quality?: string; radiation?: string };
+  dyspnea_assessment?: { nyha_class?: string; mmrc_grade?: string; borg_score?: number | null };
+  peripheral_edema?: { presence?: boolean; pitting_grade?: string; location?: string };
+  cardiac_symptoms_history?: { palpitations?: boolean; syncope?: boolean; dizziness?: boolean; details?: string };
+  cv_risk_factors?: { smoking?: boolean; hypertension?: boolean; diabetes?: boolean; family_history?: boolean; details?: string };
+  sleep_apnea_screening?: { stop_bang_score?: number | null; risk_category?: string };
+  cardiac_medications_and_treatments?: string;
+}
+
+export interface HigherMentalFunctionsData {
+  level_of_consciousness?: string;
+  glasgow_coma_scale?: { eye?: number; verbal?: number; motor?: number; total?: number };
+  behavior?: string;
+  emotional_status?: string;
+  orientation?: { time?: boolean; place?: boolean; person?: boolean; day?: boolean; year?: boolean };
+  memory?: { immediate?: string; short_term?: string; long_term?: string };
+  calculation?: string;
+  reasoning_problem_solving?: string;
+  judgement?: string;
+  attention?: string;
+  cognitive_perceptual?: string;
+}
+
+export interface CranialNerveDetail {
+  tested?: boolean;
+  status?: string;
+  notes?: string;
+}
+
+export interface CranialNerveExamData {
+  cn1_olfactory?: CranialNerveDetail;
+  cn2_optic?: CranialNerveDetail;
+  cn3_oculomotor?: CranialNerveDetail;
+  cn4_trochlear?: CranialNerveDetail;
+  cn5_trigeminal?: CranialNerveDetail;
+  cn6_abducens?: CranialNerveDetail;
+  cn7_facial?: CranialNerveDetail;
+  cn8_vestibulocochlear?: CranialNerveDetail;
+  cn9_glossopharyngeal?: CranialNerveDetail;
+  cn10_vagus?: CranialNerveDetail;
+  cn11_spinal_accessory?: CranialNerveDetail;
+  cn12_hypoglossal?: CranialNerveDetail;
+}
+
+export interface SensoryExamDetailedData {
+  superficial?: { pain?: string; temperature?: string; light_touch?: string; pressure?: string };
+  deep?: { proprioception?: string; kinesthesia?: string; vibration?: string };
+  cortical?: { graphesthesia?: string; stereognosis?: string; tactile_localization?: string; two_point_discrimination?: string };
+}
+
+export interface MotorExamDetailedData {
+  modified_ashworth_scale?: number | null;
+  spasticity_pattern?: string;
+  reflexes_deep_tendon?: Record<string, string>;
+  reflexes_pathological?: { babinski?: string; hoffmann?: string; clonus?: string };
+  oxford_power_grade?: Record<string, number>;
+  rom_summary?: string;
+  muscle_tightness?: string;
+  voluntary_control?: { bobath_stage?: string; brunnstrom_stage?: string };
+}
+
+export interface BalanceCoordinationDetailedData {
+  balance_static_dynamic?: { static_sitting?: string; dynamic_sitting?: string; static_standing?: string; dynamic_standing?: string };
+  functional_balance_scale_score?: number | null;
+  coordination_tests?: { finger_to_nose?: string; finger_to_finger?: string; dysdiadochokinesia?: string; knee_to_heel?: string };
+  equilibrium_tests?: { tandem_walking?: string; sideways_walking?: string; single_leg_standing?: string };
+}
+
+export interface GaitExamDetailedData {
+  ambulation_mode?: string;
+  step_length_cm?: number | null;
+  step_width_cm?: number | null;
+  stride_length_cm?: number | null;
+  stance_time_sec?: number | null;
+  cadence_steps_min?: number | null;
+  gait_deviations?: string;
+}
+
+export interface AutonomicExamData {
+  ninhydrin_sweat_test?: string;
+  galvanic_skin_resistance?: string;
+  vasomotor_sudomotor_notes?: string;
 }
 
 export interface NeurologicalObjectiveData {
@@ -169,6 +371,18 @@ export interface NeurologicalObjectiveData {
   berg_balance_score: number | null;
   coordination_notes: string;
   coordination_result?: string;
+  // Extended 13-domain Neurological fields
+  higher_mental_functions?: HigherMentalFunctionsData;
+  cranial_nerves?: CranialNerveExamData;
+  sensory_examination?: SensoryExamDetailedData;
+  motor_examination?: MotorExamDetailedData;
+  balance_and_coordination?: BalanceCoordinationDetailedData;
+  gait_examination?: GaitExamDetailedData;
+  autonomic_system?: AutonomicExamData;
+  functional_evaluation?: {
+    adl_performance?: string;
+    bladder_bowel_control?: string;
+  };
 }
 
 export interface GeriatricObjectiveData {

@@ -3,6 +3,7 @@ import { Activity, Calendar, Heart, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressChart } from "@/components/charts/ProgressChart";
+import { BranchProgressDashboard } from "@/components/progress/BranchProgressDashboard";
 import { getPatientSummary } from "@/lib/actions/portal";
 import { signOut } from "@/lib/actions/patients";
 import { formatDate } from "@/lib/utils";
@@ -77,14 +78,11 @@ export default async function MySummaryPage() {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Pain Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProgressChart data={painHistory} label="Pain VAS" unit="score" height={220} />
-          </CardContent>
-        </Card>
+        <BranchProgressDashboard
+          patient={patient}
+          progressEntries={summary.progressEntries ?? []}
+          isPatientView={true}
+        />
 
         <Card>
           <CardHeader>

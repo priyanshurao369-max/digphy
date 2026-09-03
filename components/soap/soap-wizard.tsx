@@ -180,6 +180,25 @@ export function SoapWizard({
       },
       patient_goals: "",
       consent_for_treatment_and_data_sharing: true,
+      ip_number: "",
+      date_of_admission: "",
+      provisional_diagnosis: "",
+      referred_by: "",
+      laboratory_reports: "",
+      handedness_dominance: "Right",
+      adl_difficulties: { ambulation: "", bed_activities: "", dressing: "", eating: "", toilet_activities: "" },
+      weakness_detail: { side: "", site: "", duration_adl: "" },
+      sensory_problems: "",
+      balance_problems: "",
+      present_history_detailed: { mode_of_transportation: "", consciousness_status: "Conscious", bleeding_sites: "None", nature_severity: "", associated_symptoms: "" },
+      past_history_detailed: { general_health_prior: "Good", pregnancies_miscarriages: "N/A", past_physio_treatment: "None", past_prognosis: "" },
+      personal_history_detailed: { marital_history: "", habits: "" },
+      family_history_detailed: { similar_symptoms: "None", hereditary_diseases: "None", infectious_diseases: "None" },
+      economical_history: { occupation_income: "", source_of_income: "", family_expenses: "" },
+      social_education: { education_patient: "", education_spouse: "", education_family: "" },
+      environmental_detailed: { home_environment: "", work_environment: "" },
+      observation_detailed: { built: "Mesomorphic", posture: "Normal alignment", respiration_pattern: "Symmetric abdominal-thoracic", appliances: "None", trophic_changes: "Absent", wounds_edema_sutures: "None", limb_attitude: "Normal posture", involuntary_movements: "Absent", muscle_wasting: "None" },
+      palpation_detailed: { tenderness_grade: 0, temperature: "Normal", spasm_tension: "Normal", swelling: "None", tone: "Normal" },
     },
     objective: {
       vitals: {
@@ -707,6 +726,242 @@ export function SoapWizard({
                 onChange={(e) => updateField("subjective.patient_goals", e.target.value)}
               />
             </div>
+
+            {/* Branch-Specific Extended Subjective Assessment */}
+            {activeBranch === "Neurological" && (
+              <div className="sm:col-span-2 space-y-4 pt-4 border-t">
+                <h3 className="text-base font-bold text-primary flex items-center gap-2">
+                  🧠 Neurological Branch — Subjective & Clinical Intake
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border">
+                  <div>
+                    <Label>Handedness / Dominance</Label>
+                    <Select
+                      value={form.subjective?.handedness_dominance ?? "Right"}
+                      onValueChange={(v) => updateField("subjective.handedness_dominance", v)}
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Right">Right-handed</SelectItem>
+                        <SelectItem value="Left">Left-handed</SelectItem>
+                        <SelectItem value="Ambidextrous">Ambidextrous</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>IP No. / DOA (Date of Admission)</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="IP No. e.g. IP-9874"
+                        value={form.subjective?.ip_number ?? ""}
+                        onChange={(e) => updateField("subjective.ip_number", e.target.value)}
+                      />
+                      <Input
+                        type="date"
+                        value={form.subjective?.date_of_admission ?? ""}
+                        onChange={(e) => updateField("subjective.date_of_admission", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Provisional Diagnosis</Label>
+                    <Input
+                      placeholder="e.g. Right Hemiparesis secondary to MCA Infarct"
+                      value={form.subjective?.provisional_diagnosis ?? ""}
+                      onChange={(e) => updateField("subjective.provisional_diagnosis", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Referred By & Lab Reports Summary</Label>
+                    <Input
+                      placeholder="e.g. Dr. Sharma (Neurologist) / CT Brain, MRI, CSF workup"
+                      value={form.subjective?.referred_by ?? ""}
+                      onChange={(e) => updateField("subjective.referred_by", e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2 font-medium text-sm pt-2 text-foreground/80 border-t">
+                    Detailed ADL Difficulties
+                  </div>
+                  <div>
+                    <Label>Bed Activities & Transfers</Label>
+                    <Input
+                      placeholder="e.g. Difficulty rolling to right, needs assistance bridging"
+                      value={form.subjective?.adl_difficulties?.bed_activities ?? ""}
+                      onChange={(e) => updateField("subjective.adl_difficulties.bed_activities", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Ambulation & Stair Climbing</Label>
+                    <Input
+                      placeholder="e.g. Gait scissoring, circumduction, max assist 1"
+                      value={form.subjective?.adl_difficulties?.ambulation ?? ""}
+                      onChange={(e) => updateField("subjective.adl_difficulties.ambulation", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Dressing & Eating</Label>
+                    <Input
+                      placeholder="e.g. Buttoning shirt difficult, uses non-dominant hand for spoon"
+                      value={form.subjective?.adl_difficulties?.dressing ?? ""}
+                      onChange={(e) => updateField("subjective.adl_difficulties.dressing", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Toilet Activities</Label>
+                    <Input
+                      placeholder="e.g. Needs grab bars, assistance for perineal care"
+                      value={form.subjective?.adl_difficulties?.toilet_activities ?? ""}
+                      onChange={(e) => updateField("subjective.adl_difficulties.toilet_activities", e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2 font-medium text-sm pt-2 text-foreground/80 border-t">
+                    Motor Weakness & Neurological Complaints
+                  </div>
+                  <div>
+                    <Label>Weakness Side & Site</Label>
+                    <Input
+                      placeholder="e.g. Right upper and lower limb (Hemiparesis)"
+                      value={form.subjective?.weakness_detail?.site ?? ""}
+                      onChange={(e) => updateField("subjective.weakness_detail.site", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Weakness Duration (in terms of ADL)</Label>
+                    <Input
+                      placeholder="e.g. 3 weeks, acute onset following stroke"
+                      value={form.subjective?.weakness_detail?.duration_adl ?? ""}
+                      onChange={(e) => updateField("subjective.weakness_detail.duration_adl", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Sensory Problems (Partial / Total)</Label>
+                    <Input
+                      placeholder="e.g. Numbness right hand, hypoesthesia C6-C8 dermatome"
+                      value={form.subjective?.sensory_problems ?? ""}
+                      onChange={(e) => updateField("subjective.sensory_problems", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Balance Problems (Falls, Dizziness, Visual)</Label>
+                    <Input
+                      placeholder="e.g. 2 falls past month, postural dizziness, diplopia"
+                      value={form.subjective?.balance_problems ?? ""}
+                      onChange={(e) => updateField("subjective.balance_problems", e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2 font-medium text-sm pt-2 text-foreground/80 border-t">
+                    Detailed History (Mode of Transport, Bleeding, Symptoms, Family/Social)
+                  </div>
+                  <div>
+                    <Label>Mode of Transport & Consciousness at Onset</Label>
+                    <Input
+                      placeholder="e.g. Ambulance / Conscious, transient loss of consciousness 5 mins"
+                      value={form.subjective?.present_history_detailed?.mode_of_transportation ?? ""}
+                      onChange={(e) => updateField("subjective.present_history_detailed.mode_of_transportation", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Bleeding (Nose, Eyes, Ears) & Associated Symptoms</Label>
+                    <Input
+                      placeholder="e.g. No ENT bleeding / Headache, nausea, projectile vomiting"
+                      value={form.subjective?.present_history_detailed?.associated_symptoms ?? ""}
+                      onChange={(e) => updateField("subjective.present_history_detailed.associated_symptoms", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Past General Health & Operations</Label>
+                    <Input
+                      placeholder="e.g. Hypertensive 10 yrs, prior angioplasty 2020"
+                      value={form.subjective?.past_history_detailed?.general_health_prior ?? ""}
+                      onChange={(e) => updateField("subjective.past_history_detailed.general_health_prior", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Past Physiotherapy & Prognosis</Label>
+                    <Input
+                      placeholder="e.g. 2 weeks outpatient rehab post-discharge, good recovery potential"
+                      value={form.subjective?.past_history_detailed?.past_physio_treatment ?? ""}
+                      onChange={(e) => updateField("subjective.past_history_detailed.past_physio_treatment", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Family History (Hereditary / Infectious TB, MD)</Label>
+                    <Input
+                      placeholder="e.g. No muscular dystrophy, history of TB in uncle 2018"
+                      value={form.subjective?.family_history_detailed?.hereditary_diseases ?? ""}
+                      onChange={(e) => updateField("subjective.family_history_detailed.hereditary_diseases", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Economical History (Occupation, Income, Expenses)</Label>
+                    <Input
+                      placeholder="e.g. Accountant, sole breadwinner, moderate medical expense strain"
+                      value={form.subjective?.economical_history?.occupation_income ?? ""}
+                      onChange={(e) => updateField("subjective.economical_history.occupation_income", e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>Environmental & Home History (Steps, Toilet Type, Width)</Label>
+                    <Input
+                      placeholder="e.g. 15 steps to 1st floor apartment, Indian toilet, doorway 75 cm"
+                      value={form.subjective?.environmental_detailed?.home_environment ?? ""}
+                      onChange={(e) => updateField("subjective.environmental_detailed.home_environment", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeBranch === "Cardiorespiratory" && (
+              <div className="sm:col-span-2 space-y-4 pt-4 border-t">
+                <h3 className="text-base font-bold text-primary flex items-center gap-2">
+                  🫀 Cardiorespiratory / Cardiovascular Branch — Subjective Intake
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border">
+                  <div>
+                    <Label>Date of Cardiovascular Evaluation</Label>
+                    <Input
+                      type="date"
+                      value={form.objective?.branch_specific?.cardiorespiratory?.evaluation_date ?? ""}
+                      onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.evaluation_date", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Chest Pain Characteristics (Onset, Quality, Radiation)</Label>
+                    <Input
+                      placeholder="e.g. Retrosternal pressure radiating to left arm on exertion"
+                      value={form.objective?.branch_specific?.cardiorespiratory?.chest_pain_characteristics?.quality ?? ""}
+                      onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.chest_pain_characteristics.quality", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>History of Cardiac Symptoms (Palpitations, Syncope)</Label>
+                    <Input
+                      placeholder="e.g. Occasional nocturnal palpitations, 1 episode presyncope during stairs"
+                      value={form.objective?.branch_specific?.cardiorespiratory?.cardiac_symptoms_history?.details ?? ""}
+                      onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.cardiac_symptoms_history.details", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Cardiovascular Risk Factors</Label>
+                    <Input
+                      placeholder="e.g. Smoker 15 pack-yrs, HTN, Type 2 DM, Father had CABG at 55"
+                      value={form.objective?.branch_specific?.cardiorespiratory?.cv_risk_factors?.details ?? ""}
+                      onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.cv_risk_factors.details", e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>Cardiac Medication & Cardiac Rehab History</Label>
+                    <Input
+                      placeholder="e.g. Aspirin 75mg, Metoprolol 25mg, Atorvastatin 20mg; Phase II Cardiac Rehab"
+                      value={form.objective?.branch_specific?.cardiorespiratory?.cardiac_medications_and_treatments ?? ""}
+                      onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.cardiac_medications_and_treatments", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 sm:col-span-2">
               <Checkbox checked={form.subjective?.consent_for_treatment_and_data_sharing} disabled />
               <Label>Consent for treatment confirmed</Label>
@@ -1130,188 +1385,586 @@ export function SoapWizard({
               )}
 
               {activeBranch === "Cardiorespiratory" && (
-                <>
-                  <div>
-                    <Label>6-Minute Walk Distance (meters)</Label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 420"
-                      value={form.objective?.functional_tests.six_mwt_m ?? ""}
-                      onChange={(e) =>
-                        updateField(
-                          "objective.functional_tests.six_mwt_m",
-                          e.target.value ? Number(e.target.value) : null
-                        )
-                      }
-                    />
+                <div className="sm:col-span-2 space-y-4 pt-2">
+                  <h4 className="font-semibold text-primary text-sm flex items-center gap-2">
+                    🫀 Cardiorespiratory / Cardiovascular Objective Examination
+                  </h4>
+                  <div className="grid gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border">
+                    <div>
+                      <Label>6-Minute Walk Distance (meters)</Label>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 420"
+                        value={form.objective?.functional_tests.six_mwt_m ?? ""}
+                        onChange={(e) =>
+                          updateField(
+                            "objective.functional_tests.six_mwt_m",
+                            e.target.value ? Number(e.target.value) : null
+                          )
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Incremental Shuttle Walk Test (m)</Label>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 350"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.iswt_m ?? ""}
+                        onChange={(e) =>
+                          updateField(
+                            "objective.branch_specific.cardiorespiratory.iswt_m",
+                            e.target.value ? Number(e.target.value) : null
+                          )
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Resting BP (Systolic/Diastolic mmHg)</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Systolic e.g. 120"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.bp_systolic_resting ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.bp_systolic_resting", e.target.value ? Number(e.target.value) : null)}
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Diastolic e.g. 80"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.bp_diastolic_resting ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.bp_diastolic_resting", e.target.value ? Number(e.target.value) : null)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Post-Exercise BP (Systolic/Diastolic mmHg)</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Systolic e.g. 140"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.bp_systolic_post_exercise ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.bp_systolic_post_exercise", e.target.value ? Number(e.target.value) : null)}
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Diastolic e.g. 85"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.bp_diastolic_post_exercise ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.bp_diastolic_post_exercise", e.target.value ? Number(e.target.value) : null)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Heart Rate (Resting vs Post-Exercise bpm)</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Resting e.g. 72"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.hr_resting_bpm ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.hr_resting_bpm", e.target.value ? Number(e.target.value) : null)}
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Post-Ex e.g. 115"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.hr_post_exercise_bpm ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.hr_post_exercise_bpm", e.target.value ? Number(e.target.value) : null)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Borg Dyspnea Scale (0-10)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={10}
+                        placeholder="0 (none) - 10 (maximal)"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.borg_dyspnea_score ?? 0}
+                        onChange={(e) =>
+                          updateField(
+                            "objective.branch_specific.cardiorespiratory.borg_dyspnea_score",
+                            e.target.value ? Number(e.target.value) : null
+                          )
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>NYHA Functional Class & mMRC Dyspnea</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={form.objective?.branch_specific?.cardiorespiratory?.dyspnea_assessment?.nyha_class ?? "Class I"}
+                          onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.dyspnea_assessment.nyha_class", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Class I", "Class II", "Class III", "Class IV"].map((n) => (
+                              <SelectItem key={n} value={n}>{n}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={form.objective?.branch_specific?.cardiorespiratory?.dyspnea_assessment?.mmrc_grade ?? "Grade 0"}
+                          onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.dyspnea_assessment.mmrc_grade", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Grade 0", "Grade 1", "Grade 2", "Grade 3", "Grade 4"].map((g) => (
+                              <SelectItem key={g} value={g}>{g}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Chest Expansion (cm)</Label>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 3.5"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.chest_expansion_cm ?? 3}
+                        onChange={(e) =>
+                          updateField(
+                            "objective.branch_specific.cardiorespiratory.chest_expansion_cm",
+                            e.target.value ? Number(e.target.value) : null
+                          )
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Auscultation Breath Sounds & Cardiac Auscultation</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={form.objective?.branch_specific?.cardiorespiratory?.auscultation_finding ?? "Vesicular"}
+                          onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.auscultation_finding", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Vesicular", "Crackles", "Wheeze", "Absent"].map((a) => (
+                              <SelectItem key={a} value={a}>{a}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          placeholder="Murmurs, Gallops S3/S4, Rubs"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.cardiac_auscultation_details ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.cardiac_auscultation_details", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Cough Strength & Sputum</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={form.objective?.branch_specific?.cardiorespiratory?.cough_strength ?? "Strong"}
+                          onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.cough_strength", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Strong", "Weak", "Absent"].map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={form.objective?.branch_specific?.cardiorespiratory?.sputum_characteristics ?? "Clear"}
+                          onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.sputum_characteristics", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Clear", "White", "Yellow", "Green", "Purulent", "Blood-streaked"].map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Peripheral Edema Presence & Pitting Grade</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select
+                          value={form.objective?.branch_specific?.cardiorespiratory?.peripheral_edema?.pitting_grade ?? "0 (None)"}
+                          onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.peripheral_edema.pitting_grade", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["0 (None)", "1+ (2mm)", "2+ (4mm)", "3+ (6mm)", "4+ (8mm)"].map((p) => (
+                              <SelectItem key={p} value={p}>{p}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          placeholder="Location e.g. Bilateral ankle/pretibial"
+                          value={form.objective?.branch_specific?.cardiorespiratory?.peripheral_edema?.location ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.peripheral_edema.location", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Electrocardiogram (ECG) Results</Label>
+                      <Input
+                        placeholder="e.g. Normal Sinus Rhythm, ST-segment depression in V4-V6"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.ecg_results ?? ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.ecg_results", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Echocardiogram Findings (EF %, Valves)</Label>
+                      <Input
+                        placeholder="e.g. LVEF 55%, mild mitral regurgitation, normal LV wall thickness"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.echocardiogram_findings ?? ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.echocardiogram_findings", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Stress Test & Exercise Tolerance Test</Label>
+                      <Input
+                        placeholder="e.g. Completed 7.5 METs on Bruce protocol, no angina or ischemic ECG"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.stress_test_results ?? ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.stress_test_results", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Holter Monitor & Coronary Angiography</Label>
+                      <Input
+                        placeholder="e.g. 24h Holter: sinus rhythm, <1% SVEs; Angio: 70% LAD stenosis s/p PCI"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.holter_monitor_data ?? ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.holter_monitor_data", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Cardiac Biomarkers (Troponin / CK-MB)</Label>
+                      <Input
+                        placeholder="e.g. Troponin I: <0.01 ng/mL (Normal), CK-MB: 2.1 ng/mL"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.cardiac_biomarkers?.troponin ?? ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.cardiac_biomarkers.troponin", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Lipid Profile & Blood Glucose (Fasting / HbA1c)</Label>
+                      <Input
+                        placeholder="e.g. Total Chol 180, HDL 45, LDL 105, Fasting Glucose 95 mg/dL, HbA1c 5.8%"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.lipid_profile?.cholesterol ? String(form.objective.branch_specific.cardiorespiratory.lipid_profile.cholesterol) : ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.lipid_profile.cholesterol", e.target.value ? Number(e.target.value) : null)}
+                      />
+                    </div>
+                    <div>
+                      <Label>BMI (kg/m²), Inflammatory Markers (hs-CRP, ESR), HRV</Label>
+                      <Input
+                        placeholder="e.g. BMI 26.4 kg/m², hs-CRP 1.2 mg/L, ESR 12 mm/hr, HRV SDNN 45 ms"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.bmi_kg_m2 ? String(form.objective.branch_specific.cardiorespiratory.bmi_kg_m2) : ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.bmi_kg_m2", e.target.value ? Number(e.target.value) : null)}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Sleep Apnea Screening (STOP-Bang Score)</Label>
+                      <Input
+                        placeholder="e.g. STOP-Bang Score: 2 (Low Risk)"
+                        value={form.objective?.branch_specific?.cardiorespiratory?.sleep_apnea_screening?.risk_category ?? ""}
+                        onChange={(e) => updateField("objective.branch_specific.cardiorespiratory.sleep_apnea_screening.risk_category", e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label>Incremental Shuttle Walk Test (m)</Label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 350"
-                      value={form.objective?.branch_specific?.cardiorespiratory?.iswt_m ?? ""}
-                      onChange={(e) =>
-                        updateField(
-                          "objective.branch_specific.cardiorespiratory.iswt_m",
-                          e.target.value ? Number(e.target.value) : null
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label>Borg Dyspnea Scale (0-10)</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={10}
-                      placeholder="0 (none) - 10 (maximal)"
-                      value={form.objective?.branch_specific?.cardiorespiratory?.borg_dyspnea_score ?? 0}
-                      onChange={(e) =>
-                        updateField(
-                          "objective.branch_specific.cardiorespiratory.borg_dyspnea_score",
-                          e.target.value ? Number(e.target.value) : null
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label>Chest Expansion (cm)</Label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 3.5"
-                      value={form.objective?.branch_specific?.cardiorespiratory?.chest_expansion_cm ?? 3}
-                      onChange={(e) =>
-                        updateField(
-                          "objective.branch_specific.cardiorespiratory.chest_expansion_cm",
-                          e.target.value ? Number(e.target.value) : null
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label>Auscultation Finding</Label>
-                    <Select
-                      value={form.objective?.branch_specific?.cardiorespiratory?.auscultation_finding ?? "Vesicular"}
-                      onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.auscultation_finding", v)}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {["Vesicular", "Crackles", "Wheeze", "Absent"].map((a) => (
-                          <SelectItem key={a} value={a}>{a}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Cough Strength</Label>
-                    <Select
-                      value={form.objective?.branch_specific?.cardiorespiratory?.cough_strength ?? "Strong"}
-                      onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.cough_strength", v)}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {["Strong", "Weak", "Absent"].map((c) => (
-                          <SelectItem key={c} value={c}>{c}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Sputum</Label>
-                    <Select
-                      value={form.objective?.branch_specific?.cardiorespiratory?.sputum_characteristics ?? "Clear"}
-                      onValueChange={(v) => updateField("objective.branch_specific.cardiorespiratory.sputum_characteristics", v)}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {["Clear", "White", "Yellow", "Green", "Purulent", "Blood-streaked"].map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label>Auscultation / Chest Exam Notes</Label>
-                    <Input
-                      placeholder="e.g. Bilateral basal crackles, reduced breath sounds right lower lobe"
-                      value={form.objective?.branch_specific?.cardiorespiratory?.auscultation_notes ?? ""}
-                      onChange={(e) =>
-                        updateField("objective.branch_specific.cardiorespiratory.auscultation_notes", e.target.value)
-                      }
-                    />
-                  </div>
-                </>
+                </div>
               )}
 
               {activeBranch === "Neurological" && (
-                <>
-                  <div>
-                    <Label>Modified Ashworth Scale (Spasticity)</Label>
-                    <Select
-                      value={String(form.objective?.branch_specific?.neurological?.modified_ashworth_scale ?? 0)}
-                      onValueChange={(v) =>
-                        updateField(
-                          "objective.branch_specific.neurological.modified_ashworth_scale",
-                          Number(v)
-                        )
-                      }
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {MAS_OPTIONS.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="sm:col-span-2 space-y-6 pt-2">
+                  <h4 className="font-semibold text-primary text-sm flex items-center gap-2">
+                    🧠 Neurological Comprehensive Examination (Domains 6–13)
+                  </h4>
+
+                  {/* 6. Higher Mental Functions */}
+                  <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
+                    <div className="font-semibold text-sm text-foreground">6. Higher Mental Functions & GCS</div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label>Level of Consciousness</Label>
+                        <Select
+                          value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.level_of_consciousness ?? "Alert"}
+                          onValueChange={(v) => updateField("objective.branch_specific.neurological.higher_mental_functions.level_of_consciousness", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Alert", "Drowsy", "Stupor", "Coma"].map((l) => (
+                              <SelectItem key={l} value={l}>{l}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Glasgow Coma Scale (Eye, Verbal, Motor = Total /15)</Label>
+                        <div className="grid grid-cols-4 gap-1">
+                          <Input
+                            type="number" min={1} max={4} placeholder="E (4)"
+                            value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.glasgow_coma_scale?.eye ?? 4}
+                            onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.glasgow_coma_scale.eye", Number(e.target.value))}
+                          />
+                          <Input
+                            type="number" min={1} max={5} placeholder="V (5)"
+                            value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.glasgow_coma_scale?.verbal ?? 5}
+                            onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.glasgow_coma_scale.verbal", Number(e.target.value))}
+                          />
+                          <Input
+                            type="number" min={1} max={6} placeholder="M (6)"
+                            value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.glasgow_coma_scale?.motor ?? 6}
+                            onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.glasgow_coma_scale.motor", Number(e.target.value))}
+                          />
+                          <Input
+                            type="number" readOnly placeholder="Total"
+                            value={(form.objective?.branch_specific?.neurological?.higher_mental_functions?.glasgow_coma_scale?.eye ?? 4) +
+                              (form.objective?.branch_specific?.neurological?.higher_mental_functions?.glasgow_coma_scale?.verbal ?? 5) +
+                              (form.objective?.branch_specific?.neurological?.higher_mental_functions?.glasgow_coma_scale?.motor ?? 6)}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Behavior & Emotional Status</Label>
+                        <Input
+                          placeholder="Cooperative, stable / depressed, fearful, labile"
+                          value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.behavior ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.behavior", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Orientation (Time, Place, Person, Day, Year)</Label>
+                        <Input
+                          placeholder="Oriented to time, place, and person x3"
+                          value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.reasoning_problem_solving ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.reasoning_problem_solving", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Memory (Immediate, Short-term, Long-term)</Label>
+                        <Input
+                          placeholder="Immediate intact (3 words), short-term intact, long-term intact"
+                          value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.memory?.short_term ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.memory.short_term", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Cognitive/Perceptual Abilities (Speech, Agnosia, Apraxia)</Label>
+                        <Input
+                          placeholder="No expressive/receptive aphasia, no ideomotor apraxia"
+                          value={form.objective?.branch_specific?.neurological?.higher_mental_functions?.cognitive_perceptual ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.higher_mental_functions.cognitive_perceptual", e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label>Berg Balance Scale Score (0-56)</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={56}
-                      placeholder="0-56"
-                      value={form.objective?.branch_specific?.neurological?.berg_balance_score ?? ""}
-                      onChange={(e) =>
-                        updateField(
-                          "objective.branch_specific.neurological.berg_balance_score",
-                          e.target.value ? Number(e.target.value) : null
-                        )
-                      }
-                    />
-                    {typeof form.objective?.branch_specific?.neurological?.berg_balance_score === "number" &&
-                      form.objective.branch_specific.neurological.berg_balance_score < 45 && (
-                        <p className="text-xs text-red-600 font-medium mt-1">
-                          ⚠ Score &lt; 45 — high fall risk
-                        </p>
-                      )}
+
+                  {/* 7. Cranial Nerve Examination */}
+                  <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
+                    <div className="font-semibold text-sm text-foreground">7. Cranial Nerve Examination (CN I–XII)</div>
+                    <div className="grid gap-2 sm:grid-cols-2 text-xs">
+                      {[
+                        { key: "cn1", label: "CN I: Olfactory (Smell)" },
+                        { key: "cn2", label: "CN II: Optic (Visual acuity/fields)" },
+                        { key: "cn3", label: "CN III: Oculomotor (Pupils, EOM)" },
+                        { key: "cn4", label: "CN IV: Trochlear (Superior oblique)" },
+                        { key: "cn5", label: "CN V: Trigeminal (Facial sensation, Mastication)" },
+                        { key: "cn6", label: "CN VI: Abducens (Lateral rectus)" },
+                        { key: "cn7", label: "CN VII: Facial (Facial expression, Taste)" },
+                        { key: "cn8", label: "CN VIII: Vestibulocochlear (Hearing, Balance)" },
+                        { key: "cn9", label: "CN IX: Glossopharyngeal (Gag reflex, Palate)" },
+                        { key: "cn10", label: "CN X: Vagus (Swallowing, Speech)" },
+                        { key: "cn11", label: "CN XI: Spinal Accessory (Trapezius, SCM)" },
+                        { key: "cn12", label: "CN XII: Hypoglossal (Tongue protrusion)" },
+                      ].map((cn) => (
+                        <div key={cn.key} className="flex items-center gap-2 border p-2 rounded bg-background">
+                          <span className="font-medium min-w-[160px]">{cn.label}</span>
+                          <Select
+                            value={form.objective?.branch_specific?.neurological?.cranial_nerves?.[cn.key]?.status ?? "Normal"}
+                            onValueChange={(v) => updateField(`objective.branch_specific.neurological.cranial_nerves.${cn.key}.status`, v)}
+                          >
+                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {["Normal", "Impaired", "Absent", "Not Tested"].map((s) => (
+                                <SelectItem key={s} value={s}>{s}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <Label>Coordination (Finger-to-Nose)</Label>
-                    <Select
-                      value={form.objective?.branch_specific?.neurological?.coordination_result ?? "Normal"}
-                      onValueChange={(v) => updateField("objective.branch_specific.neurological.coordination_result", v)}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {["Normal", "Dysmetria", "Intention Tremor", "Ataxia"].map((c) => (
-                          <SelectItem key={c} value={c}>{c}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+
+                  {/* 8. Sensory Examination */}
+                  <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
+                    <div className="font-semibold text-sm text-foreground">8. Sensory Examination</div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div>
+                        <Label className="text-xs">Superficial Sensations (Pain, Temp, Touch, Pressure)</Label>
+                        <Input
+                          placeholder="Light touch intact, pain impaired R L4 dermatome"
+                          value={form.objective?.branch_specific?.neurological?.sensory_examination?.superficial?.light_touch ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.sensory_examination.superficial.light_touch", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Deep Sensations (Proprioception, Kinesthesia, Vibration)</Label>
+                        <Input
+                          placeholder="Proprioception impaired at R great toe, 128Hz vibration normal"
+                          value={form.objective?.branch_specific?.neurological?.sensory_examination?.deep?.proprioception ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.sensory_examination.deep.proprioception", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Cortical Sensations (Graphesthesia, Stereognosis, 2-pt)</Label>
+                        <Input
+                          placeholder="Stereognosis intact, 2-point discrimination 4mm at fingertips"
+                          value={form.objective?.branch_specific?.neurological?.sensory_examination?.cortical?.stereognosis ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.sensory_examination.cortical.stereognosis", e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="sm:col-span-2">
-                    <Label>Coordination & Reflex Notes</Label>
-                    <Input
-                      placeholder="Finger-to-nose intact, patellar reflex 2+"
-                      value={form.objective?.branch_specific?.neurological?.coordination_notes ?? "Intact"}
-                      onChange={(e) =>
-                        updateField("objective.branch_specific.neurological.coordination_notes", e.target.value)
-                      }
-                    />
+
+                  {/* 9. Motor Examination & Synergy */}
+                  <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
+                    <div className="font-semibold text-sm text-foreground">9. Motor Examination & Voluntary Control</div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label>Modified Ashworth Scale (Spasticity)</Label>
+                        <Select
+                          value={String(form.objective?.branch_specific?.neurological?.modified_ashworth_scale ?? 0)}
+                          onValueChange={(v) =>
+                            updateField(
+                              "objective.branch_specific.neurological.modified_ashworth_scale",
+                              Number(v)
+                            )
+                          }
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {MAS_OPTIONS.map((o) => (
+                              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Pathological Reflexes (Babinski, Hoffmann, Clonus)</Label>
+                        <Input
+                          placeholder="Babinski positive on right, Hoffmann negative, ankle clonus 2 beats"
+                          value={form.objective?.branch_specific?.neurological?.motor_examination?.reflexes_pathological?.babinski ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.motor_examination.reflexes_pathological.babinski", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Voluntary Control — Brunnstrom Stage (1–6)</Label>
+                        <Select
+                          value={form.objective?.branch_specific?.neurological?.motor_examination?.voluntary_control?.brunnstrom_stage ?? "Stage 4"}
+                          onValueChange={(v) => updateField("objective.branch_specific.neurological.motor_examination.voluntary_control.brunnstrom_stage", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[
+                              "Stage 1 — Flaccidity",
+                              "Stage 2 — Synergies developing",
+                              "Stage 3 — Voluntary synergy",
+                              "Stage 4 — Movement deviating from synergy",
+                              "Stage 5 — Independent movement combinations",
+                              "Stage 6 — Normal isolated movement",
+                            ].map((b) => (
+                              <SelectItem key={b} value={b}>{b}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Muscle Power (Oxford MMT 0-5) & Muscle Tightness</Label>
+                        <Input
+                          placeholder="Oxford Grade 3+ shoulder flexors, tightness in hamstring & gastrocnemius"
+                          value={form.objective?.branch_specific?.neurological?.motor_examination?.muscle_tightness ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.motor_examination.muscle_tightness", e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </>
+
+                  {/* 10. Balance & Coordination */}
+                  <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
+                    <div className="font-semibold text-sm text-foreground">10. Balance & Coordination Examination</div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label>Berg Balance Scale Score (0-56)</Label>
+                        <Input
+                          type="number" min={0} max={56} placeholder="0-56"
+                          value={form.objective?.branch_specific?.neurological?.berg_balance_score ?? ""}
+                          onChange={(e) =>
+                            updateField(
+                              "objective.branch_specific.neurological.berg_balance_score",
+                              e.target.value ? Number(e.target.value) : null
+                            )
+                          }
+                        />
+                        {typeof form.objective?.branch_specific?.neurological?.berg_balance_score === "number" &&
+                          form.objective.branch_specific.neurological.berg_balance_score < 45 && (
+                            <p className="text-xs text-red-600 font-medium mt-1">
+                              ⚠ Score &lt; 45 — high fall risk
+                            </p>
+                          )}
+                      </div>
+                      <div>
+                        <Label>Coordination Tests (Finger-to-Nose, Dysdiadochokinesia)</Label>
+                        <Select
+                          value={form.objective?.branch_specific?.neurological?.coordination_result ?? "Normal"}
+                          onValueChange={(v) => updateField("objective.branch_specific.neurological.coordination_result", v)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Normal", "Dysmetria", "Intention Tremor", "Dysdiadochokinesia", "Ataxia"].map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Static & Dynamic Balance (Sitting & Standing)</Label>
+                        <Input
+                          placeholder="Static sitting Good, dynamic sitting Fair; Standing static Fair, dynamic Poor"
+                          value={form.objective?.branch_specific?.neurological?.balance_and_coordination?.balance_static_dynamic?.static_standing ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.balance_and_coordination.balance_static_dynamic.static_standing", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Equilibrium Tests (Tandem, Sideways, Single Leg)</Label>
+                        <Input
+                          placeholder="Tandem walking impaired, single leg stance < 3 seconds"
+                          value={form.objective?.branch_specific?.neurological?.balance_and_coordination?.equilibrium_tests?.tandem_walking ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.balance_and_coordination.equilibrium_tests.tandem_walking", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 11 & 12 & 13. Gait, Autonomic & Functional */}
+                  <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
+                    <div className="font-semibold text-sm text-foreground">11, 12 & 13. Gait, Autonomic & Functional Assessment</div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label>Gait Parameters (Step length, Stride, Cadence)</Label>
+                        <Input
+                          placeholder="Step length 42cm, stride 85cm, cadence 82 steps/min"
+                          value={form.objective?.branch_specific?.neurological?.gait_examination?.gait_deviations ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.gait_examination.gait_deviations", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Autonomic Sweat Function (Ninhydrin / Galvanic)</Label>
+                        <Input
+                          placeholder="Ninhydrin test normal sudomotor response; galvanic resistance intact"
+                          value={form.objective?.branch_specific?.neurological?.autonomic_system?.ninhydrin_sweat_test ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.autonomic_system.ninhydrin_sweat_test", e.target.value)}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <Label>Functional Evaluation & Bladder/Bowel Control</Label>
+                        <Input
+                          placeholder="ADL FIM score 78/126; Bladder continent with urgency, bowel intact"
+                          value={form.objective?.branch_specific?.neurological?.functional_evaluation?.adl_performance ?? ""}
+                          onChange={(e) => updateField("objective.branch_specific.neurological.functional_evaluation.adl_performance", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {activeBranch === "Geriatric" && (

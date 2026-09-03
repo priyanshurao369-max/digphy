@@ -130,20 +130,23 @@ graph TD
 - **Measurements:** True vs Apparent limb length (cm), Joint circumference/girth (cm), Swelling grade.
 - **Joint Play & End-Feel:** Hypermobile, Normal, Hypomobile; Hard/Soft/Firm end-feel.
 
-#### 2. Cardiorespiratory Checklist
-- **Functional Capacity:** 6-Minute Walk Test (6MWT) distance in meters, Incremental Shuttle Walk Test (ISWT).
-- **Dyspnea Rating:** Borg CR10 Scale (0 = None to 10 = Maximal).
-- **Chest Exam:** Auscultation (normal vesicular, crackles, wheezes, absent), Chest expansion at 4th intercostal space (cm), Sputum color/consistency.
+#### 2. Cardiorespiratory & Cardiovascular Checklist
+- **Hemodynamics & Vitals:** Blood Pressure (Systolic/Diastolic resting & post-exercise), Heart Rate (Resting & Post-exercise), Respiratory Rate, SpO₂.
+- **Chest & Cardiac Exam:** Auscultation (Vesicular, Crackles, Wheezes, Absent), Cardiac Auscultation (Murmurs, Gallops S3/S4, Rubs), Chest Expansion (cm), Cough Strength, Sputum characteristics.
+- **Symptom & Dyspnea Evaluation:** Chest Pain Characteristics (Onset, Duration, Intensity 0–10, Quality, Radiation), Dyspnea Assessment (Borg CR10, NYHA Functional Class I–IV, mMRC Grade), Peripheral Edema Presence & Pitting Grade (0 to 4+).
+- **Diagnostics & Biomarkers:** Electrocardiogram (ECG) Results, Echocardiogram Findings (EF %, Valves), Stress Test / Exercise Tolerance Test (METs), Holter Monitor Data, Coronary Angiography Findings, Cardiac Biomarkers (Troponin, CK-MB), Heart Rate Variability (HRV SDNN ms).
+- **Labs & Metabolic Risk Factors:** Lipid Profile (Total Cholesterol, HDL, LDL, Triglycerides), Blood Glucose (Fasting, HbA1c), Body Mass Index (BMI kg/m²), Inflammatory Markers (hs-CRP, ESR), Sleep Apnea Screening (STOP-Bang Score), Cardiovascular Risk Factors (Smoking, HTN, DM, Family Hx), Cardiac Medications & Rehab History.
 
-#### 3. Neurological Checklist
-- **Spasticity Assessment:** Modified Ashworth Scale (MAS):
-  - 0: No increase in tone
-  - 1: Slight increase in tone (catch & release)
-  - 1+: Slight increase in tone (catch followed by min resistance through rest of ROM)
-  - 2: Marked increase in tone through most of ROM
-  - 3: Considerable increase in tone, passive movement difficult
-  - 4: Affected part rigid in flexion or extension
-- **Balance:** Berg Balance Scale (14 items, score 0–56; < 45 indicates high fall risk).
+#### 3. Neurological Checklist (13 Clinical Domains)
+- **Subjective & Intake:** Handedness/Dominance, IP No., Date of Admission (DOA), Provisional Diagnosis, Referred By, Lab Reports, Detailed ADL Difficulties (Ambulation, Bed activities, Dressing, Eating, Toilet activities), Weakness (Side, Site, Duration in ADL), Sensory/Balance Problems (falls, dizziness, visual disturbances), Extended Present/Past/Family/Social/Environmental History.
+- **Higher Mental Functions:** Level of Consciousness (Alert, Drowsy, Stupor, Coma), Glasgow Coma Scale (GCS 3–15), Behavior, Emotional Status, Orientation (Time, Place, Person, Day, Year), Memory (Immediate, Short-term, Long-term), Calculation, Reasoning & Problem Solving, Judgement, Attention, Cognitive/Perceptual (Speech, Agnosia, Apraxia).
+- **Cranial Nerve Examination:** Cranial Nerves I through XII (Olfactory, Optic, Oculomotor, Trochlear, Trigeminal, Abducens, Facial, Vestibulocochlear, Glossopharyngeal, Vagus, Spinal Accessory, Hypoglossal).
+- **Sensory Examination:** Superficial Sensations (Pain, Temperature, Light Touch, Pressure), Deep Sensations (Proprioception, Kinesthesia, Vibration), Cortical Sensations (Graphesthesia, Stereognosis, Tactile Localization, 2-Point Discrimination).
+- **Motor Examination & Synergies:** Modified Ashworth Scale (MAS spasticity 0–4), Deep Tendon Reflexes, Pathological Reflexes (Babinski, Hoffmann, Clonus), Oxford Muscle Power (MMT 0–5), ROM summary, Tightness, Voluntary Control (Bobath & Brunnstrom Stages 1–6).
+- **Balance & Coordination:** Static/Dynamic Balance (Sitting & Standing), Berg Balance Scale (0–56, < 45 high fall risk), Coordination Tests (Finger-to-nose, Finger-to-finger, Dysdiadochokinesia, Knee-to-heel), Equilibrium Tests (Tandem, Sideways, Single leg stance).
+- **Gait Examination:** Ambulation status, Step length (cm), Step width (cm), Stride length (cm), Stance time (sec), Cadence (steps/min), Gait deviations.
+- **Autonomic Nervous System:** Sweat function tests (Ninhydrin, Galvanic skin resistance, Vasomotor/Sudomotor notes).
+- **Functional Evaluation:** ADL performance index, Bowel & Bladder continent status.
 
 #### 4. Geriatric Checklist
 - **Mobility & Strength:** Timed Up and Go (TUG, seconds; > 12s indicates fall risk), 30-Second Chair Stand Test (repetition count).

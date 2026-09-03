@@ -79,33 +79,14 @@ export default function PatientDemoPage() {
                     </Card>
                 </div>
 
-                {/* Pain Progress Chart */}
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <TrendingDown className="h-5 w-5 text-green-600" />
-                            Pain Progress
-                        </CardTitle>
-                        <CardDescription>Your pain levels over the last 3 weeks</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={painData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
-                                <YAxis domain={[0, 10]} />
-                                <Tooltip />
-                                <Line
-                                    type="monotone"
-                                    dataKey="pain"
-                                    stroke="#10b981"
-                                    strokeWidth={2}
-                                    dot={{ fill: "#10b981", r: 5 }}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
+                {/* Branch Progress Analytics Dashboard */}
+                <div className="mb-8">
+                    <BranchProgressDashboard
+                        patient={demoPatient}
+                        progressEntries={demoEntries}
+                        isPatientView={true}
+                    />
+                </div>
 
                 {/* Home Program */}
                 <Card className="mb-8">

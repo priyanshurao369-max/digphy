@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressChart } from "@/components/charts/ProgressChart";
+import { BranchProgressDashboard } from "@/components/progress/BranchProgressDashboard";
 import { DocumentUpload } from "@/components/documents/document-upload";
 import { DocumentLibrary } from "@/components/documents/document-library";
 import { getPatient } from "@/lib/actions/patients";
@@ -108,12 +109,15 @@ export default async function PatientDetailPage({
                 </p>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Pain Trend (VAS)</CardTitle>
+            <Card className="md:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-base font-bold">Branch Recovery Progress ({patient.branch_specialty ?? "Orthopedic"})</CardTitle>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/patients/${id}/progress`}>Full Analytics</Link>
+                </Button>
               </CardHeader>
               <CardContent>
-                <ProgressChart data={painProgress} label="Pain VAS" unit="score" height={200} />
+                <BranchProgressDashboard patient={patient} progressEntries={allProgress} />
               </CardContent>
             </Card>
           </div>
@@ -171,14 +175,7 @@ export default async function PatientDetailPage({
         </TabsContent>
 
         <TabsContent value="progress">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Pain VAS Over Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProgressChart data={painProgress} label="Pain VAS" unit="score" />
-            </CardContent>
-          </Card>
+          <BranchProgressDashboard patient={patient} progressEntries={allProgress} />
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">

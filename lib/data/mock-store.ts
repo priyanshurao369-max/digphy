@@ -103,7 +103,7 @@ function buildEncounter(
 
   const subj: SubjectiveData = {
     chief_complaint: isRajesh ? "Lower back pain with left leg radiation" : "Knee pain and stiffness after ACL reconstruction",
-        history_of_present_illness: {
+    history_of_present_illness: {
       onset_date: isRajesh ? "2025-12-01" : "2026-01-15",
       mechanism: isRajesh ? "Prolonged sitting, sudden onset when standing" : "Post-surgical rehabilitation",
       mode_of_onset: "Gradual", duration_category: "Subacute",
@@ -126,7 +126,7 @@ function buildEncounter(
     past_medical_history: isRajesh ? "Hypertension" : "None significant",
     surgical_history: isRajesh ? "None" : "Right ACL reconstruction (2026-01-15)",
     medications: isRajesh ? ["Amlodipine 5mg"] : [],
-        social_history: {
+    social_history: {
       occupation: isRajesh ? "Software engineer" : "Yoga instructor",
       tobacco: "no", tobacco_details: "none",
       smoking_details: "none",
@@ -137,7 +137,7 @@ function buildEncounter(
       family_history: "none significant",
       hereditary_diseases: "none",
       social_status: "middle class",
-            educational_status: "graduate",
+      educational_status: "graduate",
       environmental_history: "office work",
       consanguinity: "No",
     },
@@ -155,7 +155,7 @@ function buildEncounter(
     },
     general_condition: "Good",
     ambulatory_status: isRajesh ? "Independent" : "WithAid",
-        observation: {
+    observation: {
       sensorium: "Alert",
       body_build: isRajesh ? "Mesomorphic" : "Ectomorphic",
       deformities: isRajesh ? "None" : "None",
@@ -165,123 +165,123 @@ function buildEncounter(
     },
     palpation: { tenderness_grade: 2, tone: "normal", crepitus: "none", ligamentous_snaps: "Absent", cracking_distraction: "Absent", capillary_refill: "Normal", nodules: "", pulses: "Palpable & symmetrical", scar_status: "", edema_type: "None", edema_notes: "", swelling_type: "" },
     rom, strength,
-        neuro: { sensation: "Normal", reflexes: { patella: "++" } },
+    neuro: { sensation: "Normal", reflexes: { patella: "++" } },
     functional_tests: functional,
     gait_parameters: isRajesh
       ? { step_length_cm: 14, stride_length_cm: 28, cadence_steps_min: 100, base_width_cm: 4 }
       : { step_length_cm: 18, stride_length_cm: 36, cadence_steps_min: 110, base_width_cm: 6 },
     skin_and_soft_tissues: isRajesh
       ? {
-          swelling: "None",
-          callus: "None",
-          scar: "None",
-          wound: "None",
-          temperature: "Minor",
-          infection: "None",
-          pain: "Important",
-          abnormal_sensation: "Important",
-        }
+        swelling: "None",
+        callus: "None",
+        scar: "None",
+        wound: "None",
+        temperature: "Minor",
+        infection: "None",
+        pain: "Important",
+        abnormal_sensation: "Important",
+      }
       : {
-          swelling: "Minor",
-          callus: "None",
-          scar: "Important",
-          wound: "None",
-          temperature: "Minor",
-          infection: "None",
-          pain: "Minor",
-          abnormal_sensation: "None",
-        },
+        swelling: "Minor",
+        callus: "None",
+        scar: "Important",
+        wound: "None",
+        temperature: "Minor",
+        infection: "None",
+        pain: "Minor",
+        abnormal_sensation: "None",
+      },
     sensation_table: isRajesh
       ? {
-          superficial: { right: false, left: true, specification: "Diminished over L5 dermatome" },
-          deep: { right: false, left: true, specification: "Reduced joint position sense, left great toe" },
-          numbness: { right: false, left: true, specification: "Lateral leg and dorsum of foot" },
-          paresthesia: { right: false, left: true, specification: "Tingling in left foot, worse with sitting" },
-          other: { right: false, left: false, specification: "" },
-        }
+        superficial: { right: false, left: true, specification: "Diminished over L5 dermatome" },
+        deep: { right: false, left: true, specification: "Reduced joint position sense, left great toe" },
+        numbness: { right: false, left: true, specification: "Lateral leg and dorsum of foot" },
+        paresthesia: { right: false, left: true, specification: "Tingling in left foot, worse with sitting" },
+        other: { right: false, left: false, specification: "" },
+      }
       : {
-          superficial: { right: true, left: false, specification: "Hypoesthesia around infrapatellar scar" },
-          deep: { right: false, left: false, specification: "" },
-          numbness: { right: true, left: false, specification: "Numb patch lateral to surgical scar" },
-          paresthesia: { right: false, left: false, specification: "" },
-          other: { right: false, left: false, specification: "" },
-        },
+        superficial: { right: true, left: false, specification: "Hypoesthesia around infrapatellar scar" },
+        deep: { right: false, left: false, specification: "" },
+        numbness: { right: true, left: false, specification: "Numb patch lateral to surgical scar" },
+        paresthesia: { right: false, left: false, specification: "" },
+        other: { right: false, left: false, specification: "" },
+      },
     reflexes_table: isRajesh
       ? {
-          btr: { right: "normal", left: "normal" },
-          ttr: { right: "normal", left: "-" },
-          ktr: { right: "normal", left: "normal" },
-          atr: { right: "normal", left: "-" },
-          babinski: { right: false, left: false },
-          comments: "Left TTR and ATR depressed, consistent with L5-S1 radiculopathy. Babinski negative bilaterally.",
-        }
+        btr: { right: "normal", left: "normal" },
+        ttr: { right: "normal", left: "-" },
+        ktr: { right: "normal", left: "normal" },
+        atr: { right: "normal", left: "-" },
+        babinski: { right: false, left: false },
+        comments: "Left TTR and ATR depressed, consistent with L5-S1 radiculopathy. Babinski negative bilaterally.",
+      }
       : {
-          btr: { right: "normal", left: "normal" },
-          ttr: { right: "normal", left: "normal" },
-          ktr: { right: "+", left: "normal" },
-          atr: { right: "normal", left: "normal" },
-          babinski: { right: false, left: false },
-          comments: "Right knee jerk slightly brisker than left; symmetrical otherwise.",
-        },
+        btr: { right: "normal", left: "normal" },
+        ttr: { right: "normal", left: "normal" },
+        ktr: { right: "+", left: "normal" },
+        atr: { right: "normal", left: "normal" },
+        babinski: { right: false, left: false },
+        comments: "Right knee jerk slightly brisker than left; symmetrical otherwise.",
+      },
     branch_specific: isRajesh
       ? {
-          orthopedic: {
-            special_tests: [],
-            special_test_results: [
-              { name: "Straight Leg Raise", result: "positive" as const },
-              { name: "Slump Test", result: "positive" as const },
-            ],
-            end_feel: "Firm",
-            joint_play: "Hypomobile",
-            swelling_grade: "None",
-            limb_length_apparent_cm: null,
-          },
-        }
-      : {
-          orthopedic: {
-            special_tests: [],
-            special_test_results: [
-              { name: "Lachman", result: "negative" as const },
-              { name: "Anterior Drawer", result: "negative" as const },
-              { name: "McMurray", result: "negative" as const },
-            ],
-            end_feel: "Soft",
-            joint_play: "Normal",
-            swelling_grade: "Mild",
-            limb_length_apparent_cm: null,
-          },
+        orthopedic: {
+          special_tests: [],
+          special_test_results: [
+            { name: "Straight Leg Raise", result: "positive" as const },
+            { name: "Slump Test", result: "positive" as const },
+          ],
+          end_feel: "Firm",
+          joint_play: "Hypomobile",
+          swelling_grade: "None",
+          limb_length_apparent_cm: null,
         },
+      }
+      : {
+        orthopedic: {
+          special_tests: [],
+          special_test_results: [
+            { name: "Lachman", result: "negative" as const },
+            { name: "Anterior Drawer", result: "negative" as const },
+            { name: "McMurray", result: "negative" as const },
+          ],
+          end_feel: "Soft",
+          joint_play: "Normal",
+          swelling_grade: "Mild",
+          limb_length_apparent_cm: null,
+        },
+      },
     activity_limitations: isRajesh
       ? {
-          items: {
-            sitting_tolerance: "Severe",
-            standing_tolerance: "Moderate",
-            walking_distance: "Moderate",
-            stair_climbing: "Mild",
-            lifting_carrying: "Severe",
-            household_tasks: "Mild",
-          },
-          comments: "Sitting limited to 20 min; avoids lifting > 5 kg due to pain radiation.",
-        }
-      : {
-          items: {
-            stair_climbing: "Moderate",
-            walking_distance: "Mild",
-            squatting: "Severe",
-            household_tasks: "Mild",
-          },
-          comments: "Independent in ADLs; stairs and prolonged walking still affected.",
+        items: {
+          sitting_tolerance: "Severe",
+          standing_tolerance: "Moderate",
+          walking_distance: "Moderate",
+          stair_climbing: "Mild",
+          lifting_carrying: "Severe",
+          household_tasks: "Mild",
         },
+        comments: "Sitting limited to 20 min; avoids lifting > 5 kg due to pain radiation.",
+      }
+      : {
+        items: {
+          stair_climbing: "Moderate",
+          walking_distance: "Mild",
+          squatting: "Severe",
+          household_tasks: "Mild",
+        },
+        comments: "Independent in ADLs; stairs and prolonged walking still affected.",
+      },
     participation_restrictions: isRajesh
       ? {
-          items: { work_occupation: true, social_leisure: true, sleep_rest: true },
-          comments: "Working from home only; unable to commute. Sleep disturbed by night pain.",
-        }
+        items: { work_occupation: true, social_leisure: true, sleep_rest: true },
+        comments: "Working from home only; unable to commute. Sleep disturbed by night pain.",
+      }
       : {
-          items: { work_occupation: true, sports_hobbies: true },
-          comments: "Paused yoga teaching classes; no sport participation since surgery.",
-        },
-        measurements: { limb_length_true_cm: null, girth_cm: {} },
+        items: { work_occupation: true, sports_hobbies: true },
+        comments: "Paused yoga teaching classes; no sport participation since surgery.",
+      },
+    measurements: { limb_length_true_cm: null, girth_cm: {} },
     functional_ul: isRajesh
       ? { dressing_upper: "Mild", eating_feeding: "None", combing_hair: "None", toileting: "Mild" }
       : { dressing_upper: "Mild", eating_feeding: "None", combing_hair: "Mild", toileting: "None" },
@@ -346,7 +346,7 @@ function buildEncounter(
     notes: type === "Initial" ? "Initial assessment." : "Follow-up on treatment plan.",
     subjective: subj, objective: obj, assessment: ass, plan,
     created_at: dt, updated_at: dt,
-    };
+  };
 }
 
 // ── Initialize demo data ──
@@ -354,12 +354,18 @@ function initMockData() {
   if (profiles.length > 0) return;
 
   profiles.push(
-    { id: CLINICIAN_ID, role: "Physiotherapist", full_name: "Dr. Ananya Sharma",
-      clinic_name: "DigPhy Clinic", patient_id: null, created_at: new Date().toISOString() },
-    { id: PATIENT_RAJESH_USER_ID, role: "Patient", full_name: "Rajesh Kumar",
-      clinic_name: null, patient_id: PATIENT_RAJESH_ID, created_at: new Date().toISOString() },
-    { id: PATIENT_PRIYA_USER_ID, role: "Patient", full_name: "Priya Mehta",
-      clinic_name: null, patient_id: PATIENT_PRIYA_ID, created_at: new Date().toISOString() },
+    {
+      id: CLINICIAN_ID, role: "Physiotherapist", full_name: "Dr. Ananya Sharma",
+      clinic_name: "DigPhy Clinic", patient_id: null, created_at: new Date().toISOString()
+    },
+    {
+      id: PATIENT_RAJESH_USER_ID, role: "Patient", full_name: "Rajesh Kumar",
+      clinic_name: null, patient_id: PATIENT_RAJESH_ID, created_at: new Date().toISOString()
+    },
+    {
+      id: PATIENT_PRIYA_USER_ID, role: "Patient", full_name: "Priya Mehta",
+      clinic_name: null, patient_id: PATIENT_PRIYA_ID, created_at: new Date().toISOString()
+    },
   );
 
   patients.push(
@@ -393,14 +399,18 @@ function initMockData() {
   );
 
   documents.push(
-    { id: "doc-rajesh-consent", patient_id: PATIENT_RAJESH_ID, type: "Consent",
+    {
+      id: "doc-rajesh-consent", patient_id: PATIENT_RAJESH_ID, type: "Consent",
       filename: "Consent_Rajesh.pdf", uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
       storage_reference: buildPdfDataUrl("Consent Form - Rajesh Kumar"),
-      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
-    { id: "doc-priya-consent", patient_id: PATIENT_PRIYA_ID, type: "Consent",
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30)
+    },
+    {
+      id: "doc-priya-consent", patient_id: PATIENT_PRIYA_ID, type: "Consent",
       filename: "Consent_Priya.pdf", uploaded_by: CLINICIAN_ID, uploaded_at: daysAgo(30),
       storage_reference: buildPdfDataUrl("Consent Form - Priya Mehta"),
-      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30) },
+      access_restrictions: ["role:Physiotherapist", "role:Admin"], created_at: daysAgo(30)
+    },
   );
 
   // ── Encounters ──
@@ -461,24 +471,90 @@ function initMockData() {
     }
   }
 
+  // Seed multi-session time-series progress for Rajesh (Orthopedic/Neurological)
+  const rajeshDates = [daysAgo(21), daysAgo(14), daysAgo(7), daysAgo(1)];
+  const rajeshSeries: { key: string; vals: number[]; unit: string }[] = [
+    { key: "pain_vas", vals: [7, 5, 3, 2], unit: "score" },
+    { key: "rom_lumbar_flexion_deg", vals: [38, 42, 48, 54], unit: "deg" },
+    { key: "tug_sec", vals: [13.2, 11.0, 9.4, 8.2], unit: "sec text" },
+    { key: "berg_balance_score", vals: [34, 40, 47, 52], unit: "score" },
+    { key: "mas_spasticity_grade", vals: [3, 2, 1, 0], unit: "grade" },
+    { key: "gait_cadence", vals: [82, 94, 104, 112], unit: "steps/min" },
+    { key: "step_length_cm", vals: [32, 40, 46, 52], unit: "cm" },
+    { key: "girth_knee_R_cm", vals: [43.5, 42.0, 40.2, 39.0], unit: "cm" },
+  ];
+  for (const item of rajeshSeries) {
+    item.vals.forEach((val, idx) => {
+      progressEntries.push({
+        id: `prog-rajesh-${item.key}-${idx}`,
+        patient_id: PATIENT_RAJESH_ID,
+        date_time: rajeshDates[idx]!,
+        metric_key: item.key,
+        value: val,
+        unit: item.unit,
+        source: "clinic",
+        clinician_id: CLINICIAN_ID,
+        notes: `Clinical progress check - session ${idx + 1}`,
+        created_at: rajeshDates[idx]!,
+      });
+    });
+  }
+
+  // Seed multi-session time-series progress for Priya (Orthopedic/Neurological)
+  const priyaDates = [daysAgo(21), daysAgo(14), daysAgo(7), daysAgo(1)];
+  const priyaSeries: { key: string; vals: number[]; unit: string }[] = [
+    { key: "pain_vas", vals: [6, 4, 2, 1], unit: "score" },
+    { key: "rom_knee_flexion_deg", vals: [40, 75, 98, 120], unit: "deg" },
+    { key: "girth_knee_R_cm", vals: [44.0, 42.2, 40.5, 38.8], unit: "cm" },
+    { key: "tug_sec", vals: [14.5, 11.2, 9.0, 7.5], unit: "sec" },
+    { key: "six_mwt_m", vals: [310, 400, 480, 560], unit: "m font" },
+    { key: "berg_balance_score", vals: [40, 46, 51, 55], unit: "score" },
+  ];
+  for (const item of priyaSeries) {
+    item.vals.forEach((val, idx) => {
+      progressEntries.push({
+        id: `prog-priya-${item.key}-${idx}`,
+        patient_id: PATIENT_PRIYA_ID,
+        date_time: priyaDates[idx]!,
+        metric_key: item.key,
+        value: val,
+        unit: item.unit,
+        source: "clinic",
+        clinician_id: CLINICIAN_ID,
+        notes: `Clinical progress check - session ${idx + 1}`,
+        created_at: priyaDates[idx]!,
+      });
+    });
+  }
+
   // ── Audit logs ──
   auditLogs.push(
-    { id: uuidv4(), user_id: CLINICIAN_ID, action: "READ", entity: "Patient",
+    {
+      id: uuidv4(), user_id: CLINICIAN_ID, action: "READ", entity: "Patient",
       entity_id: PATIENT_RAJESH_ID, timestamp: daysAgo(21),
-      ip_address: "192.168.1.100", metadata: { portal: "patient_detail" } },
-    { id: uuidv4(), user_id: CLINICIAN_ID, action: "CREATE", entity: "Encounter",
+      ip_address: "192.168.1.100", metadata: { portal: "patient_detail" }
+    },
+    {
+      id: uuidv4(), user_id: CLINICIAN_ID, action: "CREATE", entity: "Encounter",
       entity_id: encounters[0]?.id ?? uuidv4(), timestamp: daysAgo(21),
-      ip_address: "192.168.1.100", metadata: null },
-    { id: uuidv4(), user_id: CLINICIAN_ID, action: "READ", entity: "Patient",
+      ip_address: "192.168.1.100", metadata: null
+    },
+    {
+      id: uuidv4(), user_id: CLINICIAN_ID, action: "READ", entity: "Patient",
       entity_id: PATIENT_RAJESH_ID, timestamp: daysAgo(14),
-      ip_address: "192.168.1.100", metadata: { portal: "patient_detail" } },
-    { id: uuidv4(), user_id: CLINICIAN_ID, action: "READ", entity: "Patient",
+      ip_address: "192.168.1.100", metadata: { portal: "patient_detail" }
+    },
+    {
+      id: uuidv4(), user_id: CLINICIAN_ID, action: "READ", entity: "Patient",
       entity_id: PATIENT_RAJESH_ID, timestamp: daysAgo(7),
-      ip_address: "192.168.1.100", metadata: { portal: "patient_summary" } },
-    { id: uuidv4(), user_id: CLINICIAN_ID, action: "UPDATE", entity: "ProgressEntry",
+      ip_address: "192.168.1.100", metadata: { portal: "patient_summary" }
+    },
+    {
+      id: uuidv4(), user_id: CLINICIAN_ID, action: "UPDATE", entity: "ProgressEntry",
       entity_id: progressEntries[0]?.id ?? uuidv4(), timestamp: daysAgo(5),
-      ip_address: "192.168.1.100", metadata: null },
-    );
+      ip_address: "192.168.1.100", metadata: null
+    },
+  );
 }
 
 // Initialize on module load
@@ -666,7 +742,8 @@ export function addAuditLog(data: {
 // ── Patient summary (for /my-summary portal) ──
 export function getPatientSummaryData(patientId: string) {
   const patient = getPatientById(patientId) ?? null;
-  const painHistory = getProgressEntries(patientId, "pain_vas");
+  const painHistory = getProgressEntriesByPatient(patientId, "pain_vas");
+  const allProgressEntries = getProgressEntriesByPatient(patientId);
   const latestPain = painHistory.length > 0
     ? painHistory[painHistory.length - 1]!.value
     : null;
@@ -677,6 +754,7 @@ export function getPatientSummaryData(patientId: string) {
   return {
     patient,
     painHistory,
+    progressEntries: allProgressEntries,
     latestPain: latestPain !== null ? Number(latestPain) : null,
     homeProgram: plan?.treatment_plan?.home_program ?? "No home program assigned yet.",
     nextFollowUp: plan?.next_follow_up ?? null,
