@@ -5,22 +5,30 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Plus, Search, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { formatDate } from "@/lib/utils";
-import type { Patient } from "@/types";
+import { formatDate, formatDateTime } from "@/lib/utils";
+import type { Patient, Encounter } from "@/types";
+
+type EncounterWithPatient = Encounter & { patients?: { first_name: string; last_name: string } | null };
 
 function PatientsContent() {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [recentEncounters, setRecentEncounters] = useState<EncounterWithPatient[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const q = searchParams.get("q") || "";
 
   useEffect(() => {
-    fetch(`/api/patients?q=${q}`)
-      .then(r => r.json())
-      .then(setPatients)
+    Promise.all([
+      fetch(`/api/patients?q=${q}`).then(r => r.json()),
+      fetch("/api/encounters/recent?limit=5").then(r => r.json()),
+    ])
+      .then(([p, e]) => {
+        setPatients(p);
+        setRecentEncounters(e);
+      })
       .finally(() => setLoading(false));
   }, [q]);
 
@@ -55,7 +63,7 @@ function PatientsContent() {
         {patients.map((patient) => (
           <div key={patient.id} className="relative">
             <Link href={`/patients/${patient.id}`} className="block">
-              <Card className="transition-shadow hover:shadow-md">
+              <Card className="transition-shadow hover:shadow-md h-full pb-10">
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{patient.first_name} {patient.last_name}</CardTitle>
@@ -71,7 +79,7 @@ function PatientsContent() {
                 </CardContent>
               </Card>
             </Link>
-            <Button type="button" variant="outline" size="sm" onClick={(e) => handlePrint(patient, e)} className="absolute top-2 right-2 z-10 h-7 px-2">
+            <Button type="button" size="sm" onClick={(e) => handlePrint(patient, e)} className="absolute bottom-3 right-3 z-10 h-7 px-2 !bg-blue-600 !hover:bg-blue-700 !text-white !border-blue-600 font-bold">
               <Printer className="h-3.5 w-3.5 mr-1" />Print
             </Button>
           </div>
@@ -83,6 +91,47 @@ function PatientsContent() {
           No patients found. <Link href="/patients/new" className="text-primary underline">Add your first patient</Link>
         </CardContent></Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Encounters</CardTitle>
+          <CardDescription>Latest sessions across all patients</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {recentEncounters.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No encounters yet.</p>
+          ) : (
+            <div className="divide-y">
+              {recentEncounters.map((enc) => {
+                const patient = enc.patients;
+                const assessment = enc.assessment as { working_diagnosis?: string } | null;
+                return (
+                  <Link
+                    key={enc.id}
+                    href={`/patients/${enc.patient_id}`}
+                    className="flex items-center justify-between py-3 transition-colors hover:bg-muted/50 -mx-2 px-2 rounded-md"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        Patient: {patient?.first_name} {patient?.last_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {assessment?.working_diagnosis ?? "No diagnosis"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="secondary">{enc.encounter_type}</Badge>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {formatDateTime(enc.date_time)}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

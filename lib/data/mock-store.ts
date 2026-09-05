@@ -1074,10 +1074,38 @@ export function getAuditLogs(limit = 50): AuditLog[] {
   return [...auditLogs]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, limit)
-    .map((log) => ({
-      ...log,
-      profiles: { full_name: getProfileById(log.user_id)?.full_name ?? "Unknown" },
-    }));
+    .map((log) => {
+      let patientName: string | null = null;
+      try {
+        if (log.entity === "Patient") {
+          const p = getPatientById(log.entity_id);
+          patientName = p ? `${p.first_name} ${p.last_name}` : null;
+        } else if (log.entity === "Encounter") {
+          const e = getEncounterById(log.entity_id);
+          if (e) {
+            const p = getPatientById(e.patient_id);
+            patientName = p ? `${p.first_name} ${p.last_name}` : null;
+          }
+        } else if (log.entity === "Document") {
+          const d = getDocumentById(log.entity_id);
+          if (d) {
+            const p = getPatientById(d.patient_id);
+            patientName = p ? `${p.first_name} ${p.last_name}` : null;
+          }
+        } else if (log.entity === "ProgressEntry") {
+          const entries = progressEntries.find((pe) => pe.id === log.entity_id);
+          if (entries) {
+            const p = getPatientById(entries.patient_id);
+            patientName = p ? `${p.first_name} ${p.last_name}` : null;
+          }
+        }
+      } catch {}
+      return {
+        ...log,
+        profiles: { full_name: getProfileById(log.user_id)?.full_name ?? "Unknown" },
+        patient: patientName ? { full_name: patientName } : null,
+      };
+    });
 }
 
 export function addAuditLog(data: {

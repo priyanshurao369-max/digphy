@@ -200,7 +200,7 @@ export function SoapWizard({
     notes: "",
     subjective: {
       chief_complaint: "",
-            history_of_present_illness: {
+      history_of_present_illness: {
         onset_date: today,
         mechanism: "",
         mode_of_onset: "Gradual",
@@ -235,7 +235,7 @@ export function SoapWizard({
         family_history: "",
         hereditary_diseases: "",
         social_status: "",
-                educational_status: "",
+        educational_status: "",
         environmental_history: "",
         consanguinity: "",
       },
@@ -271,7 +271,7 @@ export function SoapWizard({
       },
       general_condition: "Good",
       ambulatory_status: "Independent",
-            observation: {
+      observation: {
         sensorium: "Alert",
         body_build: "Mesomorphic",
         deformities: "",
@@ -308,7 +308,7 @@ export function SoapWizard({
         babinski: { right: false, left: false },
         comments: "",
       },
-            activity_limitations: { items: {}, comments: "" },
+      activity_limitations: { items: {}, comments: "" },
       participation_restrictions: { items: {}, comments: "" },
       functional_tests: { tug_sec: null, six_mwt_m: null, other: "" },
       functional_ul: {},
@@ -463,13 +463,12 @@ export function SoapWizard({
             key={s}
             type="button"
             onClick={() => setStep(i)}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap ${
-              i === step
+            className={`rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap ${i === step
                 ? "bg-primary text-primary-foreground"
                 : i < step
                   ? "bg-accent text-accent-foreground"
                   : "bg-muted text-muted-foreground"
-            }`}
+              }`}
           >
             {i + 1}. {s}
           </button>
@@ -1364,14 +1363,14 @@ export function SoapWizard({
                       onChange={(e) =>
                         updateField("objective.observation.posture.lateral", e.target.value)
                       }
-                                        />
+                    />
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-                    {/* Gait Parameters — structured measurement */}
+          {/* Gait Parameters — structured measurement */}
           <Card className="shadow-sm">
             <CardHeader className="bg-muted/40 pb-3">
               <CardTitle className="text-base font-semibold">Gait Parameters (Kinematics)</CardTitle>
@@ -1488,15 +1487,14 @@ export function SoapWizard({
                                       [...results.filter((r) => r.name !== test), { name: test, result: v }]
                                     )
                                   }
-                                  className={`w-8 py-0.5 text-xs rounded border transition-colors ${
-                                    entry?.result === v
+                                  className={`w-8 py-0.5 text-xs rounded border transition-colors ${entry?.result === v
                                       ? v === "positive"
                                         ? "bg-red-100 text-red-800 border-red-300 font-semibold"
                                         : v === "negative"
                                           ? "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold"
                                           : "bg-muted text-muted-foreground border"
                                       : "bg-background hover:bg-muted text-muted-foreground border"
-                                  }`}
+                                    }`}
                                 >
                                   {label}
                                 </button>
@@ -2559,7 +2557,7 @@ export function SoapWizard({
                 </div>
               )}
             </CardContent>
-                    </Card>
+          </Card>
 
           {/* Functional Evaluation — specific UL/LL tasks (ICF d-category) */}
           <Card className="shadow-sm border-primary/40">
@@ -2642,15 +2640,14 @@ export function SoapWizard({
                             key={q}
                             type="button"
                             onClick={() => updateField(`objective.activity_limitations.items.${key}`, q)}
-                            className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                              current === q
+                            className={`px-2.5 py-1 text-xs rounded-md transition-colors ${current === q
                                 ? q === "None"
                                   ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold"
                                   : q === "Complete"
                                     ? "bg-red-100 text-red-800 border border-red-300 font-semibold"
                                     : "bg-amber-100 text-amber-800 border border-amber-300 font-semibold"
                                 : "bg-background hover:bg-muted text-muted-foreground border"
-                            }`}
+                              }`}
                           >
                             {q}
                           </button>
@@ -2732,15 +2729,14 @@ export function SoapWizard({
                             key={sev}
                             type="button"
                             onClick={() => updateField(`objective.skin_and_soft_tissues.${key}`, sev)}
-                            className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                              current === sev
+                            className={`px-2.5 py-1 text-xs rounded-md transition-colors ${current === sev
                                 ? sev === "Important"
                                   ? "bg-destructive text-destructive-foreground font-semibold"
                                   : sev === "Minor"
                                     ? "bg-amber-500 text-white font-semibold"
                                     : "bg-primary text-primary-foreground font-semibold"
                                 : "bg-muted hover:bg-accent text-muted-foreground"
-                            }`}
+                              }`}
                           >
                             {sev}
                           </button>
@@ -2832,11 +2828,10 @@ export function SoapWizard({
                             key={g}
                             type="button"
                             onClick={() => updateField(`objective.reflexes_table.${key}.right`, g)}
-                            className={`px-2 py-0.5 text-xs rounded border transition-colors ${
-                              reflex.right === g
+                            className={`px-2 py-0.5 text-xs rounded border transition-colors ${reflex.right === g
                                 ? "bg-primary text-primary-foreground font-semibold border-primary"
                                 : "bg-background hover:bg-muted text-muted-foreground"
-                            }`}
+                              }`}
                           >
                             {g}
                           </button>
@@ -2848,11 +2843,10 @@ export function SoapWizard({
                             key={g}
                             type="button"
                             onClick={() => updateField(`objective.reflexes_table.${key}.left`, g)}
-                            className={`px-2 py-0.5 text-xs rounded border transition-colors ${
-                              reflex.left === g
+                            className={`px-2 py-0.5 text-xs rounded border transition-colors ${reflex.left === g
                                 ? "bg-primary text-primary-foreground font-semibold border-primary"
                                 : "bg-background hover:bg-muted text-muted-foreground"
-                            }`}
+                              }`}
                           >
                             {g}
                           </button>
@@ -2919,7 +2913,7 @@ export function SoapWizard({
                 }
               />
             </div>
-                        <div>
+            <div>
               <Label>Differential Diagnosis (one per line)</Label>
               <Textarea
                 placeholder="List alternative diagnoses being considered"

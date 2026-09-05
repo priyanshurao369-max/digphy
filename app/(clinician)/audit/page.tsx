@@ -32,7 +32,7 @@ export default async function AuditPage() {
                     <th className="pb-2 pr-4 font-medium">User</th>
                     <th className="pb-2 pr-4 font-medium">Action</th>
                     <th className="pb-2 pr-4 font-medium">Entity</th>
-                    <th className="pb-2 font-medium">Entity ID</th>
+                    <th className="pb-2 font-medium">Patient Name</th>
                   </tr>
                 </thead>
                 <tbody>
