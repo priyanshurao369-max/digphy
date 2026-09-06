@@ -648,6 +648,7 @@ export const interventionSchema = z.object({
 
 export const planSchema = z.object({
   short_term_goals: z.array(goalSchema).default([]),
+  intermediate_goals: z.array(goalSchema).default([]),
   long_term_goals: z.array(goalSchema).default([]),
   treatment_plan: z.object({
     treatment_id: z.string().min(1),

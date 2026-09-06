@@ -1,4 +1,4 @@
-# ✅ DigPhy Project Completion Summary
+# ✅ Digiphy Project Completion Summary
 
 **Date**: August 28, 2026  
 **Status**: 🚀 **READY FOR DEMO & DEPLOYMENT**
@@ -7,7 +7,7 @@
 
 ## 📋 Project Overview
 
-DigPhy is a **production-ready physiotherapy clinic management system** built with Next.js 15, Supabase, and shadcn/ui. All features from the MVP+ specification have been implemented, tested, and compiled successfully.
+Digiphy is a **production-ready physiotherapy clinic management system** built with Next.js 15, Supabase, and shadcn/ui. All features from the MVP+ specification have been implemented, tested, and compiled successfully.
 
 ---
 
@@ -298,7 +298,7 @@ If you have questions:
 
 ## 🎉 Conclusion
 
-**DigPhy is production-ready.** All MVP+ features have been implemented with modern best practices, full TypeScript safety, comprehensive documentation, and a clean, tested codebase.
+**Digiphy is production-ready.** All MVP+ features have been implemented with modern best practices, full TypeScript safety, comprehensive documentation, and a clean, tested codebase.
 
 The project demonstrates:
 - ✅ Full-stack web development (Next.js + database)

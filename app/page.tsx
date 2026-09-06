@@ -13,7 +13,7 @@ export default function RoleSelectPage() {
         <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
           <Activity className="h-7 w-7 text-primary" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">DigPhy</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Digiphy</h1>
         <p className="text-muted-foreground">
           Physiotherapy Assessment &amp; Patient Tracking — demo mode
         </p>

@@ -1,5 +1,5 @@
 /**
- * Request-scoped patient persistence for the DigPhy demo.
+ * Request-scoped patient persistence for the Digiphy demo.
  *
  * The in-memory mock store (`mock-store.ts`) only survives within a single
  * Node.js process, so it breaks on Vercel's serverless functions where each

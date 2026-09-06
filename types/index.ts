@@ -571,6 +571,7 @@ export interface Intervention {
 
 export interface PlanData {
   short_term_goals: Goal[];
+  intermediate_goals?: Goal[];
   long_term_goals: Goal[];
   treatment_plan: {
     treatment_id: string;

@@ -1,8 +1,8 @@
-# DigPhy - Physiotherapy Assessment & Patient Tracking Web App
+# Digiphy - Physiotherapy Assessment & Patient Tracking Web App
 
 ## 🎯 Overview
 
-DigPhy is a **physiotherapy clinic management demo app** built with **Next.js 15**, **shadcn/ui**, and **TypeScript**. It provides clinicians with patient registry, SOAP encounter documentation, progress tracking with real-time charts, secure document management, and full audit logging—plus a read-only patient portal for appointment reminders and home exercise programs.
+Digiphy is a **physiotherapy clinic management demo app** built with **Next.js 15**, **shadcn/ui**, and **TypeScript**. It provides clinicians with patient registry, SOAP encounter documentation, progress tracking with real-time charts, secure document management, and full audit logging—plus a read-only patient portal for appointment reminders and home exercise programs.
 
 **Status**: ✅ **Demo Mode** — No backend required. The app runs entirely on **in-memory mock data** (`lib/data/mock-store.ts`). On open, pick a role (**Therapist** or **Patient**) and the suitable workspace loads with pre-populated demo data. No Supabase, no login, no env vars.
 

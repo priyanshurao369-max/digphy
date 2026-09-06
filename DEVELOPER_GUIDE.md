@@ -1,4 +1,4 @@
-# DigPhy Developer Quick Reference
+# Digiphy Developer Quick Reference
 
 ## Project Structure
 ```

@@ -22,7 +22,7 @@ export function ClinicianNav({ userName }: { userName: string }) {
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-primary">
             <Activity className="h-6 w-6" />
-            <span>DigPhy</span>
+            <span>Digiphy</span>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {navItems.map(({ href, label, icon: Icon }) => (

@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DigPhy — Physiotherapy Assessment",
+  title: "Digiphy — Physiotherapy Assessment",
   description: "Patient assessment, history, and tracking for physiotherapists",
 };
 

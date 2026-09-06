@@ -1,4 +1,4 @@
-# DigPhy Deployment Guide
+# Digiphy Deployment Guide
 
 ## ✅ Project Status
 - **Build Status**: ✅ Successful (all TypeScript errors resolved)
@@ -35,7 +35,7 @@ is seeded automatically at startup from `lib/data/mock-store.ts`.
    ```bash
    git init
    git add -A
-   git commit -m "DigPhy demo"
+   git commit -m "Digiphy demo"
    git branch -M main
    git remote add origin https://github.com/<you>/digphy.git
    git push -u origin main

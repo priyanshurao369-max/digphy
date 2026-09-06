@@ -14,7 +14,7 @@ export default function ClinicianDemoPage() {
                 <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold">DigPhy Clinician Dashboard</h1>
+                            <h1 className="text-2xl font-bold">Digiphy Clinician Dashboard</h1>
                             <p className="text-sm text-muted-foreground">Demo Mode - Read Only</p>
                         </div>
                         <Link href="/login">

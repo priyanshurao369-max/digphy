@@ -22,7 +22,229 @@ import { METRIC_PRESETS } from "@/lib/validators/schemas";
 import type { BranchSpecialty, Encounter } from "@/types";
 import { detectFilledBlocks, buildFollowupPatch, type FilledItem, type FilledBlock } from "@/components/soap/followup-detection";
 
-const STEPS = ["Header", "Subjective", "Objective", "Assessment", "Plan"] as const;
+const STEPS = ["Header", "Subjective", "Objective", "Assessment", "Goals", "Plan"] as const;
+const FOLLOWUP_STEPS = ["Header", "Follow-up Tests", "Subjective", "Objective", "Assessment", "Goals", "Plan"] as const;
+
+// ── Protocol-Based Goals (per branch) ────────────────────────────────────────
+// Each group maps to a bucket on PlanData (short / intermediate / long term).
+type GoalTerm = "short_term_goals" | "intermediate_goals" | "long_term_goals";
+interface ProtocolGoalGroup {
+  term: GoalTerm;
+  label: string;
+  items: string[];
+}
+interface ProtocolGoalSection {
+  title: string;
+  groups: ProtocolGoalGroup[];
+}
+
+const ORTHOPEDIC_GOAL_SECTIONS: ProtocolGoalSection[] = [
+  {
+    title: "Orthopaedic — Protocol-Based Goals",
+    groups: [
+      {
+        term: "short_term_goals",
+        label: "Short-Term Goals",
+        items: [
+          "Protect healing tissue/repair",
+          "Control pain and inflammation",
+          "Control edema",
+          "Prevent joint stiffness",
+          "Restore safe/appropriate ROM",
+          "Restore joint mobility",
+          "Restore muscle activation",
+          "Prevent/minimize muscle atrophy",
+          "Establish appropriate weight-bearing",
+          "Restore basic functional mobility",
+          "Establish safe gait pattern",
+        ],
+      },
+      {
+        term: "long_term_goals",
+        label: "Long-Term Goals",
+        items: [
+          "Restore functional ROM",
+          "Restore muscle strength and endurance",
+          "Achieve appropriate strength symmetry",
+          "Restore dynamic joint stability",
+          "Restore proprioception and neuromuscular control",
+          "Progress to advanced functional loading",
+          "Normalize gait and movement patterns",
+          "Achieve functional independence",
+          "Return to work/ADLs",
+          "Return to recreational activity",
+          "Return to pre-injury level of function",
+          "Prevent recurrence/re-injury",
+        ],
+      },
+    ],
+  },
+];
+// Sports-Specific Goals — Protocol-Based Generic (offered for Orthopedic athletes)
+const SPORTS_GOAL_SECTIONS: ProtocolGoalSection[] = [
+  {
+    title: "Sports-Specific Goals — Protocol-Based Generic",
+    groups: [
+      {
+        term: "short_term_goals",
+        label: "Short-Term Goals",
+        items: [
+          "Pain reduction",
+          "Reduction of swelling/effusion",
+          "Restoration of ROM",
+          "Restoration of muscle activation",
+          "Restoration of baseline muscle strength",
+          "Improvement of muscular endurance",
+          "Restoration of joint stability",
+          "Improvement of proprioception",
+          "Improvement of neuromuscular control",
+          "Improvement of static and dynamic balance",
+          "Restoration of weight-bearing/loading tolerance",
+          "Improvement of movement quality",
+          "Improvement of single-limb control",
+          "Improvement of kinetic-chain control",
+          "Initiation of progressive resistance training",
+          "Initiation of closed-chain loading",
+          "Restoration of functional movement patterns",
+        ],
+      },
+      {
+        term: "long_term_goals",
+        label: "Long-Term Goals",
+        items: [
+          "Progressive resistance loading",
+          "Progressive eccentric loading",
+          "Progressive unilateral loading",
+          "Progressive closed-chain loading",
+          "Progressive open-chain loading",
+          "Progressive plyometric loading",
+          "Jump and landing progression",
+          "Hop progression",
+          "Deceleration training",
+          "Acceleration/deceleration drills",
+          "Change-of-direction drills",
+          "Cutting and pivoting drills",
+          "Lateral movement drills",
+          "Multidirectional movement drills",
+          "Agility drills",
+          "Reactive agility drills",
+          "Perturbation training",
+          "Dynamic stability training",
+          "Neuromuscular control training",
+          "Proprioceptive training progression",
+          "Dynamic balance progression",
+          "Single-limb loading progression",
+          "Running progression (only when relevant)",
+          "High-speed movement exposure (when relevant)",
+          "Repetitive loading tolerance",
+          "Fatigue-based movement training",
+          "Sport-specific movement progression",
+          "Sport-specific skill progression",
+          "Progressive training-load exposure",
+          "Full training-load tolerance",
+          "Return to unrestricted training",
+          "Return to sport",
+          "Return to pre-injury activity level",
+        ],
+      },
+    ],
+  },
+];
+
+const CARDIORESPIRATORY_GOAL_SECTIONS: ProtocolGoalSection[] = [
+  {
+    title: "Cardiorespiratory — Protocol-Based Goals",
+    groups: [
+      {
+        term: "short_term_goals",
+        label: "Short-Term Goals",
+        items: [
+          "Optimize breathing pattern",
+          "Reduce dyspnea",
+          "Improve airway clearance",
+          "Mobilize secretions",
+          "Improve ventilation",
+          "Improve chest expansion",
+          "Prevent pulmonary complications",
+          "Prevent deconditioning",
+          "Establish safe early mobilization",
+          "Improve tolerance to sitting/standing",
+          "Initiate low-level aerobic activity",
+          "Educate regarding breathing strategies",
+          "Establish appropriate exercise intensity",
+        ],
+      },
+      {
+        term: "intermediate_goals",
+        label: "Intermediate Goals",
+        items: [
+          "Progress aerobic exercise duration",
+          "Increase exercise intensity appropriately",
+          "Improve cardiovascular endurance",
+          "Improve respiratory muscle endurance",
+          "Increase walking distance",
+          "Improve activity tolerance",
+          "Improve functional mobility",
+          "Reduce exertional symptoms",
+          "Progress resistance training",
+          "Improve energy efficiency during activities",
+          "Increase independence in ADLs",
+        ],
+      },
+      {
+        term: "long_term_goals",
+        label: "Long-Term Goals",
+        items: [
+          "Improve functional exercise capacity",
+          "Achieve sustained aerobic endurance",
+          "Improve walking/activity tolerance",
+          "Perform ADLs with minimal symptoms",
+          "Return to work/recreational activity",
+          "Achieve independent exercise programme",
+          "Maintain long-term physical activity",
+          "Prevent deconditioning",
+          "Reduce risk of future exacerbations/complications where applicable",
+          "Improve quality of life",
+        ],
+      },
+    ],
+  },
+];
+
+const NEUROLOGICAL_GOAL_SECTIONS: ProtocolGoalSection[] = [
+  {
+    title: "Neurological — Protocol-Based Goals",
+    groups: [
+      {
+        term: "short_term_goals",
+        label: "Short-Term Goals",
+        items: [
+          "Prevent secondary complications",
+          "Maintain available ROM",
+          "Prevent contractures",
+          "Facilitate appropriate muscle activation",
+          "Improve selective motor control",
+          "Improve trunk control",
+          "Improve postural alignment",
+          "Establish sitting balance",
+          "Improve weight shifting",
+          "Improve bed mobility",
+          "Improve transfers",
+          "Establish safe standing",
+          "Improve standing balance",
+          "Initiate/optimize gait",
+          "Improve gait safety",
+          "Improve tolerance to activity",
+        ],
+      },
+    ],
+  },
+];
+
+// Fallback for branches without a dedicated protocol (Geriatric, Pediatric)
+const GENERIC_GOAL_SECTIONS: ProtocolGoalSection[] = ORTHOPEDIC_GOAL_SECTIONS;
+
+
 
 // Joint-specific assessment dropdowns (Objective step)
 const ROM_JOINTS = [
@@ -338,6 +560,7 @@ export function SoapWizard({
     },
     plan: {
       short_term_goals: [],
+      intermediate_goals: [],
       long_term_goals: [],
       treatment_plan: {
         treatment_id: uuidv4(),
@@ -394,17 +617,15 @@ export function SoapWizard({
     [previousEncounter]
   );
   const steps = useMemo(
-    () =>
-      isFollowUp
-        ? ["Header", "Follow-up Tests", "Subjective", "Objective", "Assessment", "Plan"]
-        : ["Header", "Subjective", "Objective", "Assessment", "Plan"],
+    () => (isFollowUp ? [...FOLLOWUP_STEPS] : [...STEPS]),
     [isFollowUp]
   );
   const reassessIdx = isFollowUp ? 1 : -1;
   const subjIdx = isFollowUp ? 2 : 1;
   const objIdx = isFollowUp ? 3 : 2;
   const assessIdx = isFollowUp ? 4 : 3;
-  const planIdx = isFollowUp ? 5 : 4;
+  const goalsIdx = isFollowUp ? 5 : 4;
+  const planIdx = isFollowUp ? 6 : 5;
 
   const selectedCount = selectedKeys.size;
 
@@ -449,6 +670,156 @@ export function SoapWizard({
     }
   }
 
+  // ── Protocol-based goals (Goals step) ──
+  const goalSections = useMemo<ProtocolGoalSection[]>(() => {
+    if (activeBranch === "Cardiorespiratory") return CARDIORESPIRATORY_GOAL_SECTIONS;
+    if (activeBranch === "Neurological") return NEUROLOGICAL_GOAL_SECTIONS;
+    if (activeBranch === "Geriatric" || activeBranch === "Pediatric") return GENERIC_GOAL_SECTIONS;
+    return ORTHOPEDIC_GOAL_SECTIONS;
+  }, [activeBranch]);
+
+  const [customGoal, setCustomGoal] = useState<Record<GoalTerm, string>>({
+    short_term_goals: "",
+    intermediate_goals: "",
+    long_term_goals: "",
+  });
+
+  function makeGoal(description: string) {
+    return {
+      goal_id: uuidv4(),
+      description,
+      baseline_value: "",
+      target_value: "",
+      target_date: "",
+      owner_clinician_id: clinicianId,
+    };
+  }
+
+  function isGoalSelected(term: GoalTerm, description: string) {
+    return (form.plan?.[term] ?? []).some((g) => g.description === description);
+  }
+
+  function toggleGroupGoals(term: GoalTerm, descriptions: string[], checked: boolean) {
+    setForm((prev) => {
+      const copy = structuredClone(prev) as Record<string, any>;
+      copy.plan ??= {};
+      let list: any[] = copy.plan[term] ?? [];
+      if (checked) {
+        for (const d of descriptions) {
+          if (!list.some((g) => g.description === d)) list.push(makeGoal(d));
+        }
+      } else {
+        list = list.filter((g) => !descriptions.includes(g.description));
+      }
+      copy.plan[term] = list;
+      return copy;
+    });
+  }
+
+  function toggleGoal(term: GoalTerm, description: string, checked: boolean) {
+    toggleGroupGoals(term, [description], checked);
+  }
+
+  function addCustomGoal(term: GoalTerm) {
+    const description = customGoal[term].trim();
+    if (!description) return;
+    toggleGroupGoals(term, [description], true);
+    setCustomGoal((prev) => ({ ...prev, [term]: "" }));
+  }
+
+  function renderGoalSection(section: ProtocolGoalSection) {
+    return (
+      <div key={section.title} className="space-y-4">
+        <h3 className="text-sm font-semibold">{section.title}</h3>
+        {section.groups.map((group) => {
+          const selected = form.plan?.[group.term] ?? [];
+          const selectedCustom = selected.filter((g) => !group.items.includes(g.description));
+          return (
+            <div key={`${group.term}-${group.label}`} className="space-y-2 rounded-md border p-3">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">{group.label}</Label>
+                <div className="flex gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => toggleGroupGoals(group.term, group.items, true)}
+                  >
+                    Select all
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => toggleGroupGoals(group.term, group.items, false)}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+              <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                {group.items.map((item) => (
+                  <label key={item} className="flex items-start gap-2 text-sm">
+                    <Checkbox
+                      className="mt-0.5"
+                      checked={isGoalSelected(group.term, item)}
+                      onCheckedChange={(c) => toggleGoal(group.term, item, c === true)}
+                    />
+                    <span>{item}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add custom goal…"
+                  value={customGoal[group.term]}
+                  onChange={(e) => setCustomGoal((prev) => ({ ...prev, [group.term]: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addCustomGoal(group.term);
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0"
+                  disabled={!customGoal[group.term].trim()}
+                  onClick={() => addCustomGoal(group.term)}
+                >
+                  Add
+                </Button>
+              </div>
+              {selectedCustom.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedCustom.map((g) => (
+                    <span
+                      key={g.goal_id}
+                      className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs"
+                    >
+                      {g.description}
+                      <button
+                        type="button"
+                        className="text-destructive"
+                        onClick={() => toggleGoal(group.term, g.description, false)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   function goNext() {
     // Apply selected follow-up tests when leaving the re-assessment step.
     if (step === reassessIdx) applyReassessment();
@@ -464,10 +835,10 @@ export function SoapWizard({
             type="button"
             onClick={() => setStep(i)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap ${i === step
-                ? "bg-primary text-primary-foreground"
-                : i < step
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-muted text-muted-foreground"
+              ? "bg-primary text-primary-foreground"
+              : i < step
+                ? "bg-accent text-accent-foreground"
+                : "bg-muted text-muted-foreground"
               }`}
           >
             {i + 1}. {s}
@@ -1488,12 +1859,12 @@ export function SoapWizard({
                                     )
                                   }
                                   className={`w-8 py-0.5 text-xs rounded border transition-colors ${entry?.result === v
-                                      ? v === "positive"
-                                        ? "bg-red-100 text-red-800 border-red-300 font-semibold"
-                                        : v === "negative"
-                                          ? "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold"
-                                          : "bg-muted text-muted-foreground border"
-                                      : "bg-background hover:bg-muted text-muted-foreground border"
+                                    ? v === "positive"
+                                      ? "bg-red-100 text-red-800 border-red-300 font-semibold"
+                                      : v === "negative"
+                                        ? "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold"
+                                        : "bg-muted text-muted-foreground border"
+                                    : "bg-background hover:bg-muted text-muted-foreground border"
                                     }`}
                                 >
                                   {label}
@@ -2641,12 +3012,12 @@ export function SoapWizard({
                             type="button"
                             onClick={() => updateField(`objective.activity_limitations.items.${key}`, q)}
                             className={`px-2.5 py-1 text-xs rounded-md transition-colors ${current === q
-                                ? q === "None"
-                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold"
-                                  : q === "Complete"
-                                    ? "bg-red-100 text-red-800 border border-red-300 font-semibold"
-                                    : "bg-amber-100 text-amber-800 border border-amber-300 font-semibold"
-                                : "bg-background hover:bg-muted text-muted-foreground border"
+                              ? q === "None"
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold"
+                                : q === "Complete"
+                                  ? "bg-red-100 text-red-800 border border-red-300 font-semibold"
+                                  : "bg-amber-100 text-amber-800 border border-amber-300 font-semibold"
+                              : "bg-background hover:bg-muted text-muted-foreground border"
                               }`}
                           >
                             {q}
@@ -2730,12 +3101,12 @@ export function SoapWizard({
                             type="button"
                             onClick={() => updateField(`objective.skin_and_soft_tissues.${key}`, sev)}
                             className={`px-2.5 py-1 text-xs rounded-md transition-colors ${current === sev
-                                ? sev === "Important"
-                                  ? "bg-destructive text-destructive-foreground font-semibold"
-                                  : sev === "Minor"
-                                    ? "bg-amber-500 text-white font-semibold"
-                                    : "bg-primary text-primary-foreground font-semibold"
-                                : "bg-muted hover:bg-accent text-muted-foreground"
+                              ? sev === "Important"
+                                ? "bg-destructive text-destructive-foreground font-semibold"
+                                : sev === "Minor"
+                                  ? "bg-amber-500 text-white font-semibold"
+                                  : "bg-primary text-primary-foreground font-semibold"
+                              : "bg-muted hover:bg-accent text-muted-foreground"
                               }`}
                           >
                             {sev}
@@ -2829,8 +3200,8 @@ export function SoapWizard({
                             type="button"
                             onClick={() => updateField(`objective.reflexes_table.${key}.right`, g)}
                             className={`px-2 py-0.5 text-xs rounded border transition-colors ${reflex.right === g
-                                ? "bg-primary text-primary-foreground font-semibold border-primary"
-                                : "bg-background hover:bg-muted text-muted-foreground"
+                              ? "bg-primary text-primary-foreground font-semibold border-primary"
+                              : "bg-background hover:bg-muted text-muted-foreground"
                               }`}
                           >
                             {g}
@@ -2844,8 +3215,8 @@ export function SoapWizard({
                             type="button"
                             onClick={() => updateField(`objective.reflexes_table.${key}.left`, g)}
                             className={`px-2 py-0.5 text-xs rounded border transition-colors ${reflex.left === g
-                                ? "bg-primary text-primary-foreground font-semibold border-primary"
-                                : "bg-background hover:bg-muted text-muted-foreground"
+                              ? "bg-primary text-primary-foreground font-semibold border-primary"
+                              : "bg-background hover:bg-muted text-muted-foreground"
                               }`}
                           >
                             {g}
@@ -2948,6 +3319,23 @@ export function SoapWizard({
               />
               <Label>Red flags present</Label>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === goalsIdx && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Goals</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-sm text-muted-foreground">
+              Protocol-based goals for the <span className="font-medium">{activeBranch}</span> branch.
+              Selected goals are saved to the treatment plan (short / intermediate / long term).
+            </p>
+            {goalSections.map((section) => renderGoalSection(section))}
+            {activeBranch === "Orthopedic" &&
+              SPORTS_GOAL_SECTIONS.map((section) => renderGoalSection(section))}
           </CardContent>
         </Card>
       )}

@@ -72,7 +72,7 @@ export default function PatientDemoPage() {
                         <CardContent>
                             <div className="text-2xl font-bold">Sept 4</div>
                             <p className="mt-2 text-xs text-muted-foreground">
-                                Wednesday, 10:00 AM at DigPhy Clinic
+                                Wednesday, 10:00 AM at Digiphy Clinic
                             </p>
                             <Badge className="mt-3" variant="secondary">Confirmed</Badge>
                         </CardContent>

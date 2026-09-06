@@ -1,5 +1,5 @@
 /**
- * In-memory mock data store for DigPhy demo.
+ * In-memory mock data store for Digiphy demo.
  * Replaces Supabase entirely — data persists in module-level arrays
  * within a single Node.js process (sufficient for `npm run dev`).
  */
@@ -351,7 +351,7 @@ function buildEncounter(
 
   return {
     id: uuidv4(), patient_id: patientId, clinician_id: CLINICIAN_ID,
-    date_time: dt, encounter_type: type, location: "DigPhy Clinic",
+    date_time: dt, encounter_type: type, location: "Digiphy Clinic",
     confidentiality_level: "Standard",
     notes: type === "Initial" ? "Initial assessment." : "Follow-up on treatment plan.",
     subjective: subj, objective: obj, assessment: ass, plan,
@@ -482,7 +482,7 @@ function buildBranchEncounter(
 
   return {
     id: uuidv4(), patient_id: patientId, clinician_id: CLINICIAN_ID,
-    date_time: dt, encounter_type: type, location: "DigPhy Clinic",
+    date_time: dt, encounter_type: type, location: "Digiphy Clinic",
     confidentiality_level: "Standard",
     notes: type === "Initial" ? "Initial branch assessment." : "Follow-up on treatment plan.",
     subjective, objective, assessment, plan,
@@ -525,7 +525,7 @@ function initMockData() {
   profiles.push(
     {
       id: CLINICIAN_ID, role: "Physiotherapist", full_name: "Dr. Ananya Sharma",
-      clinic_name: "DigPhy Clinic", patient_id: null, created_at: new Date().toISOString()
+      clinic_name: "Digiphy Clinic", patient_id: null, created_at: new Date().toISOString()
     },
     {
       id: PATIENT_RAJESH_USER_ID, role: "Patient", full_name: "Rajesh Kumar",

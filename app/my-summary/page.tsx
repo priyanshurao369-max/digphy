@@ -34,7 +34,7 @@ export default async function MySummaryPage({
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
           <div className="flex items-center gap-2 font-semibold text-primary">
             <Activity className="h-5 w-5" />
-            DigPhy — My Summary
+            Digiphy — My Summary
           </div>
           <form action={signOut}>
             <Button variant="ghost" size="sm" type="submit">
