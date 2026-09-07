@@ -315,6 +315,118 @@ const ROM_KEY_TO_LABEL = new Map<string, string>(
 );
 const MMT_KEY_TO_LABEL = new Map<string, string>(MMT_GROUPS.map((g) => [slugify(g), g]));
 
+// Normal ROM ranges [minNormal, maxNormal] in degrees (AAOS norms),
+// keyed by `${slugify(joint)}_${slugify(motion)}`.
+// When an entered AROM/PROM value is BELOW minNormal the entry is flagged
+// and an End Feel selection is required.
+const ROM_NORMAL_RANGES: Record<string, [number, number]> = {
+  // Temporomandibular Joint
+  temporomandibular_joint_depression: [40, 55],
+  temporomandibular_joint_protrusion: [5, 10],
+  temporomandibular_joint_retrusion: [3, 6],
+  temporomandibular_joint_lateral_excursion: [8, 12],
+  // Cervical Spine
+  cervical_spine_flexion: [45, 60],
+  cervical_spine_extension: [45, 75],
+  cervical_spine_rotation: [60, 80],
+  cervical_spine_lateral_flexion: [35, 45],
+  // Thoracic Spine
+  thoracic_spine_flexion: [30, 50],
+  thoracic_spine_rotation: [30, 45],
+  thoracic_spine_lateral_flexion: [20, 40],
+  // Lumbar Spine
+  lumbar_spine_flexion: [40, 60],
+  lumbar_spine_extension: [15, 25],
+  lumbar_spine_rotation: [3, 18],
+  lumbar_spine_lateral_flexion: [15, 25],
+  // Shoulder girdle
+  sternoclavicular_joint_elevation: [10, 20],
+  sternoclavicular_joint_depression: [5, 15],
+  sternoclavicular_joint_protraction: [10, 15],
+  sternoclavicular_joint_retraction: [10, 15],
+  acromioclavicular_joint_elevation: [10, 20],
+  acromioclavicular_joint_depression: [5, 15],
+  scapulothoracic_elevation: [10, 20],
+  scapulothoracic_depression: [5, 15],
+  scapulothoracic_protraction: [15, 25],
+  scapulothoracic_retraction: [20, 30],
+  scapulothoracic_upward_rotation: [40, 60],
+  scapulothoracic_downward_rotation: [0, 10],
+  // Shoulder
+  shoulder_flexion: [150, 180],
+  shoulder_extension: [40, 60],
+  shoulder_abduction: [150, 180],
+  shoulder_adduction: [30, 50],
+  shoulder_internal_rotation: [60, 80],
+  shoulder_external_rotation: [80, 90],
+  // Elbow / Forearm
+  elbow_flexion: [130, 150],
+  elbow_extension: [0, 10],
+  forearm_pronation: [65, 80],
+  forearm_supination: [65, 85],
+  // Wrist
+  wrist_flexion: [70, 90],
+  wrist_extension: [60, 75],
+  wrist_radial_deviation: [15, 25],
+  wrist_ulnar_deviation: [25, 40],
+  // Hand / digits
+  hand_mcp_flexion: [85, 110],
+  hand_mcp_extension: [0, 20],
+  hand_pip_flexion: [90, 110],
+  hand_pip_extension: [0, 10],
+  hand_dip_flexion: [60, 80],
+  hand_dip_extension: [0, 10],
+  thumb_cmc_flexion: [40, 60],
+  thumb_cmc_extension: [0, 20],
+  thumb_cmc_abduction: [40, 60],
+  thumb_mcp_flexion: [40, 60],
+  thumb_mcp_extension: [0, 20],
+  thumb_ip_flexion: [60, 90],
+  thumb_ip_extension: [0, 10],
+  // Hip
+  hip_flexion: [100, 125],
+  hip_extension: [10, 30],
+  hip_abduction: [30, 50],
+  hip_adduction: [20, 30],
+  hip_internal_rotation: [30, 40],
+  hip_external_rotation: [40, 60],
+  // Knee
+  knee_flexion: [120, 150],
+  knee_extension: [0, 10],
+  // Ankle / foot
+  ankle_dorsiflexion: [15, 25],
+  ankle_plantarflexion: [40, 60],
+  subtalar_joint_inversion: [15, 30],
+  subtalar_joint_eversion: [5, 15],
+  midtarsal_joint_inversion: [15, 30],
+  midtarsal_joint_eversion: [5, 15],
+  foot_tarsometatarsal_flexion: [10, 20],
+  foot_tarsometatarsal_extension: [10, 20],
+  toes_mtp_flexion: [30, 45],
+  toes_mtp_extension: [50, 80],
+  toes_pip_flexion: [35, 60],
+  toes_pip_extension: [0, 10],
+  great_toe_mtp_flexion: [30, 45],
+  great_toe_mtp_extension: [50, 80],
+  great_toe_ip_flexion: [20, 40],
+  great_toe_ip_extension: [0, 10],
+};
+
+// End-feel options for below-normal ROM entries
+const ROM_END_FEEL_OPTIONS = [
+  "Soft", "Firm", "Hard", "Empty", "Boggy", "Spasm", "Springy",
+] as const;
+
+// Returns true when the entered ROM value (e.g. "45" or "45 deg") is below
+// the normal range minimum for the given composite joint_motion key.
+function romBelowRange(key: string, value: string | number | undefined | null): boolean {
+  const range = ROM_NORMAL_RANGES[key];
+  if (!range || value === undefined || value === null || value === "") return false;
+  const num = typeof value === "number" ? value : parseFloat(String(value));
+  if (Number.isNaN(num)) return false;
+  return num < range[0];
+}
+
 // ICF Activity Limitations & Participation Restrictions (Objective step)
 const ICF_QUALIFIERS = ["None", "Mild", "Moderate", "Severe", "Complete"] as const;
 const ICF_ACTIVITIES = [
@@ -400,6 +512,14 @@ export function SoapWizard({
   const [romMotion, setRomMotion] = useState<string>("");
   const [romArom, setRomArom] = useState<string>("");
   const [romProm, setRomProm] = useState<string>("");
+  const [romEndFeel, setRomEndFeel] = useState<string>("");
+
+  // Normal-range check for the ROM entry currently being added
+  const romEntryKey =
+    romJoint && romMotion ? `${slugify(romJoint)}_${slugify(romMotion)}` : "";
+  const romEntryRange = romEntryKey ? ROM_NORMAL_RANGES[romEntryKey] ?? null : null;
+  const romEntryBelow =
+    romBelowRange(romEntryKey, romArom) || romBelowRange(romEntryKey, romProm);
 
   // Manual muscle testing entry state
   const [mmtJoint, setMmtJoint] = useState<string>("");
@@ -502,7 +622,7 @@ export function SoapWizard({
         gait: { barefoot: "Normal cadence", with_aids: "N/A" },
       },
       palpation: { tenderness_grade: 0, tone: "normal", crepitus: "none", ligamentous_snaps: "Absent", cracking_distraction: "Absent", capillary_refill: "Normal", nodules: "", pulses: "Palpable & symmetrical", scar_status: "", edema_type: "None", edema_notes: "", swelling_type: "" },
-      rom: { arom: {}, prom: {}, end_feel: "firm" },
+      rom: { arom: {}, prom: {}, end_feel: "firm", end_feels: {} },
       strength: { mmt: {} },
       neuro: { sensation: "normal", reflexes: {} },
       skin_and_soft_tissues: {
@@ -528,6 +648,13 @@ export function SoapWizard({
         ktr: { right: "normal", left: "normal" },
         atr: { right: "normal", left: "normal" },
         babinski: { right: false, left: false },
+        superficial: {
+          upper_abdominal: { right: "present", left: "present" },
+          lower_abdominal: { right: "present", left: "present" },
+          cremasteric: { right: "present", left: "present" },
+          plantar: { right: "present", left: "present" },
+          bulbocavernosus: { right: "present", left: "present" },
+        },
         comments: "",
       },
       activity_limitations: { items: {}, comments: "" },
@@ -2591,17 +2718,46 @@ export function SoapWizard({
                   />
                 </div>
               </div>
+              {romEntryRange && (
+                <div className="text-xs text-muted-foreground">
+                  Normal range: <span className="font-medium text-foreground">{romEntryRange[0]}° – {romEntryRange[1]}°</span>
+                  {romEntryBelow && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded bg-destructive/10 px-1.5 py-0.5 text-destructive font-semibold">
+                      ⚠ Below normal range — select End Feel
+                    </span>
+                  )}
+                </div>
+              )}
+              {romEntryBelow && (
+                <div className="grid gap-2 sm:grid-cols-12 items-end">
+                  <div className="sm:col-span-4">
+                    <Label className="text-xs text-destructive">End Feel (required — value below normal range)</Label>
+                    <Select value={romEndFeel} onValueChange={setRomEndFeel}>
+                      <SelectTrigger className={romEndFeel ? "" : "border-destructive"}>
+                        <SelectValue placeholder="Select end feel" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-56 overflow-y-auto">
+                        {ROM_END_FEEL_OPTIONS.map((f) => (
+                          <SelectItem key={f} value={f}>{f} End Feel</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
               <Button
                 type="button"
                 size="sm"
                 variant="secondary"
-                disabled={!romArom || !romJoint || !romMotion}
+                disabled={!romArom || !romJoint || !romMotion || (romEntryBelow && !romEndFeel)}
                 onClick={() => {
                   const key = `${slugify(romJoint)}_${slugify(romMotion)}`;
                   if (romArom) updateField(`objective.rom.arom.${key}`, `${romArom} deg`);
                   if (romProm) updateField(`objective.rom.prom.${key}`, `${romProm} deg`);
+                  if (romEntryBelow && romEndFeel) updateField(`objective.rom.end_feels.${key}`, romEndFeel);
                   setRomArom("");
                   setRomProm("");
+                  setRomEndFeel("");
                 }}
               >
                 Add ROM Entry
@@ -2610,18 +2766,33 @@ export function SoapWizard({
               {Object.keys(form.objective?.rom?.arom ?? {}).length > 0 && (
                 <div className="border rounded-md divide-y overflow-hidden text-sm">
                   <div className="grid grid-cols-12 bg-muted/60 px-3 py-1.5 font-medium text-xs text-muted-foreground uppercase">
-                    <div className="col-span-4">Joint / Motion</div>
-                    <div className="col-span-3">AROM</div>
-                    <div className="col-span-3">PROM</div>
+                    <div className="col-span-3">Joint / Motion</div>
+                    <div className="col-span-2">AROM</div>
+                    <div className="col-span-2">PROM</div>
+                    <div className="col-span-3">Normal Range</div>
                     <div className="col-span-2 text-right">Action</div>
                   </div>
-                  {Object.entries(form.objective?.rom?.arom ?? {}).map(([key, aromVal]) => (
+                  {Object.entries(form.objective?.rom?.arom ?? {}).map(([key, aromVal]) => {
+                    const range = ROM_NORMAL_RANGES[key] ?? null;
+                    const below = romBelowRange(key, aromVal) || romBelowRange(key, (form.objective?.rom?.prom as any)?.[key]);
+                    return (
                     <div key={key} className="grid grid-cols-12 px-3 py-1.5 items-center">
-                      <div className="col-span-4 font-medium text-xs sm:text-sm">
+                      <div className="col-span-3 font-medium text-xs sm:text-sm">
                         {ROM_KEY_TO_LABEL.get(key) ?? key.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                        {below && (
+                          <span className="ml-1 inline-flex items-center rounded bg-destructive/10 px-1 py-0.5 text-[10px] text-destructive font-semibold">
+                            ⚠ Below range
+                          </span>
+                        )}
                       </div>
-                      <div className="col-span-3">{aromVal}</div>
-                      <div className="col-span-3">{(form.objective?.rom?.prom as any)?.[key] ?? "—"}</div>
+                      <div className="col-span-2">{aromVal}</div>
+                      <div className="col-span-2">{(form.objective?.rom?.prom as any)?.[key] ?? "—"}</div>
+                      <div className="col-span-3 text-xs text-muted-foreground">
+                        {range ? `${range[0]}° – ${range[1]}°` : "—"}
+                        {below && (form.objective?.rom?.end_feels as any)?.[key] && (
+                          <span className="ml-1 font-medium text-foreground">· End feel: {(form.objective?.rom?.end_feels as any)?.[key]}</span>
+                        )}
+                      </div>
                       <div className="col-span-2 text-right">
                         <Button
                           type="button"
@@ -2643,7 +2814,8 @@ export function SoapWizard({
                         </Button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -2959,7 +3131,7 @@ export function SoapWizard({
           {/* Reflexes Assessment Card */}
           <Card className="shadow-sm">
             <CardHeader className="bg-muted/40 pb-3">
-              <CardTitle className="text-base font-semibold">Reflexes Assessment</CardTitle>
+              <CardTitle className="text-base font-semibold">Deep Reflex Test</CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
               <div className="border rounded-md divide-y overflow-hidden text-sm">
@@ -3028,6 +3200,49 @@ export function SoapWizard({
                     />
                     <span className="text-xs">L Positive (+)</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Superficial Reflex Test */}
+              <div>
+                <div className="text-sm font-semibold mb-2">Superficial Reflex Test</div>
+                <div className="border rounded-md divide-y overflow-hidden text-sm">
+                  <div className="grid grid-cols-12 bg-muted/60 px-3 py-2 font-medium text-xs text-muted-foreground uppercase gap-2 items-center">
+                    <div className="col-span-4 sm:col-span-3">Reflex Test</div>
+                    <div className="col-span-4">Right (R)</div>
+                    <div className="col-span-4">Left (L)</div>
+                  </div>
+                  {[
+                    { key: "upper_abdominal", label: "Upper Abdominal" },
+                    { key: "lower_abdominal", label: "Lower Abdominal" },
+                    { key: "cremasteric", label: "Cremasteric" },
+                    { key: "plantar", label: "Plantar" },
+                    { key: "bulbocavernosus", label: "Bulbocavernosus" },
+                  ].map(({ key, label }) => {
+                    const sup = (form.objective?.reflexes_table as any)?.superficial?.[key] || { right: "present", left: "present" };
+                    return (
+                      <div key={key} className="grid grid-cols-12 px-3 py-2 items-center gap-2">
+                        <div className="col-span-4 sm:col-span-3 font-medium text-xs sm:text-sm">{label}</div>
+                        {(["right", "left"] as const).map((side) => (
+                          <div key={side} className="col-span-4 flex gap-1">
+                            {["present", "absent"].map((g) => (
+                              <button
+                                key={g}
+                                type="button"
+                                onClick={() => updateField(`objective.reflexes_table.superficial.${key}.${side}`, g)}
+                                className={`px-2 py-0.5 text-xs rounded border transition-colors ${sup[side] === g
+                                  ? "bg-primary text-primary-foreground font-semibold border-primary"
+                                  : "bg-background hover:bg-muted text-muted-foreground"
+                                  }`}
+                              >
+                                {g === "present" ? "Present" : "Absent"}
+                              </button>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -283,6 +283,13 @@ export const reflexesTableSchema = z.object({
     right: z.boolean().default(false),
     left: z.boolean().default(false),
   }).default({ right: false, left: false }),
+  superficial: z.record(
+    z.string(),
+    z.object({
+      right: z.string().default("present"),
+      left: z.string().default("present"),
+    })
+  ).optional(),
   comments: z.string().default(""),
 });
 
@@ -355,7 +362,8 @@ export const objectiveSchema = z.object({
     arom: z.record(z.string()).default({}),
     prom: z.record(z.string()).default({}),
     end_feel: z.string().optional().default("firm"),
-  }).default({ arom: {}, prom: {}, end_feel: "firm" }),
+    end_feels: z.record(z.string()).optional().default({}),
+  }).default({ arom: {}, prom: {}, end_feel: "firm", end_feels: {} }),
   strength: z.object({
     mmt: z.record(z.number()).default({}),
   }).default({ mmt: {} }),

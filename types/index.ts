@@ -448,6 +448,7 @@ export interface ReflexesTableData {
   ktr: ReflexItemDetail;
   atr: ReflexItemDetail;
   babinski: { right: boolean; left: boolean };
+  superficial?: Record<string, { right: string; left: string }>;
   comments: string;
 }
 
@@ -515,6 +516,7 @@ export interface ObjectiveData {
     arom: Record<string, string>;
     prom: Record<string, string>;
     end_feel: string;
+    end_feels?: Record<string, string>;
   };
   strength: {
     mmt: Record<string, number>;
