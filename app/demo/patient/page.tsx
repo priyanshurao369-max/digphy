@@ -157,13 +157,13 @@ export default function PatientDemoPage() {
                         <CardTitle className="text-base">Patient Portal Features</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                        <p>✅ Real-time pain and progress tracking</p>
-                        <p>✅ View SOAP encounter notes from your clinician</p>
-                        <p>✅ Track home program exercises</p>
-                        <p>✅ Schedule and manage appointments</p>
-                        <p>✅ Download medical documents</p>
-                        <p>✅ Secure patient-clinician messaging</p>
-                        <p>✅ HIPAA-compliant data privacy</p>
+                        <p>Real-time pain and progress tracking</p>
+                        <p>View SOAP encounter notes from your clinician</p>
+                        <p>Track home program exercises</p>
+                        <p>Schedule and manage appointments</p>
+                        <p>Download medical documents</p>
+                        <p>Secure patient-clinician messaging</p>
+                        <p>HIPAA-compliant data privacy</p>
                     </CardContent>
                 </Card>
             </main>

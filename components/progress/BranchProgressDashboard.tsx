@@ -117,35 +117,30 @@ export function BranchProgressDashboard({
   // Branch icons & themes
   const branchMeta: Record<
     BranchSpecialty,
-    { title: string; emoji: string; color: string; desc: string }
+    { title: string; color: string; desc: string }
   > = {
     Neurological: {
       title: "Neurological Recovery Dashboard",
-      emoji: "🧠",
       color: "from-purple-500 to-indigo-600",
       desc: "Motor control, spasticity (MAS), balance (Berg), and gait spatiotemporal trajectory.",
     },
     Cardiorespiratory: {
       title: "Cardiorespiratory Rehabilitation Progress",
-      emoji: "🫀",
       color: "from-rose-500 to-red-600",
       desc: "Functional walk capacity (6MWT), dyspnea rating (Borg), and exercise tolerance.",
     },
     Orthopedic: {
       title: "Orthopedic Rehabilitation & ROM Tracker",
-      emoji: "🦴",
       color: "from-blue-500 to-cyan-600",
       desc: "Joint Range of Motion (AROM/PROM), muscle strength (MMT), and swelling/girth.",
     },
     Geriatric: {
       title: "Geriatric Functional Mobility & Fall Risk",
-      emoji: "👴",
       color: "from-amber-500 to-orange-600",
       desc: "Timed Up & Go (TUG), 30s chair stand reps, and ADL functional index.",
     },
     Pediatric: {
       title: "Pediatric Motor Development & Milestones",
-      emoji: "👶",
       color: "from-emerald-500 to-teal-600",
       desc: "Gross Motor Function Measure (GMFM), PEDI functional skills, and milestone attainment.",
     },
@@ -161,7 +156,6 @@ export function BranchProgressDashboard({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-2xl">{meta.emoji}</span>
                 <h2 className="text-xl font-bold tracking-tight">{meta.title}</h2>
               </div>
               <p className="text-sm opacity-90">{meta.desc}</p>

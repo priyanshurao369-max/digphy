@@ -1321,195 +1321,12 @@ export function SoapWizard({
               />
             </div>
 
-            {/* Branch-Specific Extended Subjective Assessment */}
-            {activeBranch === "Neurological" && (
-              <div className="sm:col-span-2 space-y-4 pt-4 border-t">
-                <h3 className="text-base font-bold text-primary flex items-center gap-2">
-                  🧠 Neurological Branch — Subjective & Clinical Intake
-                </h3>
-                <div className="grid gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border">
-                  <div>
-                    <Label>Handedness / Dominance</Label>
-                    <Select
-                      value={form.subjective?.handedness_dominance ?? "Right"}
-                      onValueChange={(v) => updateField("subjective.handedness_dominance", v)}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Right">Right-handed</SelectItem>
-                        <SelectItem value="Left">Left-handed</SelectItem>
-                        <SelectItem value="Ambidextrous">Ambidextrous</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>IP No. / DOA (Date of Admission)</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input
-                        placeholder="IP No. e.g. IP-9874"
-                        value={form.subjective?.ip_number ?? ""}
-                        onChange={(e) => updateField("subjective.ip_number", e.target.value)}
-                      />
-                      <Input
-                        type="date"
-                        value={form.subjective?.date_of_admission ?? ""}
-                        onChange={(e) => updateField("subjective.date_of_admission", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label>Provisional Diagnosis</Label>
-                    <Input
-                      placeholder="e.g. Right Hemiparesis secondary to MCA Infarct"
-                      value={form.subjective?.provisional_diagnosis ?? ""}
-                      onChange={(e) => updateField("subjective.provisional_diagnosis", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Referred By & Lab Reports Summary</Label>
-                    <Input
-                      placeholder="e.g. Dr. Sharma (Neurologist) / CT Brain, MRI, CSF workup"
-                      value={form.subjective?.referred_by ?? ""}
-                      onChange={(e) => updateField("subjective.referred_by", e.target.value)}
-                    />
-                  </div>
-                  <div className="sm:col-span-2 font-medium text-sm pt-2 text-foreground/80 border-t">
-                    Detailed ADL Difficulties
-                  </div>
-                  <div>
-                    <Label>Bed Activities & Transfers</Label>
-                    <Input
-                      placeholder="e.g. Difficulty rolling to right, needs assistance bridging"
-                      value={form.subjective?.adl_difficulties?.bed_activities ?? ""}
-                      onChange={(e) => updateField("subjective.adl_difficulties.bed_activities", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Ambulation & Stair Climbing</Label>
-                    <Input
-                      placeholder="e.g. Gait scissoring, circumduction, max assist 1"
-                      value={form.subjective?.adl_difficulties?.ambulation ?? ""}
-                      onChange={(e) => updateField("subjective.adl_difficulties.ambulation", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Dressing & Eating</Label>
-                    <Input
-                      placeholder="e.g. Buttoning shirt difficult, uses non-dominant hand for spoon"
-                      value={form.subjective?.adl_difficulties?.dressing ?? ""}
-                      onChange={(e) => updateField("subjective.adl_difficulties.dressing", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Toilet Activities</Label>
-                    <Input
-                      placeholder="e.g. Needs grab bars, assistance for perineal care"
-                      value={form.subjective?.adl_difficulties?.toilet_activities ?? ""}
-                      onChange={(e) => updateField("subjective.adl_difficulties.toilet_activities", e.target.value)}
-                    />
-                  </div>
-                  <div className="sm:col-span-2 font-medium text-sm pt-2 text-foreground/80 border-t">
-                    Motor Weakness & Neurological Complaints
-                  </div>
-                  <div>
-                    <Label>Weakness Side & Site</Label>
-                    <Input
-                      placeholder="e.g. Right upper and lower limb (Hemiparesis)"
-                      value={form.subjective?.weakness_detail?.site ?? ""}
-                      onChange={(e) => updateField("subjective.weakness_detail.site", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Weakness Duration (in terms of ADL)</Label>
-                    <Input
-                      placeholder="e.g. 3 weeks, acute onset following stroke"
-                      value={form.subjective?.weakness_detail?.duration_adl ?? ""}
-                      onChange={(e) => updateField("subjective.weakness_detail.duration_adl", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Sensory Problems (Partial / Total)</Label>
-                    <Input
-                      placeholder="e.g. Numbness right hand, hypoesthesia C6-C8 dermatome"
-                      value={form.subjective?.sensory_problems ?? ""}
-                      onChange={(e) => updateField("subjective.sensory_problems", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Balance Problems (Falls, Dizziness, Visual)</Label>
-                    <Input
-                      placeholder="e.g. 2 falls past month, postural dizziness, diplopia"
-                      value={form.subjective?.balance_problems ?? ""}
-                      onChange={(e) => updateField("subjective.balance_problems", e.target.value)}
-                    />
-                  </div>
-                  <div className="sm:col-span-2 font-medium text-sm pt-2 text-foreground/80 border-t">
-                    Detailed History (Mode of Transport, Bleeding, Symptoms, Family/Social)
-                  </div>
-                  <div>
-                    <Label>Mode of Transport & Consciousness at Onset</Label>
-                    <Input
-                      placeholder="e.g. Ambulance / Conscious, transient loss of consciousness 5 mins"
-                      value={form.subjective?.present_history_detailed?.mode_of_transportation ?? ""}
-                      onChange={(e) => updateField("subjective.present_history_detailed.mode_of_transportation", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Bleeding (Nose, Eyes, Ears) & Associated Symptoms</Label>
-                    <Input
-                      placeholder="e.g. No ENT bleeding / Headache, nausea, projectile vomiting"
-                      value={form.subjective?.present_history_detailed?.associated_symptoms ?? ""}
-                      onChange={(e) => updateField("subjective.present_history_detailed.associated_symptoms", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Past General Health & Operations</Label>
-                    <Input
-                      placeholder="e.g. Hypertensive 10 yrs, prior angioplasty 2020"
-                      value={form.subjective?.past_history_detailed?.general_health_prior ?? ""}
-                      onChange={(e) => updateField("subjective.past_history_detailed.general_health_prior", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Past Physiotherapy & Prognosis</Label>
-                    <Input
-                      placeholder="e.g. 2 weeks outpatient rehab post-discharge, good recovery potential"
-                      value={form.subjective?.past_history_detailed?.past_physio_treatment ?? ""}
-                      onChange={(e) => updateField("subjective.past_history_detailed.past_physio_treatment", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Family History (Hereditary / Infectious TB, MD)</Label>
-                    <Input
-                      placeholder="e.g. No muscular dystrophy, history of TB in uncle 2018"
-                      value={form.subjective?.family_history_detailed?.hereditary_diseases ?? ""}
-                      onChange={(e) => updateField("subjective.family_history_detailed.hereditary_diseases", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Economical History (Occupation, Income, Expenses)</Label>
-                    <Input
-                      placeholder="e.g. Accountant, sole breadwinner, moderate medical expense strain"
-                      value={form.subjective?.economical_history?.occupation_income ?? ""}
-                      onChange={(e) => updateField("subjective.economical_history.occupation_income", e.target.value)}
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label>Environmental & Home History (Steps, Toilet Type, Width)</Label>
-                    <Input
-                      placeholder="e.g. 15 steps to 1st floor apartment, Indian toilet, doorway 75 cm"
-                      value={form.subjective?.environmental_detailed?.home_environment ?? ""}
-                      onChange={(e) => updateField("subjective.environmental_detailed.home_environment", e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+
 
             {activeBranch === "Cardiorespiratory" && (
               <div className="sm:col-span-2 space-y-4 pt-4 border-t">
                 <h3 className="text-base font-bold text-primary flex items-center gap-2">
-                  🫀 Cardiorespiratory / Cardiovascular Branch — Subjective Intake
+                  Cardiorespiratory / Cardiovascular Branch — Subjective Intake
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border">
                   <div>
@@ -1980,7 +1797,7 @@ export function SoapWizard({
               {activeBranch === "Cardiorespiratory" && (
                 <div className="sm:col-span-2 space-y-4 pt-2">
                   <h4 className="font-semibold text-primary text-sm flex items-center gap-2">
-                    🫀 Cardiorespiratory / Cardiovascular Objective Examination
+                    Cardiorespiratory / Cardiovascular Objective Examination
                   </h4>
                   <div className="grid gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border">
                     <div>
@@ -2259,7 +2076,7 @@ export function SoapWizard({
               {activeBranch === "Neurological" && (
                 <div className="sm:col-span-2 space-y-6 pt-2">
                   <h4 className="font-semibold text-primary text-sm flex items-center gap-2">
-                    🧠 Neurological Comprehensive Examination (Domains 6–13)
+                    Neurological Comprehensive Examination (Domains 6–13)
                   </h4>
 
                   {/* 6. Higher Mental Functions */}
@@ -2578,7 +2395,7 @@ export function SoapWizard({
                     {typeof form.objective?.functional_tests.tug_sec === "number" &&
                       form.objective.functional_tests.tug_sec > 12 && (
                         <p className="text-xs text-red-600 font-medium mt-1">
-                          ⚠ TUG &gt; 12s — fall risk indicator
+                          Warning: TUG &gt; 12s — fall risk indicator
                         </p>
                       )}
                   </div>
@@ -2829,9 +2646,7 @@ export function SoapWizard({
                   ))}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
-                Entries are saved with the encounter and auto-tracked on the patient&apos;s progress charts (e.g. &quot;Knee Flexion ROM&quot;).
-              </p>
+
             </CardContent>
           </Card>
 
@@ -2930,6 +2745,27 @@ export function SoapWizard({
             </CardContent>
           </Card>
 
+          {/* Body Structure and Function */}
+          <div className="sm:col-span-2 flex items-center gap-3 py-2">
+            <h3 className="text-base font-bold text-primary flex items-center gap-2">
+              Body Structure and Function
+            </h3>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <Card className="sm:col-span-2 shadow-sm">
+            <CardContent className="pt-4">
+              <div className="space-y-2">
+                <Label>Body Structure and Function</Label>
+                <Textarea
+                  placeholder="Write observations regarding body structure and function (e.g. deformities, limb length discrepancy, muscle wasting, trophic changes, joint alignment, posture analysis, gait deviations, etc.)"
+                  value={(form.objective as any)?.body_structure_function_notes ?? ""}
+                  onChange={(e) => updateField("objective.body_structure_function_notes", e.target.value)}
+                  className="min-h-[120px]"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Functional Evaluation — specific UL/LL tasks (ICF d-category) */}
           <Card className="shadow-sm border-primary/40">
             <CardHeader className="bg-primary/5 pb-3">
@@ -2938,7 +2774,6 @@ export function SoapWizard({
             <CardContent className="pt-4 space-y-4">
               <div>
                 <Label className="font-medium text-sm text-primary">Upper Limb Functional Tasks</Label>
-                <p className="text-xs text-muted-foreground mb-2">Rate difficulty on ICF qualifier scale</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {UL_FUNCTIONAL_TASKS.map((task) => (
                     <div key={task} className="flex items-center gap-2">
@@ -2962,7 +2797,6 @@ export function SoapWizard({
               </div>
               <div>
                 <Label className="font-medium text-sm text-primary">Lower Limb Functional Tasks</Label>
-                <p className="text-xs text-muted-foreground mb-2">Rate difficulty on ICF qualifier scale</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {LL_FUNCTIONAL_TASKS.map((task) => (
                     <div key={task} className="flex items-center gap-2">
@@ -3069,56 +2903,7 @@ export function SoapWizard({
             </CardContent>
           </Card>
 
-          {/* Skin & Soft Tissues Problem Card */}
-          <Card className="shadow-sm">
-            <CardHeader className="bg-muted/40 pb-3">
-              <CardTitle className="text-base font-semibold">Skin & Soft Tissues Problem</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-3">
-              <div className="border rounded-md divide-y overflow-hidden text-sm">
-                <div className="grid grid-cols-12 bg-muted/60 px-3 py-2 font-medium text-xs text-muted-foreground uppercase">
-                  <div className="col-span-6 sm:col-span-5">Disorders</div>
-                  <div className="col-span-6 sm:col-span-7 text-right sm:text-center">Severity Rating</div>
-                </div>
-                {[
-                  { key: "swelling", label: "Swelling" },
-                  { key: "callus", label: "Callus" },
-                  { key: "scar", label: "Scar" },
-                  { key: "wound", label: "Wound" },
-                  { key: "temperature", label: "Temperature" },
-                  { key: "infection", label: "Infection" },
-                  { key: "pain", label: "Pain" },
-                  { key: "abnormal_sensation", label: "Abnormal Sensation" },
-                ].map(({ key, label }) => {
-                  const current = (form.objective?.skin_and_soft_tissues as any)?.[key] || "None";
-                  return (
-                    <div key={key} className="grid grid-cols-12 px-3 py-2 items-center gap-2">
-                      <span className="col-span-6 sm:col-span-5 font-medium">{label}</span>
-                      <div className="col-span-6 sm:col-span-7 flex justify-end sm:justify-center gap-1.5">
-                        {["None", "Minor", "Important"].map((sev) => (
-                          <button
-                            key={sev}
-                            type="button"
-                            onClick={() => updateField(`objective.skin_and_soft_tissues.${key}`, sev)}
-                            className={`px-2.5 py-1 text-xs rounded-md transition-colors ${current === sev
-                              ? sev === "Important"
-                                ? "bg-destructive text-destructive-foreground font-semibold"
-                                : sev === "Minor"
-                                  ? "bg-amber-500 text-white font-semibold"
-                                  : "bg-primary text-primary-foreground font-semibold"
-                              : "bg-muted hover:bg-accent text-muted-foreground"
-                              }`}
-                          >
-                            {sev}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+
 
           {/* Sensation Assessment Card */}
           <Card className="shadow-sm">
@@ -3404,10 +3189,6 @@ export function SoapWizard({
             {/* Progress Metrics data entry — feeds the patient's progress charts */}
             <div className="sm:col-span-2 border-t pt-4">
               <Label className="font-semibold text-primary">Progress Metrics (Track Improvement)</Label>
-              <p className="text-xs text-muted-foreground mb-3">
-                Objective findings above (ROM, TUG, 6MWT, girth, branch scales) are auto-tracked. Add any additional
-                outcome measurements here — they are saved with the encounter and appear on the patient&apos;s progress charts.
-              </p>
               <div className="grid gap-3 sm:grid-cols-12 mb-3">
                 <div className="sm:col-span-5">
                   <Select

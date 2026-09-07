@@ -1,12 +1,12 @@
 # Digiphy - Physiotherapy Assessment & Patient Tracking Web App
 
-## 🎯 Overview
+## Overview
 
 Digiphy is a **physiotherapy clinic management demo app** built with **Next.js 15**, **shadcn/ui**, and **TypeScript**. It provides clinicians with patient registry, SOAP encounter documentation, progress tracking with real-time charts, secure document management, and full audit logging—plus a read-only patient portal for appointment reminders and home exercise programs.
 
-**Status**: ✅ **Demo Mode** — No backend required. The app runs entirely on **in-memory mock data** (`lib/data/mock-store.ts`). On open, pick a role (**Therapist** or **Patient**) and the suitable workspace loads with pre-populated demo data. No Supabase, no login, no env vars.
+**Status**: Demo Mode — No backend required. The app runs entirely on **in-memory mock data** (`lib/data/mock-store.ts`). On open, pick a role (**Therapist** or **Patient**) and the suitable workspace loads with pre-populated demo data. No Supabase, no login, no env vars.
 
-### 🚀 Quick Start
+### Quick Start
 
 ```bash
 npm install
@@ -16,7 +16,7 @@ npm run dev
 
 ---
 
-## ✨ Core Features
+## Core Features
 
 ### 1. Patient Registry
 - Create, read, edit patient demographics
@@ -62,7 +62,7 @@ npm run dev
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 | Layer | Tech |
 |-------|------|
@@ -76,12 +76,12 @@ npm run dev
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 digphy/
 ├── app/
-│   ├── ✓ page.tsx                  # Landing — choose Therapist or Patient
+│   ├── page.tsx                  # Landing — choose Therapist or Patient
 │   ├── login/                      # Redirects to "/"
 │   ├── (clinician)/                # Therapist workspace
 │   │   ├── dashboard/
@@ -102,7 +102,7 @@ digphy/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone & Install
 ```bash
@@ -132,7 +132,7 @@ Choose **"I'm a Therapist"** or **"I'm a Patient"** on the landing page.
 
 ---
 
-## 🎓 Usage
+## Usage
 
 ### Clinician Workflow
 1. **Dashboard** → Patient overview
@@ -151,17 +151,17 @@ Choose **"I'm a Therapist"** or **"I'm a Patient"** on the landing page.
 
 ---
 
-## 🔐 Security (demo)
+## Security (demo)
 
-✅ **Role Selector** — Landing page partitions Therapist vs Patient views  \
-✅ **Consent Enforcement** — App-level guard blocks encounters until signed  \
-✅ **Audit Trail** — Every data access logged (user, action, timestamp, IP)  \
-✅ **PHI Protection** — Files stored as base64 in memory, no names in paths  \
-✅ **Encryption** — HTTPS (Vercel) enforced  \
+**Role Selector** — Landing page partitions Therapist vs Patient views  \
+**Consent Enforcement** — App-level guard blocks encounters until signed  \
+**Audit Trail** — Every data access logged (user, action, timestamp, IP)  \
+**PHI Protection** — Files stored as base64 in memory, no names in paths  \
+**Encryption** — HTTPS (Vercel) enforced  \
 
 ---
 
-## 📊 Data (in-memory)
+## Data (in-memory)
 
 All data is held in `lib/data/mock-store.ts` (no database):
 - `profiles` — fixed clinician + 2 patient profiles
@@ -177,7 +177,7 @@ All data is held in `lib/data/mock-store.ts` (no database):
 
 ---
 
-## 📖 Docs
+## Docs
 
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** — Local run + Vercel deploy
 - **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** — API reference, types, queries
@@ -186,7 +186,7 @@ All data is held in `lib/data/mock-store.ts` (no database):
 
 ---
 
-## 🧪 Build & Test
+## Build & Test
 
 ```bash
 npm run build        # Production build
@@ -194,11 +194,11 @@ npm run dev          # Dev server with hot reload
 npm run lint         # ESLint check
 ```
 
-**Build Status**: ✅ Success (12.8s, 102 kB shared JS)
+**Build Status**: Success (12.8s, 102 kB shared JS)
 
 ---
 
-## 🎯 Demo Scenarios
+## Demo Scenarios
 
 ### Scenario 1: New Encounter
 1. Go to patient → "New Encounter"
@@ -219,7 +219,7 @@ npm run lint         # ESLint check
 
 ---
 
-## 🚢 Deploy to Vercel
+## Deploy to Vercel
 
 1. Push to GitHub
 2. Go to [vercel.com](https://vercel.com)
@@ -228,7 +228,7 @@ npm run lint         # ESLint check
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
@@ -240,7 +240,7 @@ npm run lint         # ESLint check
 
 ---
 
-## 📚 Tech Details
+## Tech Details
 
 - **Node.js**: 18+ LTS
 - **Next.js**: 15.5.24
@@ -252,7 +252,7 @@ npm run lint         # ESLint check
 
 ---
 
-## 🎉 Ready?
+## Ready?
 
 ```bash
 npm install      # Dependencies
@@ -262,7 +262,7 @@ npm run dev      # Start server
 
 **Dashboard**: [http://localhost:3000/login](http://localhost:3000/login)
 
-Built with ❤️ for physiotherapy clinics.  
+Built for physiotherapy clinics.  
 Next.js • shadcn/ui • TypeScript
 
 ```bash
@@ -282,7 +282,7 @@ No login — pick a role on the landing page.
 
 ```
 app/
-  ✓ page.tsx           # Landing — choose Therapist or Patient
+  page.tsx           # Landing — choose Therapist or Patient
   (clinician)/         # Dashboard, patients, audit (therapist)
   my-summary/          # Patient portal
 components/            # UI, SOAP wizard, charts, forms

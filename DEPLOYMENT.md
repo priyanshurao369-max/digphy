@@ -1,7 +1,7 @@
 # Digiphy Deployment Guide
 
-## ✅ Project Status
-- **Build Status**: ✅ Successful (all TypeScript errors resolved)
+## Project Status
+- **Build Status**: Successful (all TypeScript errors resolved)
 - **Routes**: 12 pages compiled and ready
 - **Backend**: None required — in-memory mock data (`lib/data/mock-store.ts`)
 - **Components**: All UI components built with shadcn/ui + Tailwind
@@ -9,7 +9,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 npm install
@@ -23,7 +23,7 @@ is seeded automatically at startup from `lib/data/mock-store.ts`.
 
 ---
 
-## ☁️ Deploy to Vercel
+## Deploy to Vercel
 
 ### Before you start
 - **No environment variables** are required. The app is fully self-contained.
@@ -52,7 +52,7 @@ vercel        # preview deployment
 vercel --prod # production deployment
 ```
 
-### ⚠️ Important: demo data is in-memory
+### Important: demo data is in-memory
 - Data lives in `lib/data/mock-store.ts` and is held in server memory only.
 - On **serverless platforms like Vercel**, each cold start re-seeds the demo
   data, and any changes you make during a session are not persisted across
@@ -68,7 +68,7 @@ On open, the landing page shows two role cards. No credentials are needed:
 
 ---
 
-## 🧪 Local Development
+## Local Development
 
 ### Start Dev Server
 ```bash
@@ -111,7 +111,7 @@ Server runs on [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📊 Database Schema
+## Database Schema
 
 ### Tables Created
 > The app no longer uses a database. This list documents the equivalent
@@ -132,7 +132,7 @@ audit_logs       -- all data access/changes
 
 ---
 
-## 🎨 Architecture
+## Architecture
 
 ### Frontend (Next.js 15)
 - **App Router** with route groups: `(clinician)` / `(patient)`
@@ -156,18 +156,18 @@ audit_logs       -- all data access/changes
 
 ---
 
-## 🔐 Security Features (demo)
+## Security Features (demo)
 
-✅ **Role Selector**: Landing page partitions Therapist vs Patient views \
-✅ **Consent Enforcement**: App-level guard blocks encounters until signed \
-✅ **Audit Logging**: Every data access logged with user, action, timestamp, IP \
-✅ **PHI Minimization**: Files stored as base64 in memory; only metadata persisted \
-✅ **HTTPS Ready**: Vercel deployment enforces HTTPS \
-✅ **No Supabase / no secrets**: No env vars or external services required
+**Role Selector**: Landing page partitions Therapist vs Patient views \
+**Consent Enforcement**: App-level guard blocks encounters until signed \
+**Audit Logging**: Every data access logged with user, action, timestamp, IP \
+**PHI Minimization**: Files stored as base64 in memory; only metadata persisted \
+**HTTPS Ready**: Vercel deployment enforces HTTPS \
+**No Supabase / no secrets**: No env vars or external services required
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Build Fails with "next: not found"
 Run `npm install` to ensure all dependencies are installed.
@@ -188,7 +188,7 @@ Expected — data is in-memory. See the "Deploy to Vercel" section above.
 
 ---
 
-## 📝 Event Demo Checklist
+## Event Demo Checklist
 
 Before going live for event:
 - [ ] `npm install` done, `npm run dev` starts locally
@@ -203,7 +203,7 @@ Before going live for event:
 
 ---
 
-## 📚 Features Deep Dive
+## Features Deep Dive
 
 ### SOAP Encounter Wizard
 5-step form spanning all SOAP sections:
@@ -239,7 +239,7 @@ Read-only page for patients:
 
 ---
 
-## 🎯 Post-MVP Roadmap (Future)
+## Post-MVP Roadmap (Future)
 
 These are **not** in V1 but suggested for future:
 - [ ] Multi-clinic/tenant isolation
@@ -257,7 +257,7 @@ These are **not** in V1 but suggested for future:
 
 ---
 
-## 📞 Support
+## Support
 
 For issues or questions:
 1. Check TypeScript errors: `npm run build`
@@ -267,5 +267,5 @@ For issues or questions:
 
 ---
 
-## 📄 License
+## License
 Built as demo for physiotherapy clinic event. Follow your clinic's data governance policies.

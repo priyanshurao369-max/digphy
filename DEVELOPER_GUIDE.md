@@ -502,4 +502,4 @@ SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx...  # Only used for seed script
 5. **Testing** — Add Jest unit tests + Playwright E2E tests
 6. **Analytics** — Log patient outcomes (retention, goals met %)
 
-Enjoy! 🚀
+Enjoy!

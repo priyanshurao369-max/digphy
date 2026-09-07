@@ -168,9 +168,9 @@ export default function ClinicianDemoPage() {
                             <CardDescription>Upload & manage patient files with encryption</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                            <p className="text-sm text-muted-foreground">📄 Consent_Rajesh.pdf</p>
-                            <p className="text-sm text-muted-foreground">📋 Assessment_Report_Priya.docx</p>
-                            <p className="text-sm text-muted-foreground">📸 ROM_Images_Rajesh.zip</p>
+                            <p className="text-sm text-muted-foreground">Consent_Rajesh.pdf</p>
+                            <p className="text-sm text-muted-foreground">Assessment_Report_Priya.docx</p>
+                            <p className="text-sm text-muted-foreground">ROM_Images_Rajesh.zip</p>
                         </CardContent>
                     </Card>
 
@@ -197,12 +197,12 @@ export default function ClinicianDemoPage() {
                             <CardTitle className="text-base">Key Features</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
-                            <p>✅ Patient search & demographics</p>
-                            <p>✅ 5-step SOAP encounter wizard</p>
-                            <p>✅ Multi-metric progress tracking</p>
-                            <p>✅ Secure document upload</p>
-                            <p>✅ Compliance audit logs</p>
-                            <p>✅ Role-based access control</p>
+                            <p>Patient search & demographics</p>
+                            <p>5-step SOAP encounter wizard</p>
+                            <p>Multi-metric progress tracking</p>
+                            <p>Secure document upload</p>
+                            <p>Compliance audit logs</p>
+                            <p>Role-based access control</p>
                         </CardContent>
                     </Card>
                 </div>
